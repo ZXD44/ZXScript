@@ -347,6 +347,49 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         connect();
         sendResponse({ ok: true });
         break;
+      case "native_start": {
+        try {
+          chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "start" }, (resp) => {
+            if (chrome.runtime.lastError || !resp || !resp.ok) {
+              chrome.tabs.create({ url: "zxscript://start" }, (t) => {
+                if (t && t.id) setTimeout(() => chrome.tabs.remove(t.id).catch(() => {}), 1500);
+              });
+              sendResponse({ ok: true, via: "protocol", message: "เปิดผ่าน zxscript:// protocol สำเร็จ" });
+            } else {
+              setTimeout(connect, 1200);
+              sendResponse(resp);
+            }
+          });
+        } catch (e) {
+          chrome.tabs.create({ url: "zxscript://start" });
+          sendResponse({ ok: true, via: "protocol" });
+        }
+        break;
+      }
+      case "native_stop": {
+        chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "stop" }, (resp) => {
+          sendResponse(resp || { ok: false, error: chrome.runtime.lastError ? chrome.runtime.lastError.message : "Error" });
+        });
+        break;
+      }
+      case "native_status": {
+        chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "status" }, (resp) => {
+          sendResponse(resp || { ok: false, error: chrome.runtime.lastError ? chrome.runtime.lastError.message : "Error" });
+        });
+        break;
+      }
+      case "native_autostart": {
+        chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "autostart", enable: !!msg.enable }, (resp) => {
+          sendResponse(resp || { ok: false, error: chrome.runtime.lastError ? chrome.runtime.lastError.message : "Error" });
+        });
+        break;
+      }
+      case "native_logs": {
+        chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "logs", lines: msg.lines || 50 }, (resp) => {
+          sendResponse(resp || { ok: false, error: chrome.runtime.lastError ? chrome.runtime.lastError.message : "Error" });
+        });
+        break;
+      }
       default:
         sendResponse({ ok: false, error: "unknown message" });
     }

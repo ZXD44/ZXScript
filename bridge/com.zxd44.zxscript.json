@@ -1,0 +1,9 @@
+{
+  "name": "com.zxd44.zxscript",
+  "description": "ZXScript Native Bridge Host",
+  "path": "C:\\Users\\ZirconX\\Documents\\New folder\\bridge\\native_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://bcamodijjlhkemocmghgaicehljknika/"
+  ]
+}

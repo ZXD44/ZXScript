@@ -39,11 +39,14 @@ function render(s) {
     ? (ok ? "🟢 เชื่อมต่อแล้ว · Studio พร้อมทำงาน"
         : studioOff ? `🟡 กำลังรอเชื่อม Studio${DOTS} (เปิด Assistant &gt; MCP)`
         : `🟡 กำลังเชื่อมต่อแมพ Studio${DOTS}`)
-    : "⚪ Bridge ออฟไลน์ · ดับเบิลคลิก start.bat";
-  tools.textContent = s.connected ? `⚡ พร้อมใช้งาน ${s.tools || 0} เครื่องมือ` : "รัน start.bat เพื่อเริ่มเชื่อมต่อ";
+    : "⚪ Bridge ออฟไลน์ · กดเปิดจากที่นี่ได้ทันที";
+  tools.textContent = s.connected ? `⚡ พร้อมใช้งาน ${s.tools || 0} เครื่องมือ` : "คลิกปุ่มด้านล่างเพื่อเริ่มการทำงาน";
   servers.textContent = s.connected
     ? list.map((x) => `${x.alive ? "●" : "○"} ${x.id} (${x.alive ? x.tools + " คำสั่ง" : "ปิดอยู่"})`).join("\n")
     : "";
+
+  const startBtn = document.getElementById("popup-start-bridge");
+  if (startBtn) startBtn.style.display = s.connected ? "none" : "flex";
 }
 
 function refresh() {
@@ -51,6 +54,25 @@ function refresh() {
 }
 
 // ── Bridge Actions ──────────────────────────────────────────────────────────
+const popupStartBtn = document.getElementById("popup-start-bridge");
+if (popupStartBtn) {
+  popupStartBtn.addEventListener("click", () => {
+    popupStartBtn.textContent = "กำลังเริ่ม Bridge...";
+    chrome.runtime.sendMessage({ type: "native_start" }, () => {
+      setTimeout(() => {
+        popupStartBtn.textContent = "▶ เปิด Bridge ทันที (Auto-Run)";
+        refresh();
+      }, 1200);
+    });
+  });
+}
+
+const openDashBtn = document.getElementById("btn-open-dashboard");
+if (openDashBtn) {
+  openDashBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: "dashboard.html" });
+  });
+}
 document.getElementById("reconnect").addEventListener("click", () => {
   const state = document.getElementById("state");
   state.innerHTML = `กำลังเชื่อมต่อ Bridge ใหม่${DOTS}`;
