@@ -1046,3 +1046,26 @@ html.zs-light .zs-tip-sub,
 html.zs-light .zs-rbx-cur,
 html.zs-light .zs-tip-sep { color: #6b7280; }
 html.zs-light .zs-tip-rbx { color: #374151; }
+
+/* author branding card in more menu */
+.zs-author-card {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px; text-decoration: none; color: #ededf0;
+  transition: all 0.15s ease; margin-bottom: 8px;
+}
+.zs-author-card:hover {
+  background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.16);
+}
+.zs-author-avatar {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: rgba(16, 185, 129, 0.12); color: #10b981;
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.zs-author-info { flex: 1; min-width: 0; }
+.zs-author-name { font-size: 12px; font-weight: 600; color: #f4f4f5; line-height: 1.3; }
+.zs-author-url { font-size: 10px; color: #10b981; font-family: ui-monospace, monospace; }
+
+html.zs-light .zs-author-card { background: rgba(0, 0, 0, 0.03); border-color: rgba(0, 0, 0, 0.08); color: #1f2430; }
+html.zs-light .zs-author-card:hover { background: rgba(0, 0, 0, 0.06); }
+html.zs-light .zs-author-name { color: #111827; }

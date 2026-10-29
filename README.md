@@ -1,6 +1,6 @@
 # ZXScript - AI Agent for Roblox Studio
 > **Created & Maintained by [zxd44](https://github.com/zxd44) (ZirconX)**  
-> 🌐 Website: [www.zirconx.xyz](https://www.zirconx.xyz)  
+> 🌐 Website: [www.zirconx.my](https://www.zirconx.my)  
 > 📧 Contact: [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey)

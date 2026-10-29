@@ -1,6 +1,6 @@
 # กฎเหล็กและข้อกำหนดการทำงาน ZXScript (Operational Rules)
 > **ผู้พัฒนาและเจ้าของโครงการ:** [zxd44](https://github.com/zxd44) (ZirconX)  
-> **เว็บไซต์:** [www.zirconx.xyz](https://www.zirconx.xyz)  
+> **เว็บไซต์:** [www.zirconx.my](https://www.zirconx.my)  
 > **อีเมล:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)  
 > **เวอร์ชัน:** `0.0.1` | **สิทธิ์การใช้งาน:** GPL-3.0
 
