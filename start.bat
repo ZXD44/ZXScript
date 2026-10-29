@@ -2,7 +2,7 @@
 @echo off
 setlocal enabledelayedexpansion
 chcp 65001 >nul
-title ZXScript Automation Bridge - by ZXD44
+title ZXScript Bridge - by ZXD44
 cd /d "%~dp0"
 
 if not exist "%~dp0logs" mkdir "%~dp0logs" >nul 2>nul
@@ -12,12 +12,12 @@ for /f "tokens=*" %%v in ('ver') do call :log "%%v"
 
 cls
 echo =====================================================================
-echo    🚀 ZXScript Autonomous All-in-One Launcher - by ZXD44
-echo    Roblox Studio AI Agent Bridge (Bloxstrap & Vanilla Supported)
+echo    ZXScript Autonomous All-in-One Launcher - by ZXD44
+echo    Roblox Studio AI Agent Bridge (Bloxstrap and Vanilla Supported)
 echo =====================================================================
 echo.
 
-:: --- 1. Verify Project Files --------------------------------------------
+REM --- 1. Verify Project Files --------------------------------------------
 echo   [1/6] Verifying project integrity...
 if not exist "%~dp0bridge.py" (
     echo   [ERROR] bridge.py not found next to start.bat!
@@ -33,7 +33,7 @@ if not exist "%~dp0zxscript-extension\manifest.json" (
     echo         [OK] Project core and extension verified.
 )
 
-:: --- 2. Python Detection & Auto-Install ---------------------------------
+REM --- 2. Python Detection and Auto-Install ---------------------------------
 echo.
 echo   [2/6] Checking Python runtime...
 set "PY="
@@ -63,7 +63,7 @@ echo         Python not found. Auto-installing Python 3.12 via winget...
 where winget >nul 2>nul
 if errorlevel 1 (
     echo   [ERROR] winget is unavailable. Please download Python from:
-    echo   https://www.python.org/downloads/ (tick 'Add to PATH').
+    echo   https://www.python.org/downloads/ (tick Add to PATH).
     pause
     exit /b 1
 )
@@ -80,7 +80,7 @@ for /f "tokens=*" %%v in ('call %PY% --version 2^>^&1') do (
     call :log "Python detected: %PY% (%%v)"
 )
 
-:: --- 3. Dependency Check & Auto-Install ---------------------------------
+REM --- 3. Dependency Check and Auto-Install ---------------------------------
 echo.
 echo   [3/6] Checking Python dependencies (websockets)...
 %PY% -c "import websockets" >nul 2>nul
@@ -96,17 +96,15 @@ if errorlevel 1 (
 echo         [OK] websockets library is ready.
 call :log "websockets library ready."
 
-:: --- 4. Process & Port Cleanup ------------------------------------------
+REM --- 4. Process and Port Cleanup ------------------------------------------
 echo.
-echo   [4/6] Cleaning lingering processes and ports (17613 & 13469)...
-:: Clean zombie StudioMCP
+echo   [4/6] Cleaning lingering processes and ports (17613 and 13469)...
 tasklist /fi "imagename eq StudioMCP.exe" 2>nul | findstr /i "StudioMCP.exe" >nul
 if not errorlevel 1 (
     taskkill /F /IM StudioMCP.exe >nul 2>nul
     call :log "Cleaned lingering StudioMCP.exe"
 )
 
-:: Clean port 17613 if held by an old bridge
 set "OLDPID="
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :17613 ^| findstr LISTENING 2^>nul') do (
     set "OLDPID=%%a"
@@ -118,13 +116,13 @@ if defined OLDPID (
 )
 echo         [OK] Ports and background processes cleaned.
 
-:: --- 5. Roblox Studio / Bloxstrap MCP Check & Auto-Launch ---------------
+REM --- 5. Roblox Studio / Bloxstrap MCP Check and Auto-Launch ---------------
 echo.
-echo   [5/6] Inspecting Roblox Studio & Bloxstrap MCP engine...
+echo   [5/6] Inspecting Roblox Studio and Bloxstrap MCP engine...
 set "STUDIO_MCP="
 set "STUDIO_EXE="
 
-for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m; p = m.find_studio_mcp(); print(p if p else '')"') do (
+for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m; p = m.find_studio_mcp(); print(p if p else \"\")"') do (
     set "STUDIO_MCP=%%a"
 )
 
@@ -132,23 +130,20 @@ if defined STUDIO_MCP (
     echo         [OK] Detected StudioMCP binary:
     echo              !STUDIO_MCP!
     call :log "Detected StudioMCP at !STUDIO_MCP!"
-    
-    for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m, os; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else ''; s = os.path.join(d, 'RobloxStudioBeta.exe'); print(s if os.path.isfile(s) else '')"') do (
+    for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m, os; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else \"\"; s = os.path.join(d, \"RobloxStudioBeta.exe\"); print(s if os.path.isfile(s) else \"\")"') do (
         set "STUDIO_EXE=%%a"
     )
 ) else (
     echo         [WARNING] StudioMCP.exe not found automatically.
-    echo         Ensure Roblox Studio is installed and 'Studio as MCP server' is enabled.
     call :log "WARN: StudioMCP binary not detected."
 )
 
-:: Check if Roblox Studio is already running
 set "STUDIO_RUNNING=0"
 tasklist /fi "imagename eq RobloxStudioBeta.exe" 2>nul | findstr /i "RobloxStudioBeta.exe" >nul && set "STUDIO_RUNNING=1"
 tasklist /fi "imagename eq RobloxStudio.exe" 2>nul | findstr /i "RobloxStudio.exe" >nul && set "STUDIO_RUNNING=1"
 
-if "%STUDIO_RUNNING%"=="1" (
-    echo         [OK] Roblox Studio is currently running!
+if "!STUDIO_RUNNING!"=="1" (
+    echo         [OK] Roblox Studio is currently running.
 ) else (
     if defined STUDIO_EXE (
         echo         Roblox Studio is not running. Auto-launching Roblox Studio...
@@ -160,7 +155,7 @@ if "%STUDIO_RUNNING%"=="1" (
     )
 )
 
-:: --- 6. Launch Bridge ----------------------------------------------------
+REM --- 6. Launch Bridge ----------------------------------------------------
 echo.
 echo   [6/6] Starting ZXScript Bridge...
 echo.
@@ -176,7 +171,7 @@ echo       Assistant AI -^> ... -^> Manage MCP Servers -^> Enable Studio as MCP 
 echo.
 echo    3. Open Web AI:
 echo       https://chat.deepseek.com (Recommended) or https://chat.qwen.ai
-echo       Wait for green dot 🟢 and click 'Start session'!
+echo       Wait for green dot and click Start session!
 echo.
 echo    [NOTE] DO NOT CLOSE THIS TERMINAL. Minimize it while working.
 echo  =====================================================================
@@ -197,7 +192,7 @@ if not "%BRIDGE_EXIT%"=="0" (
 pause
 exit /b 0
 
-:: --- Subroutines ---------------------------------------------------------
+REM --- Subroutines ---------------------------------------------------------
 :validate_py
 %PY% -m pip --version >nul 2>nul || exit /b 1
 %PY% -c "import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)" >nul 2>nul
