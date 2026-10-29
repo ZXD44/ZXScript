@@ -2789,24 +2789,28 @@
          </section>
           <section class="zs-menu-sec">
             <div class="zs-sec-label"><span>ผู้พัฒนา & เว็บไซต์ทางการ</span></div>
-            <div class="zs-author-card" data-u="${WEBSITE_URL}" style="cursor: pointer;" title="เปิด www.zirconx.xyz">
-              <div class="zs-author-avatar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-              </div>
-              <div class="zs-author-info">
-                <div class="zs-author-name">zxd44 (ZirconX)</div>
-                <div class="zs-author-url">www.zirconx.xyz</div>
-              </div>
-              <span class="zs-site-go">&rarr;</span>
+            <div class="zs-dev-group">
+              <button class="zs-dev-item zs-tip-opt" data-u="${WEBSITE_URL}" title="เยี่ยมชม www.zirconx.xyz">
+                <div class="zs-dev-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                </div>
+                <div class="zs-dev-text">
+                  <span class="zs-dev-title">zxd44 (ZirconX)</span>
+                  <span class="zs-dev-sub">www.zirconx.xyz</span>
+                </div>
+                <span class="zs-dev-arrow">↗</span>
+              </button>
+              <button class="zs-dev-item zs-tip-opt" data-u="${GITHUB_URL}" title="Star บน GitHub: zxd44/ZXScript">
+                <div class="zs-dev-icon zs-star-icon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div class="zs-dev-text">
+                  <span class="zs-dev-title">Star บน GitHub</span>
+                  <span class="zs-dev-sub">zxd44/ZXScript</span>
+                </div>
+                <span class="zs-dev-arrow">↗</span>
+              </button>
             </div>
-            <button class="zs-tip-opt zs-tip-web" data-u="${WEBSITE_URL}">
-              <span>เยี่ยมชม www.zirconx.xyz</span>
-              <span class="zs-tip-sub">ศูนย์รวมผลงาน & อัปเดต</span>
-            </button>
-            <button class="zs-tip-opt zs-tip-star" data-u="${GITHUB_URL}">
-              <span>Star บน GitHub</span>
-              <span class="zs-tip-sub">zxd44/ZXScript</span>
-            </button>
           </section>
          <section class="zs-menu-sec">
            <div class="zs-sec-label"><span>คำสั่งเฉพาะเพิ่มเติม (Custom Prompt)</span></div>

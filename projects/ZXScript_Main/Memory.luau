@@ -18,6 +18,7 @@ local Memory = {
         "Elevated all UI surfaces and custom scrollbars (5px slim pill) across popup and overlay to Impeccable Style standards",
         "Fixed 'ChatGPT mode not ready' bug by adding locked contenteditable selectors and hydration retry",
         "Elevated ChatGPT UI bar above composer form with dedicated Zinc-950 card styling, freeing the input box completely",
+        "Streamlined developer branding menu into sleek, symmetrical 2-item layout conforming to Impeccable Style",
         "Verified and hardened bar mounting across all 8 supported AI web providers (Gemini, ChatGPT, DeepSeek, Qwen, Kimi, GLM, Meta AI, Arena)",
         "Eliminated DOM layout thrashing in 60-144 FPS rAF positioning loops, resulting in buttery-smooth performance",
         "Integrated Autonomous Rest / Stop Intent detection ('พัก', 'เสร็จแล้ว', 'ไปนอน') with automatic local project archiving",
