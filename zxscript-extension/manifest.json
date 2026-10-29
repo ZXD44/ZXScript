@@ -6,7 +6,6 @@
   "author": "zxd44 <gonhackergamer0@gmail.com>",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx01485ffFpF2DJd8N35jdDSjcB+gk6BGsZ4fY36aGMG8nYms2lx6g0nswxWJ8VA3qXdUW18GaGiUD3MtS//h3oRuZbFo/htumRR4BG9ztEyZYNxdy/r0YGO8/7hImji/Yg4ElobCmPEJnu3JQKwXvcO737RMZM+1NEF1/wqbzVezvO8DpYXiDxZsp5FWjcyrEcSu+0RlnGME6uH5XAYD3JXqgUjTbHvZCuWSnLVDcSYI/uWsmJZR0m1wCbjsVfbS1wxAAOEWB1+QuoXPEbd2B5t3i5BySTwGV2dIy8EUDSRcuQ0HaNFQZj2UureCi2M+SKksHeP3F45UDTU1woKcqwIDAQAB",
   "permissions": ["storage", "tabs", "nativeMessaging"],
-  "options_page": "dashboard.html",
   "host_permissions": [
     "https://chat.deepseek.com/*",
     "https://deepseek.com/*",

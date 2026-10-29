@@ -5,11 +5,11 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 260px;
+      width: 320px;
       padding: 12px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      background: #0f0f13;
-      color: #f1f1f4;
+      background: #090a0f;
+      color: #f1f5f9;
       user-select: none;
     }
     .header {
@@ -42,38 +42,65 @@
       font-weight: 600;
       margin-left: auto;
     }
+
+    /* Monitor Display Screen Box */
+    .screen-box {
+      background: #040508;
+      border: 1px solid rgba(129, 140, 248, 0.25);
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .screen-box::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(129, 140, 248, 0.4), transparent);
+    }
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 4px;
+    }
+    .screen-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
     .dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: #4b5563;
-      flex-shrink: 0;
-      transition: all 0.25s ease;
+      background: #475569;
+      display: inline-block;
+      transition: all 0.25s;
     }
     .dot.on {
       background: #10b981;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.9);
     }
     .dot.warn {
       background: #f59e0b;
-      box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.9);
     }
-    .card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      padding: 9px 10px;
-      margin-bottom: 10px;
-    }
-    .status-text {
-      font-size: 11px;
-      line-height: 1.4;
-      color: #e2e8f0;
-      margin-bottom: 4px;
-      font-weight: 500;
+
+    .status-main {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
+      line-height: 1.35;
     }
     .zs-dots {
       display: inline-flex;
@@ -88,32 +115,39 @@
     .zs-dots span:nth-child(2) { animation-delay: -0.16s; }
     .zs-dots span:nth-child(3) { animation-delay: 0s; }
     @keyframes zs-dots-bounce {
-      0%, 80%, 100% {
-        opacity: 0.25;
-        transform: translateY(0);
-      }
-      40% {
-        opacity: 1;
-        transform: translateY(-2px);
-        color: #818cf8;
-      }
+      0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+      40% { opacity: 1; transform: translateY(-2px); color: #818cf8; }
     }
-    .tools-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+
+    /* Screen Info Grid */
+    .screen-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 8px;
       font-size: 10px;
-      color: #94a3b8;
     }
-    .servers-list {
-      font-size: 9.5px;
+    .screen-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .screen-label {
+      color: #64748b;
+      font-size: 8.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .screen-val {
+      color: #cbd5e1;
+      font-weight: 500;
       font-family: ui-monospace, SFMono-Regular, monospace;
-      color: #a1a1aa;
-      white-space: pre-line;
-      margin-top: 5px;
-      line-height: 1.35;
+      font-size: 9.5px;
     }
-    .btn-group {
+
+    /* Quick Runner Controls */
+    .runner-controls {
+      margin-bottom: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -127,12 +161,12 @@
       color: #f1f5f9;
       cursor: pointer;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+      transition: all 0.15s ease;
     }
     button:hover {
       background: rgba(255, 255, 255, 0.1);
@@ -141,105 +175,159 @@
     button:active {
       transform: scale(0.98);
     }
-    .btn-primary {
-      background: rgba(129, 140, 248, 0.16);
-      border-color: rgba(129, 140, 248, 0.35);
-      color: #c7d2fe;
-    }
-    .btn-primary:hover {
-      background: rgba(129, 140, 248, 0.26);
-      border-color: rgba(129, 140, 248, 0.5);
-    }
-    .btn-accent {
-      background: rgba(16, 185, 129, 0.15);
-      border-color: rgba(16, 185, 129, 0.35);
+    .btn-run {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(16, 185, 129, 0.45);
       color: #a7f3d0;
+      font-size: 11.5px;
+      padding: 8px 10px;
     }
-    .btn-accent:hover {
-      background: rgba(16, 185, 129, 0.25);
-      border-color: rgba(16, 185, 129, 0.5);
+    .btn-run:hover {
+      background: rgba(16, 185, 129, 0.28);
+      border-color: rgba(16, 185, 129, 0.65);
     }
-    .hint {
-      margin-top: 10px;
-      font-size: 9.5px;
-      line-height: 1.4;
-      color: #64748b;
-      text-align: center;
+    .btn-row {
+      display: flex;
+      gap: 6px;
     }
-    .hint code {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 1px 4px;
-      border-radius: 3px;
-      color: #cbd5e1;
-      font-family: inherit;
+    .btn-row button {
+      flex: 1;
+      font-size: 10.5px;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.22);
     }
 
-    /* Settings View */
-    #view-settings {
+    .autostart-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9.5px;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 0 2px;
+    }
+    .autostart-toggle input {
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
+
+    /* Segmented Navigation */
+    .nav-seg {
+      display: flex;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 2px;
+      margin-bottom: 8px;
+    }
+    .seg-btn {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+    }
+    .seg-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .seg-btn.active {
+      color: #818cf8;
+      background: rgba(129, 140, 248, 0.12);
+    }
+
+    .seg-pane {
       display: none;
     }
-    .view-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    .seg-pane.active {
+      display: block;
     }
-    .back-btn {
-      width: auto;
-      padding: 3px 8px;
-      font-size: 10px;
-      color: #94a3b8;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .view-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #cbd5e1;
-    }
-    .section-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 8px 0 6px 0;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+
+    /* Sub-panels */
     .ai-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .ai-btn {
-      padding: 8px 6px;
+      padding: 7px 6px;
       font-size: 10.5px;
       text-align: center;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.03);
     }
     .ai-btn span.badge {
       font-size: 8px;
       color: #10b981;
       font-weight: 600;
     }
+
+    /* Tools Search & List */
+    .search-box {
+      width: 100%;
+      padding: 5px 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      color: #fff;
+      font-size: 10px;
+      outline: none;
+      margin-bottom: 6px;
+    }
+    .search-box:focus {
+      border-color: #818cf8;
+    }
+    .tools-list {
+      max-height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-right: 2px;
+    }
+    .tool-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      padding: 4px 6px;
+    }
+    .tool-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: #818cf8;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+    .tool-desc {
+      font-size: 9px;
+      color: #94a3b8;
+      line-height: 1.25;
+    }
+
+    /* Prompt Form */
     textarea.prompt-box {
       width: 100%;
       height: 60px;
       background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      color: #f1f5f9;
       font-size: 10px;
       font-family: inherit;
-      padding: 6px 8px;
+      padding: 6px;
       resize: none;
       outline: none;
       margin-bottom: 6px;
@@ -247,16 +335,6 @@
     }
     textarea.prompt-box:focus {
       border-color: #818cf8;
-    }
-    .prompt-actions {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-    .prompt-actions button {
-      flex: 1;
-      padding: 5px;
-      font-size: 10px;
     }
     .feedback-msg {
       font-size: 9.5px;
@@ -269,39 +347,64 @@
 </head>
 <body>
   <div class="header">
-    <span id="dot" class="dot"></span>
     <span class="title">ZXScript <span id="ver" class="ver"></span></span>
     <span class="author">โดย ZXD44</span>
   </div>
 
-  <!-- MAIN STATUS VIEW -->
-  <div id="view-main">
-    <div class="card">
-      <div id="state" class="status-text">กำลังตรวจสอบสถานะ…</div>
-      <div id="tools" class="tools-badge"></div>
-      <div id="servers" class="servers-list"></div>
+  <!-- MONITOR DISPLAY SCREEN -->
+  <div class="screen-box">
+    <div class="screen-header">
+      <span class="screen-title">🖥 มอนิเตอร์สถานะระบบ</span>
+      <span id="screen-dot" class="dot"></span>
     </div>
 
-    <div class="btn-group">
-      <button id="popup-start-bridge" class="btn-accent" style="display: none;">▶ เปิด Bridge ทันที (Auto-Run)</button>
-      <button id="btn-open-dashboard">📊 เปิด Dashboard ควบคุมเต็มจอ</button>
-      <button id="reconnect">↻ ตรวจสอบการเชื่อมต่อใหม่</button>
-      <button id="settings" class="btn-primary">⚙ ตั้งค่า / เลือกเว็บ AI</button>
-    </div>
+    <div id="screen-state" class="status-main">กำลังตรวจสอบสถานะ…</div>
 
-    <div class="hint">
-      เปิด <b>Roblox Studio</b> ไว้ และกดปุ่มเปิด Bridge จาก Dashboard ได้ทันที
+    <div class="screen-grid">
+      <div class="screen-row">
+        <span class="screen-label">Bridge Server</span>
+        <span id="val-bridge" class="screen-val">ws://127.0.0.1:17613</span>
+      </div>
+      <div class="screen-row">
+        <span class="screen-label">Roblox Studio</span>
+        <span id="val-studio" class="screen-val">Bloxstrap MCP</span>
+      </div>
+      <div class="screen-row">
+        <span class="screen-label">คำสั่งพร้อมใช้งาน</span>
+        <span id="val-tools" class="screen-val">0 คำสั่ง</span>
+      </div>
+      <div class="screen-row">
+        <span class="screen-label">เริ่มตอนเปิดคอม</span>
+        <span id="val-autostart" class="screen-val">พร้อมใช้งาน</span>
+      </div>
     </div>
   </div>
 
-  <!-- SETTINGS & AI SELECTOR VIEW -->
-  <div id="view-settings">
-    <div class="view-nav">
-      <button id="back-btn" class="back-btn">‹ กลับหน้าหลัก</button>
-      <span class="view-title">ตั้งค่า &amp; สลับเว็บ AI</span>
+  <!-- QUICK RUNNER CONTROLS -->
+  <div class="runner-controls">
+    <button id="btn-run-bridge" class="btn-run">▶ สตาร์ต Bridge (เริ่มรันอัตโนมัติ)</button>
+
+    <div id="online-actions" class="btn-row" style="display: none;">
+      <button id="btn-stop-bridge" class="btn-danger">⏹ ปิด Bridge</button>
+      <button id="btn-restart-bridge">⟳ รีสตาร์ต Server</button>
+      <button id="btn-refresh-state">↻ รีเฟรช</button>
     </div>
 
-    <div class="section-label">⚡ เปิดใช้งานบนเว็บ AI</div>
+    <label class="autostart-toggle">
+      <input type="checkbox" id="chk-autostart" />
+      <span>เปิด Bridge อัตโนมัติทุกครั้งที่เปิดคอมพิวเตอร์</span>
+    </label>
+  </div>
+
+  <!-- SEGMENTED QUICK TABS -->
+  <div class="nav-seg">
+    <button class="seg-btn active" data-pane="pane-ai">🌐 สลับเว็บ AI</button>
+    <button class="seg-btn" data-pane="pane-tools">⚡ คำสั่ง 31 รายการ</button>
+    <button class="seg-btn" data-pane="pane-prompt">⚙ คำสั่งพิเศษ</button>
+  </div>
+
+  <!-- PANE 1: AI QUICK SWITCH -->
+  <div id="pane-ai" class="seg-pane active">
     <div class="ai-grid">
       <button class="ai-btn" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com">
         <span>🚀 DeepSeek</span>
@@ -317,22 +420,31 @@
         <span>🟣 Qwen AI</span>
       </button>
     </div>
+    <button id="btn-open-overlay" style="font-size: 10px; padding: 4.5px;">
+      📌 เปิดแถบเมนูควบคุมบนหน้าเว็บ AI
+    </button>
+  </div>
 
-    <div class="section-label">⚙ คำสั่งพิเศษ (Custom Prompt)</div>
-    <textarea id="custom-prompt" class="prompt-box" placeholder="พิมพ์คำสั่งพิเศษที่ต้องการส่งให้ AI ทุกรอบ..."></textarea>
-    
-    <div class="prompt-actions">
-      <button id="btn-caveman" title="ใส่คำสั่ง Caveman เพื่อประหยัด token สูงสุด">⚡ ใส่ Caveman</button>
-      <button id="btn-save-prompt" class="btn-accent">บันทึกคำสั่ง</button>
+  <!-- PANE 2: 31 TOOLS LIST -->
+  <div id="pane-tools" class="seg-pane">
+    <input type="text" id="tool-search" class="search-box" placeholder="ค้นหาคำสั่ง เช่น execute_luau, multi_edit..." />
+    <div id="tools-box" class="tools-list">
+      <!-- Injected by popup.js -->
     </div>
-    <div id="prompt-feedback" class="feedback-msg"></div>
+  </div>
 
-    <div style="margin-top: 6px;">
-      <button id="open-overlay-btn" style="font-size: 10px; padding: 5px;">
-        📌 เปิดแถบควบคุมบนแท็บหน้าเว็บ
+  <!-- PANE 3: PROMPT & CAVEMAN -->
+  <div id="pane-prompt" class="seg-pane">
+    <textarea id="prompt-input" class="prompt-box" placeholder="พิมพ์คำสั่งพิเศษส่งให้ AI ทุกรอบ..."></textarea>
+    <div class="btn-row">
+      <button id="btn-caveman">⚡ ใส่ Caveman</button>
+      <button id="btn-save-prompt" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #a7f3d0;">
+        บันทึกคำสั่ง
       </button>
     </div>
   </div>
+
+  <div id="toast-msg" class="feedback-msg"></div>
 
   <script src="popup.js"></script>
 </body>
