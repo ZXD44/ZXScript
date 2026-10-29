@@ -222,7 +222,20 @@ const ZSProvider = (() => {
   const assistantCount = () => assistantItems().length;
   const userCount = () => allItems().filter(isUserItem).length;
   const getEditor = () => {
-    for (const sel of [S.editor, "#prompt-textarea", "[data-testid='prompt-textarea']", "textarea[placeholder*='Message']", "div[contenteditable='true']", "textarea"]) {
+    for (const sel of [
+      S.editor,
+      "#prompt-textarea",
+      "[data-testid='prompt-textarea']",
+      ".ProseMirror",
+      "[data-zs-locked='1']",
+      "div[contenteditable]",
+      "[contenteditable]",
+      "[role='textbox']",
+      "form [contenteditable]",
+      "textarea[placeholder*='Message']",
+      "form textarea",
+      "textarea"
+    ]) {
       for (const e of document.querySelectorAll(sel)) {
         if (!e.closest("#zs-root")) return e;
       }
@@ -658,6 +671,11 @@ const ZSProvider = (() => {
   function enforceComposer() { return { ready: true }; }
   async function ensureComposerReady(reason) {
     diag("mode_ready", { reason, provider: "chatgpt" });
+    // Retry with brief yields in case composer is mounting or hydrating
+    for (let i = 0; i < 15; i++) {
+      if (getEditor()) return { ready: true };
+      await sleep(150);
+    }
     return { ready: !!getEditor() };
   }
 
