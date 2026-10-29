@@ -3,7 +3,7 @@
 // Drives any AI chat site through the ZSProvider interface (providers/*.js):
 // waits for the model's reply, parses ZXScript commands (ZSParse), asks the
 // background worker to execute them on the Roblox MCP bridge, and feeds the
-// result back. Camouflages the system prompt ("Starting Up") and tool JSON
+// result back. Camouflages the system prompt ("กำลังเริ่มระบบ…") and tool JSON
 // behind animated chips, masks injected input, and exposes a Stop button.
 // The model ALWAYS receives an output.
 //
@@ -1804,7 +1804,7 @@
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  //  SESSION BOOTSTRAP  ("Starting Up" animated chip, shown in the conversation)
+  //  SESSION BOOTSTRAP  ("กำลังเริ่มระบบ…" animated chip, shown in the conversation)
   // ════════════════════════════════════════════════════════════════════════
   async function startSession() {
     if (A.running || A.starting) return;
@@ -1852,7 +1852,7 @@
       if (!alive()) return;
       // (syncSessionState pins A.startingKey to the conversation id once the chat
       // has content, and aborts this bootstrap if the user opens a new empty chat.)
-      decorate.sweep(); // show the animated "Starting Up" chip immediately
+      decorate.sweep(); // show the animated "กำลังเริ่มระบบ…" chip immediately
       const startRes = await waitForResponse(base);
       if (!alive()) return;
       // The user halted the bootstrap (our Stop or the site's native stop). Do
@@ -2128,7 +2128,7 @@
       // 1a. A mid-session RE-STATEMENT of the system prompt. Checked before the
       //     bootstrap branch because it carries SYS_MARKER too (that marker is
       //     what hides it), and without this it inherited the bootstrap's
-      //     "Starting Up" gear - which reads as if the agent restarted, exactly
+      //     "กำลังเริ่มระบบ…" gear - which reads as if the agent restarted, exactly
       //     the confusion Seb reported. Never animated: nothing is starting.
       if (txt.includes(ZS.RESEND_MARKER)) {
         if (item.dataset.zs !== "resend" || chipGone) {
@@ -2137,7 +2137,7 @@
           // result is the only one in the conversation with no visible outcome.
           const m = txt.match(/Output of '([^']+)'/);
           this.chip(item, {
-            label: "Reminder",
+            label: "ทบทวนคำสั่ง",
             detail: m ? `with ${m[1]} result` : "",
             category: "remind", phase: "remind", cls: "sys", whole: true,
           });
@@ -2151,7 +2151,7 @@
       if (txt.includes(ZS.SYS_MARKER)) {
         const phase = A.starting ? "run" : "sys";
         if (item.dataset.zs !== "sys" || item.dataset.zphase !== phase || chipGone) {
-          this.chip(item, { label: "Starting Up", category: "tool", phase, cls: "sys", whole: true });
+          this.chip(item, { label: "กำลังเริ่มระบบ…", category: "tool", phase, cls: "sys", whole: true });
           item.dataset.zphase = phase;
         }
         return;
@@ -2542,7 +2542,7 @@
           <span id="zs-brand">ZXScript <span class="zs-free">v${EXT_VERSION}</span></span>
           <span id="zs-state"></span>
           <button id="zs-action"></button>
-          <button id="zs-stop" hidden>■ Stop</button>
+          <button id="zs-stop" hidden>■ หยุด</button>
           <a id="zs-discord" href="https://discord.gg/D5G2HAzX8z" target="_blank" rel="noopener" title="Need help? Join our Discord"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></a>
           <button id="zs-switch" aria-label="Switch AI and options" title="Switch AI, custom prompt, support"><span id="zs-switch-name"></span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <button id="zs-support" aria-label="Support ZXScript" title="Support ZXScript"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
@@ -2752,7 +2752,7 @@
       // is already the main ZXScript dot elsewhere) and no remove button (it's
       // the primary server, protected bridge-side too).
       let mcpList =
-        `<div class="zs-mcp-item zs-mcp-item-primary"><div class="zs-mcp-info"><span class="zs-mcp-name">Roblox Studio</span><span class="zs-mcp-url">primary - always connected</span></div></div>`;
+        `<div class="zs-mcp-item zs-mcp-item-primary"><div class="zs-mcp-info"><span class="zs-mcp-name">Roblox Studio</span><span class="zs-mcp-url">หลัก - เชื่อมต่ออัตโนมัติ</span></div></div>`;
       mergedServers.forEach((s, i) => {
         // alive === undefined -> the bridge hasn't reported this server's health
         // yet (just added/removed, still restarting) - shown neutral, not red.
@@ -2763,7 +2763,7 @@
       menuEl.innerHTML =
         `<div class="zs-menu-head"><span class="zs-menu-logo">ZXScript</span><span class="zs-menu-tag">v${EXT_VERSION}</span></div>
          <section class="zs-menu-sec">
-           <div class="zs-sec-label"><span>Switch AI</span></div>
+           <div class="zs-sec-label"><span>สลับเว็บ AI</span></div>
            ${sites}
          </section>
          <section class="zs-menu-sec">
@@ -2778,19 +2778,19 @@
            <div class="zs-rbx-grid">${passes}</div>
          </section>
          <section class="zs-menu-sec">
-           <div class="zs-sec-label"><span>Custom prompt</span></div>
-           <div class="zs-menu-note">Added below the system prompt on every new session. The built-in prompt can't be edited.</div>
-           <textarea id="zs-set-text" rows="4" placeholder="e.g. Always comment your Luau code. Prefer small modular scripts."></textarea>
-           <div class="zs-set-row"><button id="zs-set-save">Save</button><span id="zs-set-status"></span></div>
+           <div class="zs-sec-label"><span>คำสั่งเฉพาะเพิ่มเติม (Custom Prompt)</span></div>
+           <div class="zs-menu-note">แทรกต่อท้าย System Prompt ในทุกเซสชันใหม่ เหมาะสำหรับคำสั่งบังคับเฉพาะ</div>
+           <textarea id="zs-set-text" rows="4" placeholder="เช่น: บังคับเขียนแบบ Caveman Mode, ใช้ task.wait() เสมอ"></textarea>
+           <div class="zs-set-row"><button id="zs-set-save">บันทึก</button><span id="zs-set-status"></span></div>
          </section>
          <section class="zs-menu-sec">
-           <div class="zs-sec-label"><span>MCP servers</span></div>
+           <div class="zs-sec-label"><span>เซิร์ฟเวอร์ MCP ทั้งหมด</span></div>
            <div class="zs-menu-note">Roblox Studio is always connected (primary). Add another MCP server (e.g. Blender, Sketchfab) as an addon - the bridge restarts briefly to load it. Experimental.</div>
            ${mcpList}
            <div class="zs-mcp-sep"></div>
            <input id="zs-mcp-name" class="zs-mcp-field" placeholder="Name, e.g. Blender" />
            <input id="zs-mcp-url" class="zs-mcp-field" placeholder="Start command, e.g. npx -y @some/mcp-server" />
-           <div class="zs-set-row"><button id="zs-mcp-add">Add server</button><span id="zs-mcp-status"></span></div>
+           <div class="zs-set-row"><button id="zs-mcp-add">เพิ่มเซิร์ฟเวอร์</button><span id="zs-mcp-status"></span></div>
          </section>`;
       const open = (url) => { try { window.open(url, "_blank", "noopener"); } catch {} menuEl.hidden = true; };
       menuEl.querySelectorAll("button.zs-site-opt, .zs-tip-opt").forEach((b) =>
@@ -2802,7 +2802,7 @@
       saveBtn.addEventListener("click", () => {
         customPrompt = ta.value;
         try { chrome.storage.local.set({ zsCustomPrompt: customPrompt }); } catch {}
-        status.textContent = "Saved ✓";
+        status.textContent = "บันทึกเรียบร้อย ✓";
         setTimeout(() => { status.textContent = ""; }, 1600);
       });
       const mcpNameEl = menuEl.querySelector("#zs-mcp-name");
@@ -2884,18 +2884,18 @@
         : "";
       setupCard.innerHTML =
         `<div id="zs-setup-head"><span id="zs-setup-logo">ZXScript</span><span id="zs-setup-tag">Setup</span></div>` +
-        `<div id="zs-setup-sub">The <b>Bridge</b> is what connects this chat to Roblox Studio. Three steps and you're running.</div>` +
+        `<div id="zs-setup-sub"><b>Bridge</b> คือตัวเชื่อมแชต AI เข้ากับ Roblox Studio เริ่มต้นง่ายๆ ใน 3 ขั้นตอน:</div>` +
         `<ol id="zs-setup-steps">` +
-          `<li>Download the Bridge from GitHub</li>` +
-          `<li>Run <code>start.bat</code></li>` +
-          `<li>Back here, click <b>Start Roblox agent</b></li>` +
+          `<li>เปิดโฟลเดอร์โปรเจกต์บนเครื่องของคุณ</li>` +
+          `<li>ดับเบิลคลิกไฟล์ <code>start.bat</code></li>` +
+          `<li>กลับมาหน้านี้แล้วกดปุ่ม <b>เริ่มทำงาน</b></li>` +
         `</ol>` +
         `<div class="zs-setup-copy-row">` +
           `<input type="text" id="zs-setup-link" readonly value="${GITHUB_URL}">` +
           `<button id="zs-setup-copy">Copy</button>` +
         `</div>` +
         videoBtn +
-        `<button id="zs-setup-dismiss">Got it</button>`;
+        `<button id="zs-setup-dismiss">เข้าใจแล้ว</button>`;
       document.documentElement.appendChild(setupCard);
 
       setupCard.querySelector("#zs-setup-copy").addEventListener("click", () => {
@@ -2965,7 +2965,7 @@
       if (A.staleExtension) {
         if (dot) dot.className = "off";
         toneClass = "warn"; warn = true;
-        msg = `<b>Disconnected</b> · reload this page to reconnect`;
+        msg = `<b>ขาดการเชื่อมต่อ</b> · กรุณารีเฟรชหน้านี้เพื่อเชื่อมต่อใหม่`;
       }
       // Show "Starting…" for the whole bootstrap. If the user actually leaves for
       // a new (empty) chat, syncSessionState clears A.starting, so this naturally
@@ -2974,8 +2974,8 @@
       else if (A.starting) {
         toneClass = "starting";
         indicator = `<span class="zs-spin"></span>`;
-        msg = `Starting the Roblox agent…`;
-        label = "Starting…"; kind = "starting"; disabled = true;
+        msg = `กำลังเริ่มเซสชัน AI…`;
+        label = "กำลังเริ่ม…"; kind = "starting"; disabled = true;
       } else if (A.started) {
         // Prefer the ADVERTISED list length (A.toolList - the AGGREGATE catalogue
         // across every connected MCP server, already filtered by the vision/blocked
@@ -2998,7 +2998,7 @@
           // without this check the bridge dropping fell through to the
           // stale "N tools" text below, reading as if nothing was wrong.
           toneClass = "warn"; warn = true;
-          msg = `<b>Agent active</b> · bridge offline, run start.bat`;
+          msg = `<b>Agent พร้อม</b> · Bridge ออฟไลน์ กรุณารัน start.bat`;
         } else if ((placeDown || appDown || studioDown) && addonOk) {
           // DEGRADED session by CHOICE: the user started the agent with Roblox
           // down but other MCP server(s) alive (the "Start agent (Roblox
@@ -3008,21 +3008,21 @@
           // session (warn=false → no zs-state-warn red text). The full nag
           // still shows when NO server is usable (the branches below).
           toneClass = "warn";
-          msg = `<b>Agent active</b>${tools ? ` · ${tools} tools` : ""} · Roblox offline`;
+          msg = `<b>Agent active</b>${tools ? ` · ${tools} คำสั่ง` : ""} · Roblox offline`;
         } else if (placeDown) {
           toneClass = "warn"; warn = true;
-          msg = `<b>Agent active</b> · open a place in Roblox Studio`;
+          msg = `<b>Agent พร้อม</b> · กรุณาเปิดแมพใน Roblox Studio`;
         } else if (appDown || studioDown) {
           toneClass = "warn"; warn = true;
           msg = studioProcUp
-            ? `<b>Agent active</b> · Studio is open but not connected - open <b>Assistant Settings &gt; MCP Servers</b> in Studio`
-            : `<b>Agent active</b> · open Roblox Studio & enable its MCP server`;
+            ? `<b>Agent พร้อม</b> · เปิด Studio แล้วแต่ยังไม่เปิด MCP · ไปที่ <b>Assistant &gt; MCP Servers</b>`
+            : `<b>Agent พร้อม</b> · กรุณาเปิด Roblox Studio และเปิดใช้งาน MCP`;
         } else {
           toneClass = "active";
           // No inline dot here: the leading status dot already shows green, two
           // dots side by side looked cluttered. The green "Agent active" text
           // carries it.
-          msg = `<b>Agent active</b>${tools ? ` · ${tools} tools` : ""}`;
+          msg = `<b>Agent active</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
         }
       } else if (P.isFreshChat() || P.chatIsEmpty()) {
         // Treat ANY empty chat (no turns yet) as the standby/start case - not just
@@ -3034,23 +3034,23 @@
         // an EXISTING conversation (one that has turns) we did not start.
         if (bridgeOk) {
           toneClass = "standby";
-          msg = `Standby. Start the agent, or just chat.`;
-          label = "▶︎ Start Roblox agent"; kind = "start";
+          msg = `พร้อมทำงาน · กดปุ่มเพื่อเริ่มสั่งงาน Studio หรือพิมพ์คุยปกติ`;
+          label = "▶︎ เริ่มทำงาน"; kind = "start";
         } else if (addonOk) {
           // Roblox is down but another MCP server is live: allow a DEGRADED start
           // (yellow). The agent runs on the other server(s); Roblox tools stay
           // unavailable until Studio is back. Button enabled, but visibly warned.
           toneClass = "warn"; warn = true;
           msg = !A.bridge.connected
-            ? `Run <b>start.bat</b> on your PC.`
+            ? `กรุณารันไฟล์ <b>start.bat</b> บนคอมพิวเตอร์`
             : studioProcUp
               ? `<b>Studio open but not connected</b> - open <b>Assistant Settings &gt; MCP Servers</b> in Studio, or start without it.`
               : `<b>Roblox Studio offline</b> - start with your other MCP server(s).`;
-          label = "▶︎ Start agent (Roblox offline)"; kind = "start-degraded";
+          label = "▶︎ เริ่มทำงาน (Roblox ออฟไลน์)"; kind = "start-degraded";
         } else {
           toneClass = "warn"; warn = true;
           msg = !A.bridge.connected
-            ? `Run <b>start.bat</b> on your PC.`
+            ? `กรุณารันไฟล์ <b>start.bat</b> บนคอมพิวเตอร์`
             : placeDown
               ? `Open a <b>place</b> in Roblox Studio.`
               : (appDown || studioDown) && studioProcUp
@@ -3060,12 +3060,12 @@
                   : studioDown
                     ? `Open <b>Roblox Studio</b> &amp; enable its MCP server.`
                     : `Open <b>Roblox Studio</b> for the tools.`;
-          label = "▶︎ Start Roblox agent"; kind = "start";
+          label = "▶︎ เริ่มทำงาน"; kind = "start";
         }
         disabled = !bridgeOk && !addonOk;
       } else {
         toneClass = "noagent";
-        msg = `No agent here. Open a new chat to start one.`;
+        msg = `แชตนี้ยังไม่ได้เริ่มเซสชัน · เปิดแชตใหม่เพื่อเริ่มใช้งาน`;
       }
       // Parked on visibility: the loop is alive but deliberately frozen because
       // this tab is not the foreground tab of its window. Say so explicitly -
@@ -3074,7 +3074,7 @@
       // background"). No red warn tone: this is a normal, recoverable pause.
       if (A.parked && (A.running || A.starting)) {
         toneClass = "warn"; warn = false;
-        msg = `<b>Paused</b> · bring this tab to the front to continue`;
+        msg = `<b>หยุดชั่วคราว</b> · สลับแท็บนี้มาด้านหน้าเพื่อทำงานต่อ`;
       }
       // Provider mode guard: some sites (e.g. Arena) only work in one chat mode.
       // When the provider reports the current mode is unsupported, override the
@@ -4190,7 +4190,7 @@
   // the browser paints, but the debounced sweep above waits one extra rAF -
   // long enough for a freshly-sent system-prompt/injected-feedback turn's raw
   // text to paint for a single frame before decorate.sweep() builds its chip
-  // and hides it (seen live on DeepSeek: "Starting Up" flashed the raw prompt
+  // and hides it (seen live on DeepSeek: "กำลังเริ่มระบบ…" flashed the raw prompt
   // for an instant). Do the cheap whole-item hide test right here, synchronously,
   // so the class lands before that first paint; the full sweep still runs after
   // to build the actual chip.

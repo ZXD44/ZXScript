@@ -1,37 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
   <meta charset="utf-8" />
   <style>
-    body { width: 248px; margin: 0; font-family: "Segoe UI", sans-serif; background: #16161a; color: #e8e8ec; }
-    .wrap { padding: 14px; }
-    h1 { font-size: 14px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
-    .ver { font-size: 9.5px; font-weight: 500; letter-spacing: 0.2px;
-           color: rgba(255,255,255,0.55); background: none; border: none;
-           padding: 0; }
-    .author { font-size: 9px; color: #818cf8; font-weight: 600; margin-left: auto; }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #6b7280; }
-    .dot.on { background: #34d399; box-shadow: 0 0 8px #34d399; }
-    .dot.warn { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
-    .row { font-size: 12px; opacity: 0.85; margin: 6px 0; }
-    button { width: 100%; margin-top: 8px; padding: 8px; border: 0; border-radius: 8px; cursor: pointer; font-size: 12px; }
-    .ghost { background: rgba(255,255,255,0.08); color: #e8e8ec; }
-    code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 250px;
+      padding: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: #0f0f13;
+      color: #f1f1f4;
+      user-select: none;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 10px;
+    }
+    .title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ver {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.45);
+      font-weight: 500;
+      padding: 1px 4px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+    }
+    .author {
+      font-size: 9px;
+      color: #818cf8;
+      font-weight: 600;
+      margin-left: auto;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4b5563;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+    .dot.on {
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    }
+    .dot.warn {
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 9px 10px;
+      margin-bottom: 10px;
+    }
+    .status-text {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .tools-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .servers-list {
+      font-size: 9.5px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      color: #a1a1aa;
+      white-space: pre-line;
+      margin-top: 5px;
+      line-height: 1.35;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #f1f5f9;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 9.5px;
+      line-height: 1.4;
+      color: #64748b;
+      text-align: center;
+    }
+    .hint code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: #cbd5e1;
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1><span id="dot" class="dot"></span> ZXScript <span id="ver" class="ver"></span> <span class="author">by ZXD44</span></h1>
-    <div class="row" id="state">Bridge: …</div>
-    <div class="row" id="tools"></div>
-    <div class="row" id="servers" style="white-space:pre-line; font-family:ui-monospace,monospace; opacity:0.75"></div>
-    <button class="ghost" id="reconnect">↻ Reconnect bridge</button>
-    <button class="ghost" id="restart">⟳ Restart Roblox server</button>
-    <button class="ghost" id="settings">⚙ Settings</button>
-    <div class="row" style="margin-top:10px; opacity:0.6">
-      Run <code>start.bat</code> and open <b>Roblox Studio</b>, then go to a supported AI.
-    </div>
+  <div class="header">
+    <span id="dot" class="dot"></span>
+    <span class="title">ZXScript <span id="ver" class="ver"></span></span>
+    <span class="author">โดย ZXD44</span>
   </div>
+
+  <div class="card">
+    <div id="state" class="status-text">กำลังตรวจสอบสถานะ…</div>
+    <div id="tools" class="tools-badge"></div>
+    <div id="servers" class="servers-list"></div>
+  </div>
+
+  <div class="btn-group">
+    <button id="reconnect">↻ เชื่อมต่อ Bridge ใหม่</button>
+    <button id="restart">⟳ รีสตาร์ต Roblox Server</button>
+    <button id="settings">⚙ ตั้งค่า / เลือกเว็บ AI</button>
+  </div>
+
+  <div class="hint">
+    รัน <code>start.bat</code> และเปิด <b>Roblox Studio</b> ไว้ตลอดเวลาที่ใช้งาน
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>

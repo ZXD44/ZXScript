@@ -19,3 +19,7 @@ desktop.ini
 __pycache__/
 *.pyc
 *.log
+
+# Extension packaging
+*.crx
+*.pem

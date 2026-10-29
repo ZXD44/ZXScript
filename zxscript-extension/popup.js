@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-const KOFI_URL = "https://ko-fi.com/sebattfg";
 const SUPPORTED_HOSTS = [
   "chat.deepseek.com", "deepseek.com", "chatgpt.com", "chat.openai.com",
   "gemini.google.com", "www.kimi.ai", "kimi.ai",
@@ -21,13 +20,13 @@ function render(s) {
   const ok = mcpOk && !studioOff;
   dot.className = "dot " + (s.connected ? (ok ? "on" : "warn") : "");
   state.textContent = s.connected
-    ? (ok ? "Connected · Roblox Studio ready"
-        : studioOff ? "Studio not connected · enable the MCP server in Studio"
-        : "Bridge OK · open Roblox Studio")
-    : "Bridge offline";
-  tools.textContent = s.connected ? `${s.tools || 0} tools available` : "Run bridge.py";
+    ? (ok ? "🟢 เชื่อมต่อแล้ว · Studio พร้อมทำงาน"
+        : studioOff ? "🟡 Studio ยังไม่เชื่อมต่อ · เปิด Assistant > MCP Servers"
+        : "🟡 Bridge ทำงานแล้ว · กรุณาเปิดแมพใน Studio")
+    : "⚪ Bridge ออฟไลน์ · ดับเบิลคลิก start.bat";
+  tools.textContent = s.connected ? `⚡ พร้อมใช้งาน ${s.tools || 0} เครื่องมือ` : "รัน start.bat เพื่อเริ่มเชื่อมต่อ";
   servers.textContent = s.connected
-    ? list.map((x) => `${x.alive ? "●" : "○"} ${x.id} (${x.alive ? x.tools + " tools" : "down"})`).join("\n")
+    ? list.map((x) => `${x.alive ? "●" : "○"} ${x.id} (${x.alive ? x.tools + " คำสั่ง" : "ปิดอยู่"})`).join("\n")
     : "";
 }
 
@@ -39,19 +38,13 @@ document.getElementById("reconnect").addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "reconnect" }, () => setTimeout(refresh, 600));
 });
 document.getElementById("restart").addEventListener("click", (e) => {
-  e.target.textContent = "Restarting…";
+  e.target.textContent = "กำลังรีสตาร์ต…";
   chrome.runtime.sendMessage({ type: "restart_mcp" }, () => {
-    e.target.textContent = "⟳ Restart Roblox server";
+    e.target.textContent = "⟳ รีสตาร์ต Roblox Server";
     setTimeout(refresh, 600);
   });
 });
-document.getElementById("kofi").addEventListener("click", () => {
-  chrome.tabs.create({ url: KOFI_URL });
-});
 document.getElementById("settings").addEventListener("click", () => {
-  // Same mechanism as the Ko-fi button (chrome.tabs), but tries the in-page
-  // panel on an already-open supported AI tab first, so opening it doesn't
-  // require a conversation to already be started there.
   chrome.tabs.query({}, (tabs) => {
     const active = tabs.find((t) => t.active && t.url && SUPPORTED_HOSTS.some((h) => t.url.includes(h)));
     const anySupported = active || tabs.find((t) => t.url && SUPPORTED_HOSTS.some((h) => t.url.includes(h)));
