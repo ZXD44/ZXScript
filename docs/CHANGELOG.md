@@ -1,6 +1,15 @@
 # Changelog
 
-All notable changes to ZeroScript Free are documented here.
+All notable changes to ZXScript are documented here.
+
+## [0.0.1] - 2026-10-29
+
+### Added & Rebranded
+- **ZXScript Release by zxd44 (ZirconX)**.
+- Integrated Native Messaging & direct browser runner.
+- Impeccable minimalist design in extension popup.
+- Automated Bloxstrap MCP discovery & Anti-Ban Shield pacing.
+- Modularized repository architecture (bridge/, scripts/, dist/, docs/).
 
 ## [1.5.5] - 2026-09-10
 
