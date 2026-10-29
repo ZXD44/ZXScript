@@ -4,7 +4,7 @@
   "version": "1.5.5",
   "description": "ZXScript โดย zxd44 (ZirconX) - เปลี่ยน DeepSeek, ChatGPT, Gemini, Qwen ให้เป็นผู้ช่วย AI ควบคุม Roblox Studio อัตโนมัติ",
   "author": "zxd44 <gonhackergamer0@gmail.com>",
-  "permissions": ["storage"],
+  "permissions": ["storage", "tabs"],
   "host_permissions": [
     "https://chat.deepseek.com/*",
     "https://deepseek.com/*",

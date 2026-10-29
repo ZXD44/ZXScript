@@ -5,7 +5,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 250px;
+      width: 260px;
       padding: 12px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
       background: #0f0f13;
@@ -120,7 +120,7 @@
     }
     button {
       width: 100%;
-      padding: 6px 10px;
+      padding: 6.5px 10px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 6px;
       background: rgba(255, 255, 255, 0.05);
@@ -132,7 +132,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
     }
     button:hover {
       background: rgba(255, 255, 255, 0.1);
@@ -140,6 +140,24 @@
     }
     button:active {
       transform: scale(0.98);
+    }
+    .btn-primary {
+      background: rgba(129, 140, 248, 0.16);
+      border-color: rgba(129, 140, 248, 0.35);
+      color: #c7d2fe;
+    }
+    .btn-primary:hover {
+      background: rgba(129, 140, 248, 0.26);
+      border-color: rgba(129, 140, 248, 0.5);
+    }
+    .btn-accent {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #a7f3d0;
+    }
+    .btn-accent:hover {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: rgba(16, 185, 129, 0.5);
     }
     .hint {
       margin-top: 10px;
@@ -155,6 +173,98 @@
       color: #cbd5e1;
       font-family: inherit;
     }
+
+    /* Settings View */
+    #view-settings {
+      display: none;
+    }
+    .view-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .back-btn {
+      width: auto;
+      padding: 3px 8px;
+      font-size: 10px;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .view-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 8px 0 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ai-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .ai-btn {
+      padding: 8px 6px;
+      font-size: 10.5px;
+      text-align: center;
+      flex-direction: column;
+      gap: 2px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .ai-btn span.badge {
+      font-size: 8px;
+      color: #10b981;
+      font-weight: 600;
+    }
+    textarea.prompt-box {
+      width: 100%;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 10px;
+      font-family: inherit;
+      padding: 6px 8px;
+      resize: none;
+      outline: none;
+      margin-bottom: 6px;
+      user-select: text;
+    }
+    textarea.prompt-box:focus {
+      border-color: #818cf8;
+    }
+    .prompt-actions {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .prompt-actions button {
+      flex: 1;
+      padding: 5px;
+      font-size: 10px;
+    }
+    .feedback-msg {
+      font-size: 9.5px;
+      color: #10b981;
+      font-weight: 600;
+      min-height: 14px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -164,20 +274,63 @@
     <span class="author">โดย ZXD44</span>
   </div>
 
-  <div class="card">
-    <div id="state" class="status-text">กำลังตรวจสอบสถานะ…</div>
-    <div id="tools" class="tools-badge"></div>
-    <div id="servers" class="servers-list"></div>
+  <!-- MAIN STATUS VIEW -->
+  <div id="view-main">
+    <div class="card">
+      <div id="state" class="status-text">กำลังตรวจสอบสถานะ…</div>
+      <div id="tools" class="tools-badge"></div>
+      <div id="servers" class="servers-list"></div>
+    </div>
+
+    <div class="btn-group">
+      <button id="reconnect">↻ เชื่อมต่อ Bridge ใหม่</button>
+      <button id="restart">⟳ รีสตาร์ต Roblox Server</button>
+      <button id="settings" class="btn-primary">⚙ ตั้งค่า / เลือกเว็บ AI</button>
+    </div>
+
+    <div class="hint">
+      รัน <code>start.bat</code> และเปิด <b>Roblox Studio</b> ไว้ตลอดเวลาที่ใช้งาน
+    </div>
   </div>
 
-  <div class="btn-group">
-    <button id="reconnect">↻ เชื่อมต่อ Bridge ใหม่</button>
-    <button id="restart">⟳ รีสตาร์ต Roblox Server</button>
-    <button id="settings">⚙ ตั้งค่า / เลือกเว็บ AI</button>
-  </div>
+  <!-- SETTINGS & AI SELECTOR VIEW -->
+  <div id="view-settings">
+    <div class="view-nav">
+      <button id="back-btn" class="back-btn">‹ กลับหน้าหลัก</button>
+      <span class="view-title">ตั้งค่า &amp; สลับเว็บ AI</span>
+    </div>
 
-  <div class="hint">
-    รัน <code>start.bat</code> และเปิด <b>Roblox Studio</b> ไว้ตลอดเวลาที่ใช้งาน
+    <div class="section-label">⚡ เปิดใช้งานบนเว็บ AI</div>
+    <div class="ai-grid">
+      <button class="ai-btn" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com">
+        <span>🚀 DeepSeek</span>
+        <span class="badge">[แนะนำ]</span>
+      </button>
+      <button class="ai-btn" data-url="https://chatgpt.com/" data-host="chatgpt.com">
+        <span>🟢 ChatGPT</span>
+      </button>
+      <button class="ai-btn" data-url="https://gemini.google.com/" data-host="gemini.google.com">
+        <span>🔵 Gemini</span>
+      </button>
+      <button class="ai-btn" data-url="https://chat.qwen.ai/" data-host="chat.qwen.ai">
+        <span>🟣 Qwen AI</span>
+      </button>
+    </div>
+
+    <div class="section-label">⚙ คำสั่งพิเศษ (Custom Prompt)</div>
+    <textarea id="custom-prompt" class="prompt-box" placeholder="พิมพ์คำสั่งพิเศษที่ต้องการส่งให้ AI ทุกรอบ..."></textarea>
+    
+    <div class="prompt-actions">
+      <button id="btn-caveman" title="ใส่คำสั่ง Caveman เพื่อประหยัด token สูงสุด">⚡ ใส่ Caveman</button>
+      <button id="btn-save-prompt" class="btn-accent">บันทึกคำสั่ง</button>
+    </div>
+    <div id="prompt-feedback" class="feedback-msg"></div>
+
+    <div style="margin-top: 6px;">
+      <button id="open-overlay-btn" style="font-size: 10px; padding: 5px;">
+        📌 เปิดแถบควบคุมบนแท็บหน้าเว็บ
+      </button>
+    </div>
   </div>
 
   <script src="popup.js"></script>
