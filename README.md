@@ -57,7 +57,9 @@ ZXScript/
 - **Context Resend & Tool Persistence:** Auto-refreshes tools every 8 calls and resends system prompts to prevent AI from dropping MCP tool calling.
 - **28+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more. Script chunking for large files (start_line/end_line).
 - **Play Mode Auto-Routing:** Automatically retries `execute_luau` on Server datamodel when Studio is in Play mode.
-- **Provider Agnostic:** Supports DeepSeek (`chat.deepseek.com`), ChatGPT, Gemini, Qwen, GLM, Kimi, and Arena.
+- **Provider Agnostic & All-Platform Verified:** Fortified start button (`▶︎ เริ่มทำงาน`) across all 8 major AI platforms: DeepSeek, ChatGPT, Gemini, Qwen, Kimi, GLM / Z.ai, Meta AI, and Arena.
+- **Impeccable Style UI & 5px Custom Scrollbars:** Conforms strictly to impeccable.style guidelines with deep Zinc-950 aesthetics, custom 5px slim pill scrollbars on all containers, and tactile micro-interactions.
+- **High-Performance 144Hz Engine:** Zero DOM layout thrashing in requestAnimationFrame positioning loops, ensuring buttery-smooth rendering with no dropped frames.
 - **Persistent Project Memory & Auto-Sync:** Automatically detects intent to rest or finish (e.g. 'พักผ่อน', 'เสร็จแล้ว'), syncs `game.ServerStorage.ZXScript.Memory` in Studio, and mirrors local documentation to `projects/<PlaceName>/`.
 - **Standalone Build:** Optional PyInstaller build (`scripts/build_exe.py`) produces a single `ZXScript-Bridge.exe` with no Python dependency.
 - **GitHub Actions CI:** Automated syntax checks and test suite on every push.
