@@ -2,53 +2,47 @@
 @echo off
 setlocal enabledelayedexpansion
 chcp 65001 >nul
-title ZXScript Bridge - by ZXD44
+title ZXScript Automation Bridge - by ZXD44
 cd /d "%~dp0"
 
 if not exist "%~dp0logs" mkdir "%~dp0logs" >nul 2>nul
 set "LOGFILE=%~dp0logs\start.log"
 call :log "===== %DATE% %TIME%  start.bat launched ====="
-REM Log the Windows build once per launch - most support requests arrive as a
-REM single terminal screenshot, so anything that identifies the machine's
-REM environment must be either ON SCREEN or in this log.
 for /f "tokens=*" %%v in ('ver') do call :log "%%v"
 
-echo.
-echo   === ZXScript Bridge - by ZXD44 ===
+cls
+echo =====================================================================
+echo    🚀 ZXScript Autonomous All-in-One Launcher - by ZXD44
+echo    Roblox Studio AI Agent Bridge (Bloxstrap & Vanilla Supported)
+echo =====================================================================
 echo.
 
-REM Refuse to run from inside a ZIP preview: Explorer extracts start.bat alone
-REM to %TEMP%, so bridge.py is missing and the launch fails with a confusing
-REM Python error. Detect the missing file up front with a plain explanation -
-REM this is one of the most common first-run mistakes.
+:: --- 1. Verify Project Files --------------------------------------------
+echo   [1/6] Verifying project integrity...
 if not exist "%~dp0bridge.py" (
-    echo   ERROR: bridge.py not found next to start.bat.
-    echo.
-    echo   If you opened start.bat from inside the downloaded ZIP, first EXTRACT
-    echo   the whole ZIP ^(right-click, "Extract All..."^), then run start.bat
-    echo   from the extracted folder.
-    echo.
-    call :log "FATAL: bridge.py missing next to start.bat (run from inside ZIP?)."
+    echo   [ERROR] bridge.py not found next to start.bat!
+    echo   Make sure you extracted the complete folder before running.
+    call :log "FATAL: bridge.py missing."
     pause
     exit /b 1
 )
+if not exist "%~dp0zxscript-extension\manifest.json" (
+    echo   [WARNING] zxscript-extension folder not found!
+    call :log "WARN: zxscript-extension missing."
+) else (
+    echo         [OK] Project core and extension verified.
+)
 
-REM --- 1. Find Python ---------------------------------------------------------
-echo   [1/3] Looking for Python...
+:: --- 2. Python Detection & Auto-Install ---------------------------------
+echo.
+echo   [2/6] Checking Python runtime...
 set "PY="
-
-REM Prefer the py launcher - it never resolves to the Microsoft Store stub.
 where py >nul 2>nul && set "PY=py -3"
-call :validate_py && goto :found
+call :validate_py && goto :py_found
 
-REM Fall back to python on PATH, but skip the Store stub (WindowsApps) which
-REM cannot run pip and silently fails.
 set "PY=python"
-call :validate_py && goto :found
+call :validate_py && goto :py_found
 
-REM Last resort: scan the standard install folders directly. Covers the common
-REM case where Python was installed WITHOUT "Add to PATH" and without the py
-REM launcher, so neither "py" nor "python" resolves. Newest version first.
 for %%R in (
     "%LOCALAPPDATA%\Programs\Python"
     "%ProgramFiles%"
@@ -58,189 +52,157 @@ for %%R in (
         for /f "delims=" %%D in ('dir /b /ad /o-n "%%~R\Python3*" 2^>nul') do (
             if exist "%%~R\%%D\python.exe" (
                 set PY="%%~R\%%D\python.exe"
-                call :validate_py && goto :found
+                call :validate_py && goto :py_found
             )
         )
     )
 )
 
-set "PY="
-call :log "Python not found on PATH or in standard install folders."
-goto :need_install
-
-:found
-REM Print the exact interpreter VERSION on screen (not just the launcher name):
-REM a user screenshot must tell us whether the failure is a too-old Python
-REM without asking them to run anything else.
-REM "call" prefix: when %PY% is a quoted full path (the no-PATH scan case), a
-REM bare quoted command inside for /f trips cmd's leading-quote stripping rule;
-REM call re-parses the line and keeps the quotes intact.
-for /f "tokens=*" %%v in ('call %PY% --version 2^>^&1') do (
-    echo         Found: %PY%  ^(%%v^)
-    call :log "Python found: %PY% (%%v)"
-)
-goto :install_deps
-
-:need_install
-REM --- Python not found, try winget -------------------------------------------
-REM winget itself may be absent (LTSC / old Win10 / stripped installs). Without
-REM this check the "winget" line fails with an unrelated "not recognized" error
-REM that users screenshot without context - name the real problem instead.
+call :log "Python missing. Attempting auto-installation via winget..."
+echo         Python not found. Auto-installing Python 3.12 via winget...
 where winget >nul 2>nul
 if errorlevel 1 (
-    echo   ERROR: Python is not installed and winget ^(Windows package manager^)
-    echo   is not available on this PC, so it cannot be installed automatically.
-    echo.
-    echo   Install Python manually: https://www.python.org/downloads/
-    echo   IMPORTANT: tick "Add python.exe to PATH", then run start.bat again.
-    echo.
-    call :log "FATAL: no Python and no winget on this machine."
+    echo   [ERROR] winget is unavailable. Please download Python from:
+    echo   https://www.python.org/downloads/ (tick 'Add to PATH').
     pause
     exit /b 1
 )
-echo         Not found. Installing via winget...
-echo.
 winget install --id Python.Python.3.12 --source winget --accept-package-agreements --accept-source-agreements
-if errorlevel 1 call :log "winget install returned an error (see console output above)."
-echo.
-echo   Checking again...
-set "PY=py -3"
-call :validate_py && goto :ready
 set "PY=python"
-call :validate_py && goto :ready
-REM A winget install does NOT refresh THIS console's PATH, so "py"/"python" can
-REM stay unresolvable in the very session that installed them. Rescan the
-REM standard install folders directly (same scan as the pre-install fallback)
-REM before telling the user it failed - a plain restart-and-retry would have
-REM worked, so we do its equivalent for them.
-for %%R in (
-    "%LOCALAPPDATA%\Programs\Python"
-    "%ProgramFiles%"
-    "%ProgramFiles(x86)%"
-) do (
-    if exist "%%~R" (
-        for /f "delims=" %%D in ('dir /b /ad /o-n "%%~R\Python3*" 2^>nul') do (
-            if exist "%%~R\%%D\python.exe" (
-                set PY="%%~R\%%D\python.exe"
-                call :validate_py && goto :ready
-            )
-        )
-    )
-)
-echo.
-echo   ERROR: Python not found after install.
-echo   Install manually: https://www.python.org/downloads/
-echo   Tick "Add python.exe to PATH" then run this again.
-echo.
-call :log "FATAL: no usable Python found even after winget install."
+call :validate_py && goto :py_found
+echo   [ERROR] Python auto-install failed. Please install manually.
 pause
 exit /b 1
-:ready
-echo         Python ready!
-call :log "Python ready after winget install: %PY%"
 
-:install_deps
-REM --- 2. Install websockets --------------------------------------------------
+:py_found
+for /f "tokens=*" %%v in ('call %PY% --version 2^>^&1') do (
+    echo         [OK] Python found: %PY% (%%v)
+    call :log "Python detected: %PY% (%%v)"
+)
+
+:: --- 3. Dependency Check & Auto-Install ---------------------------------
 echo.
-echo   [2/3] Checking websockets library...
+echo   [3/6] Checking Python dependencies (websockets)...
 %PY% -c "import websockets" >nul 2>nul
 if errorlevel 1 (
-    echo         Installing websockets - first time only...
+    echo         Installing required websockets library...
     %PY% -m pip install --user websockets
     if errorlevel 1 (
-        echo.
-        echo   ERROR: Could not install websockets ^(see pip output above^).
-        echo   Common causes: no internet, a firewall/antivirus blocking pip,
-        echo   or Python has no working pip. If you used the Microsoft Store
-        echo   python, install from https://www.python.org/downloads/ instead
-        echo   ^(tick "Add to PATH"^).
-        echo.
-        call :log "FATAL: pip install websockets failed."
+        echo   [ERROR] Failed to install websockets. Check internet connection.
         pause
         exit /b 1
     )
 )
-echo         OK
-call :log "websockets library OK"
+echo         [OK] websockets library is ready.
+call :log "websockets library ready."
 
-REM --- 3. Run the bridge ------------------------------------------------------
+:: --- 4. Process & Port Cleanup ------------------------------------------
 echo.
-echo   [3/3] Starting bridge...
+echo   [4/6] Cleaning lingering processes and ports (17613 & 13469)...
+:: Clean zombie StudioMCP
+tasklist /fi "imagename eq StudioMCP.exe" 2>nul | findstr /i "StudioMCP.exe" >nul
+if not errorlevel 1 (
+    taskkill /F /IM StudioMCP.exe >nul 2>nul
+    call :log "Cleaned lingering StudioMCP.exe"
+)
 
-REM If a previous bridge is already listening on 17613, say so instead of
-REM silently killing it - a double-launch is easy to do by mistake (e.g.
-REM double-clicking start.bat twice) and should not look like nothing happened.
+:: Clean port 17613 if held by an old bridge
 set "OLDPID="
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :17613 ^| findstr LISTENING 2^>nul') do (
     set "OLDPID=%%a"
 )
 if defined OLDPID (
-    echo         A previous bridge ^(pid !OLDPID!^) is already running on this port.
-    echo         Replacing it with this new instance...
-    call :log "Killing previous bridge instance (pid !OLDPID!) on port 17613."
     taskkill /F /T /PID !OLDPID! >nul 2>nul
-    REM Give Windows a moment to actually free the socket before we rebind it.
     timeout /t 1 /nobreak >nul
-    set "STILLTHERE="
-    for /f "tokens=5" %%a in ('netstat -aon ^| findstr :17613 ^| findstr LISTENING 2^>nul') do (
-        set "STILLTHERE=%%a"
+    call :log "Replaced previous bridge on PID !OLDPID!"
+)
+echo         [OK] Ports and background processes cleaned.
+
+:: --- 5. Roblox Studio / Bloxstrap MCP Check & Auto-Launch ---------------
+echo.
+echo   [5/6] Inspecting Roblox Studio & Bloxstrap MCP engine...
+set "STUDIO_MCP="
+set "STUDIO_EXE="
+
+for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m; p = m.find_studio_mcp(); print(p if p else '')"') do (
+    set "STUDIO_MCP=%%a"
+)
+
+if defined STUDIO_MCP (
+    echo         [OK] Detected StudioMCP binary:
+    echo              !STUDIO_MCP!
+    call :log "Detected StudioMCP at !STUDIO_MCP!"
+    
+    for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m, os; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else ''; s = os.path.join(d, 'RobloxStudioBeta.exe'); print(s if os.path.isfile(s) else '')"') do (
+        set "STUDIO_EXE=%%a"
     )
-    if defined STILLTHERE (
-        echo.
-        echo   WARNING: port 17613 is still held by pid !STILLTHERE! after trying
-        echo   to close the previous bridge. If the bridge below fails to start,
-        echo   close that process manually in Task Manager ^(or restart Windows^)
-        echo   and run start.bat again.
-        echo.
-        call :log "WARNING: port 17613 still held by pid !STILLTHERE! after taskkill."
+) else (
+    echo         [WARNING] StudioMCP.exe not found automatically.
+    echo         Ensure Roblox Studio is installed and 'Studio as MCP server' is enabled.
+    call :log "WARN: StudioMCP binary not detected."
+)
+
+:: Check if Roblox Studio is already running
+set "STUDIO_RUNNING=0"
+tasklist /fi "imagename eq RobloxStudioBeta.exe" 2>nul | findstr /i "RobloxStudioBeta.exe" >nul && set "STUDIO_RUNNING=1"
+tasklist /fi "imagename eq RobloxStudio.exe" 2>nul | findstr /i "RobloxStudio.exe" >nul && set "STUDIO_RUNNING=1"
+
+if "%STUDIO_RUNNING%"=="1" (
+    echo         [OK] Roblox Studio is currently running!
+) else (
+    if defined STUDIO_EXE (
+        echo         Roblox Studio is not running. Auto-launching Roblox Studio...
+        start "" "!STUDIO_EXE!"
+        call :log "Auto-launched Roblox Studio from !STUDIO_EXE!"
+        echo         [OK] Roblox Studio launched! Please open your Place.
+    ) else (
+        echo         [NOTICE] Please launch Roblox Studio and open your Place.
     )
 )
 
+:: --- 6. Launch Bridge ----------------------------------------------------
 echo.
-echo  ############################################################
-echo  ##                                                        ##
-echo  ##   KEEP THIS TERMINAL OPEN - DO NOT CLOSE THIS WINDOW   ##
-echo  ##                                                        ##
-echo  ##   ZXScript stops working if you close it. Just       ##
-echo  ##   minimize this window and leave it running.           ##
-echo  ##                                                        ##
-echo  ############################################################
+echo   [6/6] Starting ZXScript Bridge...
 echo.
+echo  =====================================================================
+echo    STATUS: Bridge is ONLINE and ready!
+echo.
+echo    1. Load Extension in Chrome:
+echo       chrome://extensions -> Developer Mode -> Load unpacked:
+echo       %~dp0zxscript-extension
+echo.
+echo    2. Open your Place in Roblox Studio:
+echo       Assistant AI -^> ... -^> Manage MCP Servers -^> Enable Studio as MCP Server
+echo.
+echo    3. Open Web AI:
+echo       https://chat.deepseek.com (Recommended) or https://chat.qwen.ai
+echo       Wait for green dot 🟢 and click 'Start session'!
+echo.
+echo    [NOTE] DO NOT CLOSE THIS TERMINAL. Minimize it while working.
+echo  =====================================================================
+echo.
+
 call :log "Launching bridge.py with %PY%"
 %PY% "%~dp0bridge.py"
-REM Show the exit code ON SCREEN, not only in the log: a screenshot of this
-REM terminal is usually the only diagnostic we get, and "Bridge stopped" alone
-REM does not say whether it crashed (non-zero) or was closed normally.
+
 set "BRIDGE_EXIT=%errorlevel%"
 call :log "bridge.py exited with code %BRIDGE_EXIT%"
-
 echo.
 if not "%BRIDGE_EXIT%"=="0" (
-    echo   Bridge stopped with ERROR code %BRIDGE_EXIT% - scroll up for the Python
-    echo   error message and include THIS WHOLE WINDOW in any bug report.
+    echo   Bridge stopped with error code %BRIDGE_EXIT%.
     echo   Log file: logs\start.log
 ) else (
     echo   Bridge stopped normally.
 )
-echo   Press any key to close.
-pause >nul
+pause
 exit /b 0
 
-REM --- Subroutine: verify %PY% is a real, usable Python ------------------------
-REM Returns 0 only if the interpreter runs, has a working pip, AND is Python 3.9
-REM or newer. The pip check rejects the Microsoft Store stub (WindowsApps\
-REM python.exe). The version check rejects old interpreters (e.g. 3.7/3.8) that
-REM lack asyncio.to_thread, which the bridge requires.
+:: --- Subroutines ---------------------------------------------------------
 :validate_py
 %PY% -m pip --version >nul 2>nul || exit /b 1
 %PY% -c "import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)" >nul 2>nul
 exit /b %errorlevel%
 
-REM --- Subroutine: append a line to start.log (best-effort, never blocks) -----
 :log
-REM Redirect FIRST, then echo. With the redirect at the end, a message that
-REM ENDS IN A DIGIT (e.g. "exited with code 0") makes cmd parse "0>>" as a
-REM file-handle redirect: the digit is eaten and the line prints to the console
-REM instead of the log (seen live). echo( is the safe echo form for arbitrary text.
 >>"%LOGFILE%" 2>nul echo(%~1
 exit /b 0
