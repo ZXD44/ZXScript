@@ -2974,7 +2974,7 @@
       else if (A.starting) {
         toneClass = "starting";
         indicator = `<span class="zs-spin"></span>`;
-        msg = `กำลังเริ่มเซสชัน AI…`;
+        msg = `กำลังเชื่อมต่อเซสชัน AI<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
         label = "กำลังเริ่ม…"; kind = "starting"; disabled = true;
       } else if (A.started) {
         // Prefer the ADVERTISED list length (A.toolList - the AGGREGATE catalogue
@@ -3015,8 +3015,8 @@
         } else if (appDown || studioDown) {
           toneClass = "warn"; warn = true;
           msg = studioProcUp
-            ? `<b>Agent พร้อม</b> · เปิด Studio แล้วแต่ยังไม่เปิด MCP · ไปที่ <b>Assistant &gt; MCP Servers</b>`
-            : `<b>Agent พร้อม</b> · กรุณาเปิด Roblox Studio และเปิดใช้งาน MCP`;
+            ? `<b>Agent พร้อม</b> · กำลังรอเชื่อมต่อ MCP<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span> (เปิด Assistant &gt; MCP)`
+            : `<b>Agent พร้อม</b> · กำลังรอเปิด Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
         } else {
           toneClass = "active";
           // No inline dot here: the leading status dot already shows green, two
@@ -3050,16 +3050,16 @@
         } else {
           toneClass = "warn"; warn = true;
           msg = !A.bridge.connected
-            ? `กรุณารันไฟล์ <b>start.bat</b> บนคอมพิวเตอร์`
+            ? `กำลังค้นหา Bridge<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span> (ดับเบิลคลิก <b>start.bat</b>)`
             : placeDown
-              ? `Open a <b>place</b> in Roblox Studio.`
+              ? `กำลังรอเปิด Place ใน Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
               : (appDown || studioDown) && studioProcUp
-                ? `Studio is open but not connected - open <b>Assistant Settings &gt; MCP Servers</b> in Studio.`
+                ? `กำลังรอเชื่อมต่อ MCP<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span> (Assistant &gt; MCP Servers)`
                 : appDown
-                  ? `Open <b>Roblox Studio</b> &amp; enable its MCP server.`
+                  ? `กำลังรอเปิด Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
                   : studioDown
-                    ? `Open <b>Roblox Studio</b> &amp; enable its MCP server.`
-                    : `Open <b>Roblox Studio</b> for the tools.`;
+                    ? `กำลังรอเปิด Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
+                    : `กำลังเชื่อมต่อ Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
           label = "▶︎ เริ่มทำงาน"; kind = "start";
         }
         disabled = !bridgeOk && !addonOk;

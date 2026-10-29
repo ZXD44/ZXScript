@@ -71,6 +71,32 @@
       color: #e2e8f0;
       margin-bottom: 4px;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .zs-dots {
+      display: inline-flex;
+      margin-left: 2px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+    }
+    .zs-dots span {
+      animation: zs-dots-bounce 1.4s infinite ease-in-out both;
+    }
+    .zs-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .zs-dots span:nth-child(2) { animation-delay: -0.16s; }
+    .zs-dots span:nth-child(3) { animation-delay: 0s; }
+    @keyframes zs-dots-bounce {
+      0%, 80%, 100% {
+        opacity: 0.25;
+        transform: translateY(0);
+      }
+      40% {
+        opacity: 1;
+        transform: translateY(-2px);
+        color: #818cf8;
+      }
     }
     .tools-badge {
       display: inline-flex;

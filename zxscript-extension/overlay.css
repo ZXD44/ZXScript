@@ -499,6 +499,33 @@ div[contenteditable].zs-typing {
 .zs-spin.big { width: 26px; height: 26px; border-width: 3px; }
 @keyframes zs-rot { to { transform: rotate(360deg); } }
 
+/* animated bouncing dots (ไข่ปลาขยับๆ) */
+.zs-dots {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+.zs-dots span {
+  display: inline-block;
+  animation: zs-dots-bounce 1.4s infinite ease-in-out both;
+}
+.zs-dots span:nth-child(1) { animation-delay: -0.32s; }
+.zs-dots span:nth-child(2) { animation-delay: -0.16s; }
+.zs-dots span:nth-child(3) { animation-delay: 0s; }
+@keyframes zs-dots-bounce {
+  0%, 80%, 100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2.5px);
+    color: #818cf8;
+  }
+}
+
 /* ── tool cards (replace tool JSON / sys prompt / results) ──────── */
 .zs-hidden > *:not(.zs-chip) { display: none !important; }
 /* hide the code block / paragraph(s) containing the raw tool call */
