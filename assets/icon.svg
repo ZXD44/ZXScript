@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#141418"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </radialGradient>
+    <filter id="emeraldGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="url(#bgGrad)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+
+  <!-- ZX Monogram & Terminal Chevron -->
+  <!-- Top bar of Z -->
+  <line x1="143" y1="160" x2="333" y2="160" stroke="#f4f4f5" stroke-width="26" stroke-linecap="round"/>
+  <!-- Bottom bar of Z -->
+  <line x1="143" y1="352" x2="333" y2="352" stroke="#f4f4f5" stroke-width="26" stroke-linecap="round"/>
+  <!-- Main diagonal -->
+  <line x1="333" y1="160" x2="143" y2="352" stroke="#f4f4f5" stroke-width="26" stroke-linecap="round"/>
+  <!-- Intersecting diagonal (Forms Terminal Chevron > and X) -->
+  <line x1="143" y1="160" x2="333" y2="352" stroke="#f4f4f5" stroke-width="26" stroke-linecap="round"/>
+
+  <!-- Glowing Emerald Terminal Cursor -->
+  <rect x="359" y="336" width="27" height="23" rx="5.5" fill="#10b981" stroke="#34d399" stroke-width="1.5" filter="url(#emeraldGlow)"/>
+</svg>
