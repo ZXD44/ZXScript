@@ -4,20 +4,20 @@ const CAVEMAN_PRESET = "CAVEMAN MODE: ตอบภาษาไทยสั้น
 
 const DEFAULT_TOOLS = [
   { name: "execute_luau", desc: "รันโค้ด Luau บน Roblox Studio (Edit, Server, Client)" },
-  { name: "multi_edit", desc: "สร้างหรือแก้ไข Source Code ของ Script ในเกม" },
+  { name: "multi_edit", desc: "สร้างหรือแก้ไข Source Code ของ Script ในโปรเจกต์" },
   { name: "script_read", desc: "อ่าน Source code ของ Script หรือ LocalScript" },
   { name: "script_search", desc: "ค้นหาข้อความหรือฟังก์ชันภายในสคริปต์ทั้งหมด" },
   { name: "script_grep", desc: "ค้นหาข้อความด้วย Regex ในสคริปต์" },
-  { name: "search_game_tree", desc: "ค้นหา Instance ใน Explorer Tree ตามชื่อหรือ Class" },
+  { name: "search_game_tree", desc: "ค้นหา Instance ใน Explorer Tree ตามชื่อหรือ ClassName" },
   { name: "inspect_instance", desc: "ดู Properties และ Children ของ Instance อย่างละเอียด" },
   { name: "get_studio_state", desc: "ตรวจสอบสถานะ Roblox Studio (Edit หรือ Play mode)" },
   { name: "get_console_output", desc: "ดึง Error และ Output จาก Console ใน Studio" },
   { name: "screen_capture", desc: "ถ่ายภาพหน้าจอ Viewport ใน Roblox Studio" },
-  { name: "insert_from_creator_store", desc: "นำเข้าโมเดล/Asset จาก Creator Store" },
+  { name: "insert_from_creator_store", desc: "นำเข้า Model หรือ Asset จาก Creator Store" },
   { name: "search_creator_store", desc: "ค้นหา Asset ใน Roblox Creator Store" },
-  { name: "store_image", desc: "บันทึกรูปภาพ Texture / Decal" },
+  { name: "store_image", desc: "บันทึกรูปภาพ Texture หรือ Decal" },
   { name: "list_roblox_studios", desc: "แสดงรายชื่อหน้าต่าง Studio ที่เปิดอยู่" },
-  { name: "list_commands", desc: "แสดงคำสั่ง MCP ทั้งหมดพร้อมเอกสาร" }
+  { name: "list_commands", desc: "แสดงคำสั่ง MCP ทั้งหมดพร้อมเอกสารประกอบ" }
 ];
 
 document.getElementById("ver").textContent = `v${chrome.runtime.getManifest().version}`;
@@ -30,7 +30,7 @@ function showToast(text, isError = false) {
   el.style.color = isError ? "#f87171" : "#10b981";
   setTimeout(() => {
     if (el.textContent === text) el.textContent = "";
-  }, 2200);
+  }, 2000);
 }
 
 // ── Screen Rendering ────────────────────────────────────────────────────────
@@ -52,21 +52,21 @@ function render(s) {
 
   dot.className = "dot " + (s.connected ? (ok ? "on" : "warn") : "");
   state.innerHTML = s.connected
-    ? (ok ? "🟢 เชื่อมต่อแล้ว · Studio พร้อมทำงาน"
-        : studioOff ? `🟡 กำลังรอ Studio${DOTS} (เปิด Assistant &gt; MCP)`
-        : `🟡 กำลังเชื่อมต่อ Studio MCP${DOTS}`)
-    : "⚪ Bridge ออฟไลน์ · กดปุ่มเพื่อเปิดทันที";
+    ? (ok ? "เชื่อมต่อแล้ว — Studio พร้อมทำงาน"
+        : studioOff ? `รอการเชื่อมต่อ Studio${DOTS} (เปิด Assistant &gt; MCP)`
+        : `กำลังเชื่อมต่อ Studio MCP${DOTS}`)
+    : "Bridge ออฟไลน์";
 
-  valBridge.textContent = s.connected ? "ออนไลน์ 🟢" : "ออฟไลน์ ⚪";
-  valBridge.style.color = s.connected ? "#10b981" : "#94a3b8";
+  valBridge.textContent = s.connected ? "ออนไลน์" : "ออฟไลน์";
+  valBridge.style.color = s.connected ? "#10b981" : "#71717a";
 
   valStudio.textContent = s.connected
-    ? (ok ? "พร้อมทำงาน ✓" : studioOff ? "รอเปิด Place" : "กำลังโหลด")
+    ? (ok ? "พร้อมทำงาน" : studioOff ? "รอเปิด Place" : "กำลังโหลด")
     : "รอเปิด Bridge";
   valStudio.style.color = ok ? "#10b981" : "#f59e0b";
 
   const count = s.tools || (s.connected ? toolsList.length : 0);
-  valTools.textContent = `${count} คำสั่ง`;
+  valTools.textContent = `${count} รายการ`;
 
   if (s.connected) {
     runBtn.style.display = "none";
@@ -83,8 +83,8 @@ function refresh() {
     if (res && typeof res.autostart === "boolean") {
       document.getElementById("chk-autostart").checked = res.autostart;
       const valAuto = document.getElementById("val-autostart");
-      valAuto.textContent = res.autostart ? "เปิดอัตโนมัติ ✓" : "ปิดอยู่";
-      valAuto.style.color = res.autostart ? "#10b981" : "#94a3b8";
+      valAuto.textContent = res.autostart ? "เปิดใช้งาน" : "ปิดอยู่";
+      valAuto.style.color = res.autostart ? "#10b981" : "#71717a";
     }
   });
 }
@@ -92,11 +92,11 @@ function refresh() {
 // ── Runner Controls ─────────────────────────────────────────────────────────
 document.getElementById("btn-run-bridge").addEventListener("click", () => {
   const btn = document.getElementById("btn-run-bridge");
-  btn.textContent = "กำลังเริ่ม Bridge ใน Background...";
-  chrome.runtime.sendMessage({ type: "native_start" }, (res) => {
-    showToast("เริ่ม Bridge สำเร็จ 🟢");
+  btn.textContent = "กำลังเริ่มการทำงาน...";
+  chrome.runtime.sendMessage({ type: "native_start" }, () => {
+    showToast("เริ่มการทำงานแล้ว");
     setTimeout(() => {
-      btn.textContent = "▶ สตาร์ต Bridge (เริ่มรันอัตโนมัติ)";
+      btn.textContent = "เริ่มการทำงาน Bridge";
       refresh();
     }, 1200);
   });
@@ -104,30 +104,30 @@ document.getElementById("btn-run-bridge").addEventListener("click", () => {
 
 document.getElementById("btn-stop-bridge").addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "native_stop" }, () => {
-    showToast("ปิด Bridge Server เรียบร้อย ⚪");
+    showToast("หยุดการทำงานแล้ว");
     setTimeout(refresh, 800);
   });
 });
 
 document.getElementById("btn-restart-bridge").addEventListener("click", () => {
   const state = document.getElementById("screen-state");
-  state.innerHTML = `กำลังรีสตาร์ต Roblox Server${DOTS}`;
+  state.innerHTML = `กำลังรีสตาร์ตเซิร์ฟเวอร์${DOTS}`;
   chrome.runtime.sendMessage({ type: "restart_mcp" }, () => {
-    showToast("รีสตาร์ต Server สำเร็จ ✓");
+    showToast("รีสตาร์ตเสร็จสิ้น");
     setTimeout(refresh, 800);
   });
 });
 
 document.getElementById("btn-refresh-state").addEventListener("click", () => {
   refresh();
-  showToast("รีเฟรชข้อมูลแล้ว ✓");
+  showToast("อัปเดตสถานะแล้ว");
 });
 
 document.getElementById("chk-autostart").addEventListener("change", (e) => {
   const enable = e.target.checked;
   chrome.runtime.sendMessage({ type: "native_autostart", enable }, (res) => {
     if (res && res.ok) {
-      showToast(enable ? "เปิดทำงานอัตโนมัติพร้อม Windows แล้ว ✓" : "ปิดการทำงานอัตโนมัติแล้ว");
+      showToast(enable ? "เปิดการทำงานเมื่อเปิดเครื่องแล้ว" : "ปิดการทำงานอัตโนมัติแล้ว");
       refresh();
     }
   });
@@ -158,7 +158,7 @@ document.querySelectorAll(".ai-btn").forEach((btn) => {
           });
         });
         if (match.windowId) chrome.windows.update(match.windowId, { focused: true });
-        showToast(`สลับไป ${targetHost} แล้ว ✓`);
+        showToast(`สลับไปที่ ${targetHost}`);
       } else {
         chrome.tabs.create({ url: targetUrl });
       }
@@ -176,7 +176,7 @@ document.getElementById("btn-open-overlay").addEventListener("click", () => {
           void chrome.runtime.lastError;
         });
       });
-      showToast("เปิดแถบควบคุมบนแท็บแล้ว ✓");
+      showToast("เปิดแถบควบคุมแล้ว");
     } else {
       chrome.tabs.create({ url: "https://chat.deepseek.com/" });
     }
@@ -188,7 +188,7 @@ function renderTools(list) {
   const box = document.getElementById("tools-box");
   box.innerHTML = "";
   if (!list.length) {
-    box.innerHTML = '<div style="color: #64748b; font-size: 10px; text-align: center;">ไม่พบคำสั่ง</div>';
+    box.innerHTML = '<div style="color: #71717a; font-size: 10px; text-align: center; padding: 12px 0;">ไม่พบคำสั่ง</div>';
     return;
   }
   list.forEach((t) => {
@@ -234,14 +234,14 @@ chrome.storage.local.get("zsCustomPrompt", (r) => {
 document.getElementById("btn-save-prompt").addEventListener("click", () => {
   const val = promptInput.value;
   chrome.storage.local.set({ zsCustomPrompt: val }, () => {
-    showToast("บันทึกคำสั่งสำเร็จ ✓");
+    showToast("บันทึกการตั้งค่าแล้ว");
   });
 });
 
 document.getElementById("btn-caveman").addEventListener("click", () => {
   promptInput.value = CAVEMAN_PRESET;
   chrome.storage.local.set({ zsCustomPrompt: CAVEMAN_PRESET }, () => {
-    showToast("เปิดโหมด Caveman แล้ว ✓");
+    showToast("เปิดโหมด Caveman แล้ว");
   });
 });
 
