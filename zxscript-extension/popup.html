@@ -436,6 +436,18 @@
 
   <!-- PANE 3: PROMPT / CAVEMAN -->
   <div id="pane-prompt" class="seg-pane">
+    <div style="margin-bottom: 6px;">
+      <select id="sel-template" style="width: 100%; padding: 5px 8px; background: #111114; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 5px; color: #d4d4d8; font-size: 10px; outline: none; cursor: pointer;">
+        <option value="">-- เลือกเทมเพลตคำสั่งระบบ (1-Click) --</option>
+        <option value="caveman">Caveman Mode (กระชับ ประหยัด token สูงสุด)</option>
+        <option value="datastore">ProfileStore Data Persistence (บันทึกข้อมูลปลอดภัย)</option>
+        <option value="leaderstats">Leaderstats & Currency (ระบบเงิน/สถิติผู้เล่น)</option>
+        <option value="inventory">Inventory & Shop UI (กระเป๋าและร้านค้าไอเทม)</option>
+        <option value="raycast_combat">Raycast Combat System (ระบบต่อสู้/อาวุธยิง)</option>
+        <option value="npc_ai">NPC Pathfinding & AI (บอทเดินตรวจการณ์/ไล่ล่า)</option>
+      </select>
+    </div>
+
     <textarea id="prompt-input" class="prompt-box" placeholder="คำสั่งเพิ่มเติมสำหรับส่งให้ AI ทุกรอบ..."></textarea>
     <div class="btn-row">
       <button id="btn-caveman">โหมด Caveman</button>

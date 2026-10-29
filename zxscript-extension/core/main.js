@@ -33,6 +33,45 @@
     return sleep(lo + Math.random() * (hi - lo));
   }
 
+  // ── Native Web Audio Chime ────────────────────────────────────────────────
+  // Generates subtle, non-intrusive audio cues on tool completion and turn finish.
+  // Pure Web Audio synthesis - zero external audio assets or network requests.
+  function playChime(kind = "tool") {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === "suspended") ctx.resume();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      if (kind === "done") {
+        // Soft two-tone chime (D5 -> A5) on full turn finish
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.08);
+        gain.gain.setValueAtTime(0.025, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else {
+        // Ultra-soft tick on tool finish
+        osc.frequency.setValueAtTime(523.25, now);
+        gain.gain.setValueAtTime(0.012, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+      setTimeout(() => { try { ctx.close(); } catch {} }, 350);
+    } catch {}
+  }
+
+
   // ── Diagnostics ───────────────────────────────────────────────────────────
   // Persistent, lightweight breadcrumb log of the agentic loop's key decisions
   // (sends, response kinds, tool start/end, resumes, stops). Read back from the
@@ -1426,6 +1465,7 @@
           const resultCat = hasImages ? "screen" : category;
           decorate.toolBox(res.item, call.tool, isErr ? "err" : "done", outSummary(feedback),
             true, outBody, resultCat);
+          if (!isErr) playChime("tool");
           // Snapshot the settled outcome. If the site swaps this turn's DOM node
           // while we wait for the model's next turn (wiping the chip AND the
           // zloop ownership dataset), the sweep re-owns the fresh node with this
@@ -1501,6 +1541,7 @@
       ui.inputCover(false); // lift the "Agent is working" cover when the loop ends
       P.setInputLock(false); // always unlock, even on error or stop
       diag("loop.end");
+      if (!A.stop && !A.stopping) playChime("done");
     }
   }
 

@@ -22,6 +22,7 @@ import asyncio
 import json
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -1263,11 +1264,90 @@ def probe_studio():
     return {"app": True, "place": place}
 
 
+def _modernize_and_wrap_luau(args):
+    """Modernizes deprecated Luau calls and wraps code in ChangeHistoryService for Ctrl+Z undo support."""
+    if not isinstance(args, dict):
+        return args
+    code = args.get("code")
+    if not isinstance(code, str) or not code.strip():
+        return args
+
+    # 1. Modernize deprecated calls (wait -> task.wait, spawn -> task.spawn, delay -> task.delay)
+    code = re.sub(r'(?<![.\w])wait\s*\(', 'task.wait(', code)
+    code = re.sub(r'(?<![.\w])spawn\s*\(', 'task.spawn(', code)
+    code = re.sub(r'(?<![.\w])delay\s*\(', 'task.delay(', code)
+
+    # 2. Roblox Studio ChangeHistoryService recording (Ctrl+Z support)
+    dm = str(args.get("datamodel_type", "Edit")).lower()
+    if (dm == "edit" or not dm) and "_chs:TryBeginRecording" not in code:
+        wrapped_code = (
+            'local _chs = game:GetService("ChangeHistoryService")\n'
+            'local _rec = nil\n'
+            'pcall(function() _rec = _chs:TryBeginRecording("ZXScript Action") end)\n'
+            'local function _zx_action()\n'
+            f'{code}\n'
+            'end\n'
+            'local _ok, _res = pcall(_zx_action)\n'
+            'if _rec then\n'
+            '    pcall(function()\n'
+            '        if _ok then\n'
+            '            _chs:FinishRecording(_rec, Enum.FinishRecordingOperation.Commit)\n'
+            '        else\n'
+            '            _chs:FinishRecording(_rec, Enum.FinishRecordingOperation.Cancel)\n'
+            '        end\n'
+            '    end)\n'
+            'end\n'
+            'if not _ok then error(_res) end\n'
+            'return _res'
+        )
+        new_args = dict(args)
+        new_args["code"] = wrapped_code
+        return new_args
+
+    new_args = dict(args)
+    new_args["code"] = code
+    return new_args
+
+
+def _prune_game_tree(text: str) -> str:
+    """Filters out noisy internal Roblox services and core packages to save context tokens."""
+    if not text or len(text) < 400:
+        return text
+    noisy_services = (
+        "CorePackages", "CoreGui", "RobloxPluginGuiService", "PackageService",
+        "RobloxReplicatedStorage", "VoiceChatService", "VRService",
+        "InternalSyncService", "MemStorageService", "AssetService"
+    )
+    lines = text.splitlines()
+    filtered = []
+    skip_indent = None
+    for line in lines:
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+        if skip_indent is not None:
+            if indent > skip_indent:
+                continue
+            skip_indent = None
+        if any(stripped.startswith(svc) or f" {svc} " in line for svc in noisy_services):
+            skip_indent = indent
+            continue
+        filtered.append(line)
+    return "\n".join(filtered)
+
+
 def safe_call(name, arguments, timeout):
     """Never raises. Always returns a dict the extension can feed back to DeepSeek."""
     try:
+        if name == "execute_luau":
+            arguments = _modernize_and_wrap_luau(arguments)
+
         result = mgr.call(name, arguments, timeout)
-        return {"ok": True, "text": result["text"], "images": result["images"]}
+        text = result["text"]
+
+        if name == "search_game_tree" and text:
+            text = _prune_game_tree(text)
+
+        return {"ok": True, "text": text, "images": result["images"]}
     except TimeoutError as e:
         return {"ok": False, "error": str(e), "kind": "timeout"}
     except Exception as e:

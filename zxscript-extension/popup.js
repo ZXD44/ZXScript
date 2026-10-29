@@ -245,6 +245,30 @@ document.getElementById("btn-caveman").addEventListener("click", () => {
   });
 });
 
+
+// ── System Prompt Templates ────────────────────────────────────────────────
+const PROMPT_TEMPLATES = {
+  caveman: CAVEMAN_PRESET,
+  datastore: "PROJECT FOCUS: วางระบบเซฟข้อมูลผู้เล่นโดยใช้ ProfileStore / DataStoreService ที่ปลอดภัย ป้องกัน Data Loss, รองรับ Session Locking, State Reconciliation, และจัดการ PlayerAdded/PlayerRemoving อย่างถูกต้องตามมาตรฐาน Luau",
+  leaderstats: "PROJECT FOCUS: สร้างระบบ Leaderstats และเงิน (Coins, Level, Exp) พร้อมระบบเก็บเหรียญบนแมพ ตรวจจับ Touched ด้วย task.wait debounce และ sync ค่าให้ PlayerGui แบบเรียลไทม์",
+  inventory: "PROJECT FOCUS: สร้างระบบกระเป๋าเก็บของ (Inventory) และร้านค้า (Shop) ด้วย ScreenGui ที่ทันสมัย แบ่งสัดส่วน Client/Server ผ่าน RemoteFunction/RemoteEvent ตรวจสอบความถูกต้องฝั่ง Server เสมอ",
+  raycast_combat: "PROJECT FOCUS: สร้างระบบอาวุธ/การโจมตีแบบ Raycast ที่มีประสิทธิภาพ ใช้ workspace:Raycast พร้อม RaycastParams กรองตัวละครผู้ยิง มีระบบ Hitbox Detection และ Damage Verification ฝั่ง Server ป้องกันการแฮก",
+  npc_ai: "PROJECT FOCUS: พัฒนาระบบ NPC AI และ PathfindingService อัจฉริยะ รองรับ State Machine (Patrol, Detect Player, Chase, Attack, Return), มี Waypoint Visualization และคำนวณ Raycast Line-of-Sight"
+};
+
+const selTemplate = document.getElementById("sel-template");
+if (selTemplate) {
+  selTemplate.addEventListener("change", (e) => {
+    const key = e.target.value;
+    if (key && PROMPT_TEMPLATES[key]) {
+      promptInput.value = PROMPT_TEMPLATES[key];
+      chrome.storage.local.set({ zsCustomPrompt: PROMPT_TEMPLATES[key] }, () => {
+        showToast("ใช้งานเทมเพลต " + key + " แล้ว");
+      });
+    }
+  });
+}
+
 // ── Boot ────────────────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg && msg.type === "zs-status") render(msg);
