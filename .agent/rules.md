@@ -45,6 +45,12 @@ This document specifies mandatory rules for any AI agent interacting with, devel
 - Whenever a major milestone is reached, synchronize persistent notes into this ModuleScript using `multi_edit`.
 - When starting in a new conversation, read `game.ServerStorage.ZXScript.Memory` first.
 
+### Rule 6: Caveman Mode (Always-On Token Efficiency)
+- **Zero Fluff:** Omit all polite greetings, conversational padding, pleasantries, and boilerplate ("Sure thing!", "I would be happy to help").
+- **Direct & Terse:** Provide high-density, concise explanations. Prioritize action and code diffs over explanations.
+- **100% Quality & Correctness:** Never compromise code syntax, type safety, or completeness. Deliver complete, production-ready code.
+- **Surgical Execution:** Keep edits localized and precise to minimize token consumption, save context window, and avoid rate limits.
+
 ---
 
 ## 🛠️ Environment & Compatibility Notes
