@@ -459,22 +459,53 @@ button.zs-site-opt:hover .zs-site-go { opacity: 1; transform: translateX(0); }
 /* ── input cover: fully hides the text the extension types + sends ──
    background colour is set inline at runtime to match the input box,
    so the masked input simply looks empty. */
+/* ── modern non-blocking input cover indicator (Impeccable Style) ── */
 #zs-input-cover {
-  position: fixed; z-index: 2147483500;
-  display: flex; align-items: center; gap: 8px;
-  box-sizing: border-box; padding-left: 16px;
-  border-radius: 14px;
-  background: #ffffff;
-  color: rgba(140, 140, 150, 0.9);
-  font-size: 11.5px; font-family: ui-sans-serif, "Segoe UI", sans-serif;
-  white-space: nowrap; overflow: hidden;
-  /* Capture pointer events: the cover sits over the composer while the agent
-     works, so eating clicks/focus stops the user from clicking THROUGH it into
-     the input box and typing (contenteditable=false alone leaks - Vue/Angular
-     re-renders can reset it). The place() loop hides the cover whenever a modal
-     or captcha is up, so this never traps clicks the user actually needs. */
-  pointer-events: auto;
-  cursor: default;
+  position: fixed;
+  z-index: 2147483500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-sizing: border-box;
+  padding: 3px 11px 3px 9px;
+  height: 24px;
+  border-radius: 9999px;
+  background: rgba(18, 18, 22, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  color: #ededf0;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  white-space: nowrap;
+  pointer-events: none; /* Never block user clicks or typing into composer */
+  user-select: none;
+  animation: zs-pop 0.15s ease-out;
+}
+.zs-cover-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+  animation: zs-cover-glow 1.5s infinite ease-in-out;
+  flex: none;
+}
+@keyframes zs-cover-glow {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 10px rgba(16, 185, 129, 0.9); }
+}
+.zs-cover-label {
+  line-height: 1;
+  letter-spacing: 0.1px;
+}
+html.zs-light #zs-input-cover {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  color: #18181b;
 }
 
 /* belt-and-suspenders: the typed text itself is rendered invisible

@@ -3639,38 +3639,37 @@
         return;
       }
       if (!ed) return;
-      ed.classList.add("zs-typing"); // make the typed text itself invisible
+
+      // Only mask text as transparent during active extension payload injection
+      // (user's typed text remains 100% visible while agent works)
+      if (A.injecting) {
+        ed.classList.add("zs-typing");
+      } else {
+        ed.classList.remove("zs-typing");
+      }
+
       if (!cover) {
         cover = document.createElement("div");
         cover.id = "zs-input-cover";
-        cover.innerHTML = `<span>Agent is working…</span>`;
+        cover.innerHTML = `<span class="zs-cover-pulse"></span><span class="zs-cover-label">Agent is working…</span>`;
         document.documentElement.appendChild(cover);
       }
-      cover.dataset.on = "1"; // intent flag: keep the place() loop alive while set
+      cover.dataset.on = "1";
       cover.style.display = "flex";
+
       const place = () => {
-        // Loop runs while the cover is INTENDED on (dataset.on), not while it's
-        // visible - so we can hide it for an overlay and still restore it after.
         if (!cover || cover.dataset.on !== "1") return;
         const e = P.getEditor();
         if (!e) { coverRaf = requestAnimationFrame(place); return; }
-        // Re-assert the typing mask on the CURRENT editor node: sites that
-        // recreate the editor on each inject/clear (Kimi's Vue) drop the class,
-        // which would un-hide the raw text and un-cap its height. Cheap idempotent
-        // add every frame keeps the mask + height cap glued to the live node.
-        if (!e.classList.contains("zs-typing")) e.classList.add("zs-typing");
-        // The cover is SIZED to coverTarget() when a provider supplies one, else
-        // to the editor node itself. Some composers (Meta AI) make the editable a
-        // tiny line inside a much larger rounded card - covering only the editor
-        // left the rest of the card exposed and CLICKABLE (a careful click focused
-        // the editor and let the user type behind the cover). Meta returns its
-        // whole composer card so the cover blankets the entire input band and its
-        // pointer-events:auto blocks every click. The typing mask above still lives
-        // on the real editor node `e`.
+
+        // Keep zs-typing strictly tied to A.injecting so user writing is never blinded
+        if (A.injecting) {
+          if (!e.classList.contains("zs-typing")) e.classList.add("zs-typing");
+        } else {
+          if (e.classList.contains("zs-typing")) e.classList.remove("zs-typing");
+        }
+
         const covNode = (P.coverTarget && P.coverTarget()) || e;
-        // While a blocking modal (login / consent) or bot-check is up, hide the
-        // cover so it doesn't sit on top of the modal; it reappears once the
-        // overlay clears (the loop keeps running).
         if (
           (P.overlayBlocking && P.overlayBlocking()) ||
           (P.captchaPresent && P.captchaPresent())
@@ -3679,104 +3678,25 @@
           coverRaf = requestAnimationFrame(place);
           return;
         }
+
+        const r = covNode.getBoundingClientRect();
+        if (r.width <= 0 || r.height <= 0) {
+          cover.style.display = "none";
+          coverRaf = requestAnimationFrame(place);
+          return;
+        }
         cover.style.display = "flex";
-        let r = covNode.getBoundingClientRect();
-        // Clip the cover to the composer's VISIBLE band. Some composers grow the
-        // inner editor node past a scrolling ancestor that clips it (Kimi's Vue
-        // RECREATES .chat-input-editor on every inject/clear, dropping the
-        // .zs-typing height cap, so the editor balloons to ~1500px while its
-        // .chat-input-editor-container caps the visible box via overflow:auto).
-        // Measuring the raw editor then centres the cover on the giant editor's
-        // midpoint - far below the visible input - so it "vanishes" off the box.
-        // Intersect with the nearest clipping ancestor to track what's on screen.
-        // The SAME clipping applies horizontally, and for the same reason: a
-        // composer whose editor is a flex item grows to its content width when a
-        // long unbroken line is injected, while an ancestor with overflow-x:hidden
-        // keeps the PAGE looking right. Seen on ChatGPT at Start, where the editor
-        // is filled with the (large) system prompt: the inner
-        // .prosemirror-parent widened past its `-my-2.5 flex overflow-x-hidden`
-        // wrapper, so the cover - position:fixed and sized to the raw rect - stuck
-        // out to the RIGHT of the composer card. Clip on each axis independently:
-        // the ancestor that clips X is not always the one that clips Y.
-        let clipY = false, clipX = false;
-        for (let a = covNode.parentElement, i = 0; a && a !== document.body && i < 8 && !(clipX && clipY); a = a.parentElement, i++) {
-          const st = getComputedStyle(a);
-          const clips = (v) => v === "auto" || v === "scroll" || v === "hidden";
-          const ar = a.getBoundingClientRect();
-          if (!clipY && clips(st.overflowY)) {
-            clipY = true;
-            const top = Math.max(r.top, ar.top);
-            const bottom = Math.min(r.bottom, ar.bottom);
-            if (bottom > top) r = new DOMRect(r.left, top, r.width, bottom - top);
-          }
-          if (!clipX && clips(st.overflowX)) {
-            clipX = true;
-            const left = Math.max(r.left, ar.left);
-            const right = Math.min(r.right, ar.right);
-            if (right > left) r = new DOMRect(left, r.top, right - left, r.height);
-          }
-        }
-        // Never paint outside the composer card. The cover is position:fixed and
-        // re-placed every rAF from a freshly measured rect, which is correct while
-        // the page is still - but a site that ANIMATES its composer updates layout
-        // AFTER our callback, so for the whole animation the cover trails one frame
-        // behind. Seen on ChatGPT at Start: injecting the system prompt grows the
-        // composer 58px -> 156px, the page gains a scrollbar, the content column
-        // narrows and the composer slides 29px left - while the cover kept the
-        // previous coordinates and hung 28px past the card's right edge. It only
-        // showed on the FIRST send, because afterwards the composer is already
-        // docked at the bottom and stops moving. Clamping to the composer frame
-        // makes a stale rect impossible to see: worst case the cover is briefly a
-        // few px small, which reads as nothing.
-        const frame = P.composerFrame && P.composerFrame();
-        if (frame) {
-          const fr = frame.getBoundingClientRect();
-          // Only clamp to a frame that really wraps the cover target, so a provider
-          // whose frame is narrower than its editor can never shrink the cover.
-          const cx = r.left + r.width / 2;
-          if (fr.width > 0 && fr.left <= cx && fr.right >= cx) {
-            const left = Math.max(r.left, fr.left);
-            const right = Math.min(r.right, fr.right);
-            if (right - left > 40) r = new DOMRect(left, r.top, right - left, r.height);
-          }
-        }
-        // Optionally overshoot the editor box by PAD px on every side. Some
-        // composers (Gemini's Quill) keep typed text near rounded corners, so a
-        // cover sized EXACTLY to the editor leaves slivers of text peeking; those
-        // providers set coverPad to bleed past the edges. A native <textarea>
-        // (DeepSeek) needs none - overshooting there just makes the cover overflow
-        // the composer, so it defaults to 0.
-        const PAD = P.coverPad || 0;
-        // Optional vertical nudge: some composers (Gemini's Quill) report an
-        // editor rect that sits a few px below the visual input box centre, so
-        // the centred "Agent is working…" text looks low. A provider can shift it.
-        const OFFY = P.coverOffsetY || 0;
-        // Height is at least MIN_H so the label is readable even over a
-        // single-line composer. CENTER the cover on the editor's vertical middle
-        // rather than anchoring its TOP to the editor top: a short (e.g. 20px)
-        // textarea bumped to 36px would otherwise grow only DOWNWARD, leaving the
-        // "Agent is working…" label sitting high in the composer's input band
-        // (seen on Cloudflare's 1-line textarea). For a composer already taller
-        // than MIN_H the maths reduces to the old `r.top - PAD`, so DeepSeek/Gemini
-        // are unchanged.
-        // Hard ceiling: even though .zs-typing caps the editor's visual height
-        // (see overlay.css), belt-and-suspenders clamp the cover so a composer
-        // whose growing element escapes that CSS cap on some provider can never
-        // turn the "Agent is working…" cover into a full-page white slab.
-        const MAXH = P.coverMaxH || 200;
-        const h = Math.min(Math.max(r.height + PAD * 2, 36), MAXH);
-        const centerY = r.top + r.height / 2 + OFFY;
-        cover.style.left = (r.left - PAD) + "px";
-        cover.style.top = (centerY - h / 2) + "px";
-        cover.style.width = (r.width + PAD * 2) + "px";
-        cover.style.height = h + "px";
-        // Composite the surface BEHIND the cover target so the fill matches what
-        // the user sees (a translucent composer card blends over the page).
-        cover.style.background = opaqueBg(covNode);
-        // When the cover blankets a whole composer card (coverTarget), match its
-        // corner radius so the cover's square corners don't poke past the card's
-        // rounded ones. Editor-sized covers keep the CSS default.
-        if (P.coverTarget) cover.style.borderRadius = getComputedStyle(covNode).borderRadius;
+
+        // Sleek floating pill at top-right of composer - never blocks user typing or obscures text
+        const pillW = cover.offsetWidth || 135;
+        const pillH = cover.offsetHeight || 24;
+        const rightEdge = Math.round(r.right - pillW - 12);
+        const left = Math.max(Math.round(r.left + 8), rightEdge);
+        const top = Math.round(r.top + 6);
+
+        cover.style.left = left + "px";
+        cover.style.top = top + "px";
+
         coverRaf = requestAnimationFrame(place);
       };
       place();
