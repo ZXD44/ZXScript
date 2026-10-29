@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -33,10 +34,12 @@ def _candidate_roots() -> list[Path]:
     local_appdata = os.environ.get("LOCALAPPDATA")
     if local_appdata:
         roots.append(Path(local_appdata) / "Roblox" / "Versions")
+        roots.append(Path(local_appdata) / "Bloxstrap" / "Versions")
     for env in ("ProgramFiles", "ProgramFiles(x86)"):
         value = os.environ.get(env)
         if value:
             roots.append(Path(value) / "Roblox" / "Versions")
+            roots.append(Path(value) / "Bloxstrap" / "Versions")
     return roots
 
 
@@ -59,6 +62,26 @@ def _newest_path(paths: Iterable[Path]) -> Optional[Path]:
         return max(paths, key=lambda p: p.stat().st_mtime)
     except (ValueError, OSError):
         return None
+
+
+def _find_studio_mcp_from_bat() -> Optional[Path]:
+    """Inspect %LOCALAPPDATA%\\Roblox\\mcp.bat if Roblox created one."""
+    local_appdata = os.environ.get("LOCALAPPDATA")
+    if not local_appdata:
+        return None
+    bat_file = Path(local_appdata) / "Roblox" / "mcp.bat"
+    if not bat_file.is_file():
+        return None
+    try:
+        content = bat_file.read_text(encoding="utf-8", errors="replace")
+        matches = re.findall(r'["\']?([^"\']+\\StudioMCP\.exe)["\']?', content, re.IGNORECASE)
+        for m in matches:
+            p = Path(m)
+            if p.is_file():
+                return p
+    except Exception:
+        pass
+    return None
 
 
 def _find_studio_mcp_windows() -> Optional[Path]:
@@ -92,7 +115,10 @@ def _find_studio_mcp_windows() -> Optional[Path]:
                     orphans.append(studio_mcp)
         except OSError:
             continue
-    return _newest_path(paired) or _newest_path(orphans)
+    found = _newest_path(paired) or _newest_path(orphans)
+    if found:
+        return found
+    return _find_studio_mcp_from_bat()
 
 
 def _mac_app_candidates() -> list[Path]:
