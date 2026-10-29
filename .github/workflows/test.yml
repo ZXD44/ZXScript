@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# ZXScript CI - Syntax validation and test suite
+name: ZXScript CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Syntax & Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.10', '3.12']
+        node-version: ['20']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Python dependencies
+        run: pip install websockets
+
+      # ── Python syntax check ──
+      - name: Python compile check
+        run: |
+          python -m py_compile bridge/bridge.py
+          python -m py_compile bridge/launch_studio_mcp.py
+          python -m py_compile bridge/register.py
+          python -m py_compile scripts/generate_assets.py
+          python -m py_compile scripts/build_exe.py
+
+      # ── JavaScript syntax check ──
+      - name: JavaScript syntax check
+        run: |
+          node --check zxscript-extension/background.js
+          node --check zxscript-extension/popup.js
+          node --check zxscript-extension/core/config.js
+          node --check zxscript-extension/core/main.js
+          node --check zxscript-extension/core/parser.js
+
+      # ── Unit tests ──
+      - name: Parser test suite
+        run: node zxscript-extension/test-parser.js
+
+      - name: ChatGPT provider tests
+        run: node zxscript-extension/test-chatgpt.js
+
+      # ── Bridge unit tests ──
+      - name: Bridge helper function tests
+        run: |
+          python -c "
+          from bridge.bridge import _modernize_and_wrap_luau, _prune_game_tree
+
+          # Test Luau modernizer
+          r = _modernize_and_wrap_luau({'code': 'wait(1)', 'datamodel_type': 'Edit'})
+          assert 'task.wait(1)' in r['code'], 'wait not modernized'
+          assert 'ChangeHistoryService' in r['code'], 'CHS not injected'
+
+          # Test tree pruner
+          tree = ('Workspace\n  PartA\nCorePackages\n  Sub\nServerScriptService\n  S\n') * 30
+          pruned = _prune_game_tree(tree)
+          assert 'CorePackages' not in pruned, 'CorePackages not pruned'
+          assert 'ServerScriptService' in pruned, 'SSS mistakenly pruned'
+
+          print('ALL BRIDGE TESTS PASSED')
+          "
+
+      # ── Manifest validation ──
+      - name: Validate manifest.json
+        run: |
+          python -c "
+          import json
+          with open('zxscript-extension/manifest.json') as f:
+              m = json.load(f)
+          assert m['manifest_version'] == 3
+          assert m['version'] == '0.0.1'
+          assert 'background' in m
+          assert 'content_scripts' in m
+          print(f'manifest.json OK: {m[\"name\"]} v{m[\"version\"]}')
+          "

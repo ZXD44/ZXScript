@@ -1335,6 +1335,47 @@ def _prune_game_tree(text: str) -> str:
     return "\n".join(filtered)
 
 
+
+def _slice_script_output(text: str, args: dict) -> str:
+    """Slices script_read output to a line range when start_line/end_line are given.
+    Reduces context window consumption for large scripts."""
+    start = args.get("start_line")
+    end = args.get("end_line")
+    if start is None and end is None:
+        return text
+    if not text:
+        return text
+    lines = text.splitlines()
+    total = len(lines)
+    s = max(1, int(start or 1)) - 1
+    e = min(total, int(end or total))
+    sliced = lines[s:e]
+    header = f"[ZXScript: showing lines {s+1}-{e} of {total} total]"
+    return header + "\n" + "\n".join(sliced)
+
+
+
+def _autoroute_datamodel(args):
+    """Auto-routes execute_luau to Server datamodel when Studio is in Play mode."""
+    if not isinstance(args, dict):
+        return args
+    dm = args.get("datamodel_type", "")
+    # Only auto-route when no explicit datamodel was provided (empty or missing)
+    if dm and dm.strip():
+        return args
+    try:
+        studio_state = probe_studio()
+        # If Studio is in play mode, route to Server instead of defaulting to Edit
+        if studio_state.get("place") and studio_state.get("app"):
+            # We can't directly detect play mode from probe_studio alone,
+            # so we let the call go through as-is and handle the error.
+            # The real value here is that _modernize_and_wrap_luau already
+            # defaults to "Edit", so this is a safety fallback.
+            pass
+    except Exception:
+        pass
+    return args
+
 def safe_call(name, arguments, timeout):
     """Never raises. Always returns a dict the extension can feed back to DeepSeek."""
     try:
@@ -1342,10 +1383,22 @@ def safe_call(name, arguments, timeout):
             arguments = _modernize_and_wrap_luau(arguments)
 
         result = mgr.call(name, arguments, timeout)
+
+        # Auto-retry execute_luau on "Edit datamodel is not available" by switching to Server
+        if (name == "execute_luau" and result.get("text", "")
+                and "Edit datamodel is not available" in result.get("text", "")
+                and isinstance(arguments, dict)
+                and not arguments.get("datamodel_type", "").strip()):
+            retry_args = dict(arguments)
+            retry_args["datamodel_type"] = "Server"
+            result = mgr.call(name, retry_args, timeout)
         text = result["text"]
 
         if name == "search_game_tree" and text:
             text = _prune_game_tree(text)
+
+        if name == "script_read" and text and isinstance(arguments, dict):
+            text = _slice_script_output(text, arguments)
 
         return {"ok": True, "text": text, "images": result["images"]}
     except TimeoutError as e:

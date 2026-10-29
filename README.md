@@ -52,9 +52,12 @@ ZXScript/
 - **Native Bloxstrap & Vanilla Studio Support:** Automatically discovers `StudioMCP.exe` across standard Roblox installations and Bloxstrap directories without manual path configuration.
 - **Built-in Anti-Ban Shield:** Smart humanized delay (`1000 - 2200ms`) prevents rate-limiting and account blocks from Cloudflare and AI providers.
 - **Context Resend & Tool Persistence:** Auto-refreshes tools every 8 calls and resends system prompts to prevent AI from dropping MCP tool calling.
-- **28+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more.
+- **28+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more. Script chunking for large files (start_line/end_line).
+- **Play Mode Auto-Routing:** Automatically retries `execute_luau` on Server datamodel when Studio is in Play mode.
 - **Provider Agnostic:** Supports DeepSeek (`chat.deepseek.com`), ChatGPT, Gemini, Qwen, GLM, Kimi, and Arena.
 - **Persistent Project Memory:** Tracks project architecture and conventions in `game.ServerStorage.ZXScript.Memory`.
+- **Standalone Build:** Optional PyInstaller build (`scripts/build_exe.py`) produces a single `ZXScript-Bridge.exe` with no Python dependency.
+- **GitHub Actions CI:** Automated syntax checks and test suite on every push.
 
 ---
 

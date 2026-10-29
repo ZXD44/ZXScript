@@ -23,3 +23,7 @@ __pycache__/
 # Extension packaging
 *.crx
 *.pem
+
+# PyInstaller build artifacts
+build/
+*.spec
