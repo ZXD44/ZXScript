@@ -1,9 +1,8 @@
-﻿# Local-only folders
+# Local-only folders
 Compressed/
 Deprecated/
 ExtensionPresentation/
 presentation/
-docs/
 
 # Zip files
 *.zip
@@ -13,8 +12,10 @@ probe.py
 logs/
 devtools/
 
-# System files
+# System files & Python cache
 .DS_Store
 Thumbs.db
 desktop.ini
 __pycache__/
+*.pyc
+*.log

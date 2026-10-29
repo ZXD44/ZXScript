@@ -13,29 +13,41 @@ Directly control Roblox Studio from your browser: inspect explorer trees, read/w
 
 ---
 
-## 🚀 Key Features
+## 📂 Project Structure
 
-- **Native Bloxstrap & Vanilla Studio Support:** Automatically discovers `StudioMCP.exe` across standard Roblox installations and Bloxstrap directories without manual path configuration.
-- **28+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more.
-- **Provider Agnostic:** Supports DeepSeek (`chat.deepseek.com`), ChatGPT, Gemini, Qwen, GLM, Kimi, and Arena.
-- **Persistent Project Memory:** Tracks project architecture and conventions in `game.ServerStorage.ZXScript.Memory`.
+```text
+ZXScript/
+├── assets/                 # Icons, banners, and media branding
+│   ├── banner.png
+│   ├── banner.svg
+│   └── icon.png
+├── docs/                   # Documentation & guides
+│   ├── CHANGELOG.md        # Version history
+│   └── ZXScript_Guide.md   # Complete installation & prompt guide (TH)
+├── zxscript-extension/     # Chrome / Edge Browser Extension
+│   ├── manifest.json
+│   ├── popup.html
+│   ├── core/               # Agent loop, parser, and anti-ban engine
+│   └── providers/          # DeepSeek, ChatGPT, Qwen, Gemini, etc.
+├── bridge.py               # Core Bridge Server (WebSocket <-> MCP)
+├── launch_studio_mcp.py    # Roblox Studio & Bloxstrap MCP discovery
+├── config.json             # Bridge server configuration
+├── start.bat               # 1-Click launcher for Windows
+├── MacOS_Start.command     # 1-Click launcher for macOS
+├── README.md               # Project overview
+└── LICENSE                 # GPL-3.0 License
+```
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Key Features
 
-```
-Web AI (DeepSeek / ChatGPT / Qwen / Gemini) 
-               │
-               ▼
-    [ zxscript-extension ]  (Chrome / Edge Extension)
-               │  ws://127.0.0.1:17613
-               ▼
-      [ ZXScript Bridge ]   (bridge.py / start.bat)
-               │  stdio / JSON-RPC
-               ▼
-    [ Roblox Studio MCP ]   (RobloxStudioBeta / Bloxstrap)
-```
+- **Native Bloxstrap & Vanilla Studio Support:** Automatically discovers `StudioMCP.exe` across standard Roblox installations and Bloxstrap directories without manual path configuration.
+- **Built-in Anti-Ban Shield:** Smart humanized delay (`1000 - 2200ms`) prevents rate-limiting and account blocks from Cloudflare and AI providers.
+- **Context Resend & Tool Persistence:** Auto-refreshes tools every 8 calls and resends system prompts to prevent AI from dropping MCP tool calling.
+- **28+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more.
+- **Provider Agnostic:** Supports DeepSeek (`chat.deepseek.com`), ChatGPT, Gemini, Qwen, GLM, Kimi, and Arena.
+- **Persistent Project Memory:** Tracks project architecture and conventions in `game.ServerStorage.ZXScript.Memory`.
 
 ---
 
@@ -60,12 +72,12 @@ Web AI (DeepSeek / ChatGPT / Qwen / Gemini)
 ### 4. Connect Web AI
 1. Go to `chat.deepseek.com` (recommended) or `chat.qwen.ai`.
 2. Wait for the green status indicator 🟢 on the ZXScript bar.
-3. Click **Start session** and use the prompts from `ZXScript_Guide.md`.
+3. Click **Start session** and use the prompts from [docs/ZXScript_Guide.md](./docs/ZXScript_Guide.md).
 
 ---
 
 ## 📄 Documentation & Prompts
-For full Thai documentation and step-by-step prompt templates, see [ZXScript_Guide.md](./ZXScript_Guide.md).
+For full Thai documentation and step-by-step prompt templates, see [docs/ZXScript_Guide.md](./docs/ZXScript_Guide.md).
 
 ---
 
