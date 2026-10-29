@@ -168,7 +168,7 @@ echo  =====================================================================
 echo    STATUS: Bridge is ONLINE and ready!
 echo.
 echo    1. Load Extension in Chrome:
-echo       chrome://extensions -> Developer Mode -> Load unpacked:
+echo       chrome://extensions -^> Developer Mode -^> Load unpacked:
 echo       %~dp0zxscript-extension
 echo.
 echo    2. Open your Place in Roblox Studio:
