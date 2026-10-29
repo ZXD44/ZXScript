@@ -125,8 +125,10 @@ const ZSProvider = (() => {
   // the send hooks intact (otherwise our own textarea would defeat it and the
   // hooks could swallow the site's login button).
   const getEditor = () => {
-    for (const e of document.querySelectorAll(S.editor)) {
-      if (!e.closest("#zs-root")) return e;
+    for (const sel of [S.editor, "#chat-input", ".messageInputContainer textarea", "textarea"]) {
+      for (const e of document.querySelectorAll(sel)) {
+        if (!e.closest("#zs-root")) return e;
+      }
     }
     return null;
   };
@@ -196,7 +198,13 @@ const ZSProvider = (() => {
   // pushes the input down with no overlap.
   function barAnchor() {
     const ed = getEditor();
-    return (ed && ed.closest('.flex-col[class*="rounded"]')) || null;
+    return (
+      (ed && ed.closest('.flex-col[class*="rounded"]')) ||
+      (ed && ed.closest(S.composer)) ||
+      (ed && ed.closest("form")) ||
+      (ed && ed.parentElement) ||
+      null
+    );
   }
 
   // ── Input lock ────────────────────────────────────────────────────────────

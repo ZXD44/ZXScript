@@ -208,7 +208,7 @@ const ZSProvider = (() => {
   // `.chat-editor` (holds the text box then the toolbar row).
   function barAnchor() {
     const ed = getEditor();
-    return (ed && ed.closest(".chat-editor")) || null;
+    return (ed && (ed.closest(".chat-editor") || ed.closest(".chat-box") || ed.closest(".chat-input") || ed.parentElement)) || null;
   }
 
   // ── Chip anchor ───────────────────────────────────────────────────────────

@@ -306,8 +306,10 @@ const ZSProvider = (() => {
   // (#zs-set-text inside #zs-root) so login pages without a site editor return
   // null and the send-hook guards stay intact.
   const getEditor = () => {
-    for (const e of document.querySelectorAll(S.editor)) {
-      if (!e.closest("#zs-root")) return e;
+    for (const sel of [S.editor, ".message-input-wrapper textarea", "textarea.message-input-textarea", "textarea"]) {
+      for (const e of document.querySelectorAll(sel)) {
+        if (!e.closest("#zs-root")) return e;
+      }
     }
     return null;
   };

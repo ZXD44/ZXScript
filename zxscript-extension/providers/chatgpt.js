@@ -221,7 +221,14 @@ const ZSProvider = (() => {
   const assistantItems = () => allItems().filter(isAssistantItem);
   const assistantCount = () => assistantItems().length;
   const userCount = () => allItems().filter(isUserItem).length;
-  const getEditor = () => document.querySelector(S.editor);
+  const getEditor = () => {
+    for (const sel of [S.editor, "#prompt-textarea", "[data-testid='prompt-textarea']", "textarea[placeholder*='Message']", "div[contenteditable='true']", "textarea"]) {
+      for (const e of document.querySelectorAll(sel)) {
+        if (!e.closest("#zs-root")) return e;
+      }
+    }
+    return null;
+  };
   const editorText = () => {
     const e = getEditor();
     return e ? e.textContent || "" : "";
@@ -308,7 +315,7 @@ const ZSProvider = (() => {
   function barMount() {
     const ed = getEditor();
     if (!ed) return null;
-    const box = ed.closest("[class*='composer-surface']");
+    const box = ed.closest("[class*='composer-surface'], #composer-background, [class*='composer'], form");
     if (!box) return null;
     const area = topArea(box);
     if (area) {
@@ -319,6 +326,11 @@ const ZSProvider = (() => {
     let before = box.firstElementChild;
     if (before && before.id === "zs-bar") before = before.nextElementSibling;
     return { parent: box, before, inside: true };
+  }
+
+  function barAnchor() {
+    const ed = getEditor();
+    return ed ? (ed.closest("[class*='composer'], form") || ed.parentElement) : null;
   }
 
   // ── Input lock ────────────────────────────────────────────────────────────
@@ -951,7 +963,7 @@ const ZSProvider = (() => {
     assistantCount, userCount, lastAssistant, lastAssistantId, itemKey, readAssistant,
     streamLen, snapshot,
     // composer / state
-    getEditor, editorText, chatIsEmpty, isFreshChat, composerFrame, barMount,
+    getEditor, editorText, chatIsEmpty, isFreshChat, composerFrame, barMount, barAnchor,
     // Cover the scrolling text band, and lift the core's 200px clamp past that
     // band's own ~245px ceiling so a full composer is covered edge to edge.
     coverTarget,

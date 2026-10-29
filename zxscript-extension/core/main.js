@@ -3409,8 +3409,10 @@
       if (!br.width) { if (!u.hidden) u.hidden = true; return; }
       if (u.hidden) u.hidden = false;
       const uh = u.offsetHeight || 20;
-      u.style.left = Math.round(br.left) + "px";
-      u.style.top = Math.round(Math.max(4, br.top - uh - 5)) + "px";
+      const nL = Math.round(br.left) + "px";
+      const nT = Math.round(Math.max(4, br.top - uh - 5)) + "px";
+      if (u.style.left !== nL) u.style.left = nL;
+      if (u.style.top !== nT) u.style.top = nT;
     }
 
     function placeBar() {
@@ -3493,14 +3495,20 @@
         if (anchorPadEl && anchorPadEl !== anchorEl) clearAnchorPad();
         anchorPadEl = anchorEl;
         anchorEl.style.paddingTop = (bh + 6) + "px"; // reserve the strip the bar sits in (+gap)
-        bar.style.left = Math.round(r.left) + "px";
-        bar.style.top = Math.round(r.top) + "px";
-        bar.style.width = Math.round(r.width) + "px";
+        const nL = Math.round(r.left) + "px";
+        const nT = Math.round(r.top) + "px";
+        const nW = Math.round(r.width) + "px";
+        if (bar.style.left !== nL) bar.style.left = nL;
+        if (bar.style.top !== nT) bar.style.top = nT;
+        if (bar.style.width !== nW) bar.style.width = nW;
         if (menuEl && !menuEl.hidden) {
           bar.classList.remove("zs-bar-inline"); // ensure fixed geometry for menu math
-          menuEl.style.right = Math.round(window.innerWidth - (r.left + r.width)) + "px";
-          menuEl.style.bottom = Math.round(window.innerHeight - r.top + 6) + "px";
-          menuEl.style.maxHeight = Math.max(140, Math.round(r.top - 16)) + "px";
+          const mR = Math.round(window.innerWidth - (r.left + r.width)) + "px";
+          const mB = Math.round(window.innerHeight - r.top + 6) + "px";
+          const mMaxH = Math.max(140, Math.round(r.top - 16)) + "px";
+          if (menuEl.style.right !== mR) menuEl.style.right = mR;
+          if (menuEl.style.bottom !== mB) menuEl.style.bottom = mB;
+          if (menuEl.style.maxHeight !== mMaxH) menuEl.style.maxHeight = mMaxH;
         }
         return;
       }
@@ -3522,15 +3530,21 @@
       const left = Math.round(r.left + (r.width - w) / 2);
       const bh = bar.offsetHeight || 40;
       const top = Math.max(4, Math.round(r.top - bh - BAR_GAP));
-      bar.style.width = w + "px";
-      bar.style.left = left + "px";
-      bar.style.top = top + "px";
+      const fW = w + "px";
+      const fL = left + "px";
+      const fT = top + "px";
+      if (bar.style.width !== fW) bar.style.width = fW;
+      if (bar.style.left !== fL) bar.style.left = fL;
+      if (bar.style.top !== fT) bar.style.top = fT;
       // Keep the open "more" menu anchored to the bar, opening upward.
       if (menuEl && !menuEl.hidden) {
         const br = bar.getBoundingClientRect();
-        menuEl.style.right = Math.round(window.innerWidth - br.right) + "px";
-        menuEl.style.bottom = Math.round(window.innerHeight - br.top + 6) + "px";
-        menuEl.style.maxHeight = Math.max(140, Math.round(br.top - 16)) + "px";
+        const fR = Math.round(window.innerWidth - br.right) + "px";
+        const fB = Math.round(window.innerHeight - br.top + 6) + "px";
+        const fMaxH = Math.max(140, Math.round(br.top - 16)) + "px";
+        if (menuEl.style.right !== fR) menuEl.style.right = fR;
+        if (menuEl.style.bottom !== fB) menuEl.style.bottom = fB;
+        if (menuEl.style.maxHeight !== fMaxH) menuEl.style.maxHeight = fMaxH;
       }
     }
 
