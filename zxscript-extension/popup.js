@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 const DOTS = '<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>';
+const RULES_PRESET = "ROBLOX AI RULES: 1) สำรวจ Explorer ก่อนทำเสมอ ห้ามเดา Path 2) จำกัดไม่เกิน 3-5 tool calls ต่อรอบแล้วหยุดรอคำสั่ง 3) ใช้ Modern Luau เท่านั้น (task.wait, task.spawn, WaitForChild 5s timeout) 4) execute_luau ผ่าน ###LUA### เท่านั้น 5) บันทึก architecture ลง game.ServerStorage.ZXScript.Memory";
 const CAVEMAN_PRESET = "CAVEMAN MODE: ตอบภาษาไทยสั้นกระชับ ตรงประเด็น ห้ามเยิ่นเย้อ ห้ามทักทาย สั่งรันคำสั่ง Roblox Studio MCP ทันที ประหยัด token สูงสุด";
 
 const DEFAULT_TOOLS = [
@@ -246,8 +247,20 @@ document.getElementById("btn-caveman").addEventListener("click", () => {
 });
 
 
+
+const btnRules = document.getElementById("btn-rules");
+if (btnRules) {
+  btnRules.addEventListener("click", () => {
+    promptInput.value = RULES_PRESET;
+    chrome.storage.local.set({ zsCustomPrompt: RULES_PRESET }, () => {
+      showToast("เปิดใช้งานกฎเหล็ก 5 ข้อแล้ว");
+    });
+  });
+}
+
 // ── System Prompt Templates ────────────────────────────────────────────────
 const PROMPT_TEMPLATES = {
+  rules: RULES_PRESET,
   caveman: CAVEMAN_PRESET,
   datastore: "PROJECT FOCUS: วางระบบเซฟข้อมูลผู้เล่นโดยใช้ ProfileStore / DataStoreService ที่ปลอดภัย ป้องกัน Data Loss, รองรับ Session Locking, State Reconciliation, และจัดการ PlayerAdded/PlayerRemoving อย่างถูกต้องตามมาตรฐาน Luau",
   leaderstats: "PROJECT FOCUS: สร้างระบบ Leaderstats และเงิน (Coins, Level, Exp) พร้อมระบบเก็บเหรียญบนแมพ ตรวจจับ Touched ด้วย task.wait debounce และ sync ค่าให้ PlayerGui แบบเรียลไทม์",
