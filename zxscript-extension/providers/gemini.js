@@ -654,6 +654,11 @@ const ZSProvider = (() => {
     return hidAny;
   }
 
+  // Anti-drift instructions: keep Gemini focused on executing ZXScript tools
+  // instead of answering with passive plain text.
+  const PROMPT_EXTRA =
+    "- CONTINUOUS TOOL USAGE: Always use ZXScript commands (execute_luau, multi_edit, search_game_tree, etc.) to perform real actions in Roblox Studio. NEVER output plain Luau code in chat when you can run it directly. Keep executing tools until the user's objective is fully accomplished.";
+
   return {
     id: "gemini",
     displayName: "Gemini",
@@ -686,12 +691,8 @@ const ZSProvider = (() => {
     // watcher uses this to refuse finalizing before this send's reply turn
     // exists (fixes premature loop.end on the previous turn's stable text).
     reliableCounts: true,
-    // Shown as a permanent, non-intrusive notice in the ZeroScript panel.
-    // Gemini drifts away from emitting tool blocks after a while in long
-    // sessions - observed live, model behavior, not something the prompt fixes.
-    unstableWarning:
-      "Gemini tends to stop using the Roblox tools after a while in long sessions (model behavior, not the extension). " +
-      "If it starts answering in plain text instead of acting, remind it to use the commands - or start a new session.",
+    // Anti-drift enforced via promptExtra
+    promptExtra: PROMPT_EXTRA,
     init({ diag: d } = {}) { if (d) diag = d; },
     // turns
     allItems, isUserItem, isAssistantItem, itemText, classifyText,
