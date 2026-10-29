@@ -21,21 +21,27 @@ ZXScript/
 │   ├── banner.png
 │   ├── banner.svg
 │   └── icon.png
+├── bridge/                 # Python Bridge Server & MCP Discovery
+│   ├── bridge.py           # Core Bridge Server (WebSocket <-> MCP)
+│   ├── launch_studio_mcp.py# Roblox Studio & Bloxstrap MCP discovery
+│   └── config.json         # Bridge server configuration
+├── dist/                   # Packed extension artifacts (.crx, .pem)
 ├── docs/                   # Documentation & guides
 │   ├── CHANGELOG.md        # Version history
 │   └── ZXScript_Guide.md   # Complete installation & prompt guide (TH)
+├── logs/                   # Bridge and runtime logs
+├── scripts/                # Automated launchers
+│   ├── start.bat           # 1-Click launcher for Windows
+│   └── MacOS_Start.command # 1-Click launcher for macOS
 ├── zxscript-extension/     # Chrome / Edge Browser Extension
 │   ├── manifest.json
 │   ├── popup.html
 │   ├── core/               # Agent loop, parser, and anti-ban engine
 │   └── providers/          # DeepSeek, ChatGPT, Qwen, Gemini, etc.
-├── bridge.py               # Core Bridge Server (WebSocket <-> MCP)
-├── launch_studio_mcp.py    # Roblox Studio & Bloxstrap MCP discovery
-├── config.json             # Bridge server configuration
-├── start.bat               # 1-Click launcher for Windows
-├── MacOS_Start.command     # 1-Click launcher for macOS
-├── README.md               # Project overview
-└── LICENSE                 # GPL-3.0 License
+├── .gitattributes          # Git attributes
+├── .gitignore              # Git ignore rules
+├── LICENSE                 # GPL-3.0 License with zxd44 ownership notice
+└── README.md               # Project overview
 ```
 
 ---
@@ -65,8 +71,8 @@ ZXScript/
 4. Check **Enable Studio as MCP Server**.
 
 ### 3. Run the Bridge Server
-- On Windows: Double-click `start.bat`.
-- On macOS: Run `./MacOS_Start.command`.
+- On Windows: Double-click `scripts/start.bat` (or run `.\scripts\start.bat`).
+- On macOS: Run `./scripts/MacOS_Start.command`.
 - Keep the terminal window minimized while using ZXScript.
 
 ### 4. Connect Web AI
@@ -82,4 +88,4 @@ For full Thai documentation and step-by-step prompt templates, see [docs/ZXScrip
 ---
 
 ## ⚖️ License
-GNU General Public License v3.0 (GPL-3.0). See [LICENSE](./LICENSE) for details.
+GNU General Public License v3.0 (GPL-3.0). Customized, modified, and maintained by [zxd44](https://github.com/zxd44) (ZirconX). See [LICENSE](./LICENSE) for details.

@@ -103,7 +103,8 @@ else:
 # Every run appends here (never truncated), so a whole test session - across
 # multiple restarts - stays in one file the user can just send us. Each
 # process start writes a banner (see main()) so restarts are easy to spot.
-LOGS_DIR = os.path.join(HERE, "logs")
+ROOT_DIR = os.path.dirname(HERE)
+LOGS_DIR = os.path.join(ROOT_DIR, "logs") if os.path.isdir(os.path.join(ROOT_DIR, "logs")) else os.path.join(HERE, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
 LOG_PATH = os.path.join(LOGS_DIR, "bridge_debug.log")
 try:

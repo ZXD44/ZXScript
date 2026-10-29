@@ -13,7 +13,7 @@ set -u
 
 # Run from the folder this script lives in, so bridge.py is found regardless of
 # where Finder launched it from.
-cd "$(dirname "$0")" || exit 1
+cd "$(dirname "$0")/.." || exit 1
 
 BRIDGE_PORT="${ZS_BRIDGE_PORT:-17613}"
 LOG_DIR="logs"
@@ -42,7 +42,7 @@ log "===== MacOS_Start.command launched ====="
 # --- 0. bridge.py must be next to us ---------------------------------------
 # If the user ran this out of a half-extracted download, bridge.py is missing
 # and Python would fail with a confusing error. Say the real thing instead.
-if [ ! -f "bridge.py" ]; then
+if [ ! -f "bridge/bridge.py" ]; then
     echo "  ERROR: bridge.py was not found next to this launcher."
     echo "  Extract the WHOLE download, then run MacOS_Start.command from that folder."
     log "FATAL: bridge.py missing next to launcher."
@@ -128,7 +128,7 @@ echo "  ############################################################"
 echo
 log "Launching bridge.py with $PY"
 
-"$PY" bridge.py
+"$PY" bridge/bridge.py
 BRIDGE_EXIT=$?
 log "bridge.py exited with code $BRIDGE_EXIT"
 

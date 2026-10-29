@@ -1,3 +1,41 @@
+================================================================================
+ZXScript - Autonomous Roblox Studio AI Agent Bridge
+Copyright (C) 2026 zxd44 (ZirconX) <gonhackergamer0@gmail.com>
+
+[OWNERSHIP, MODIFICATION, AND RENAMING NOTICE]
+Owner & Maintainer: zxd44 (ZirconX) <gonhackergamer0@gmail.com>
+Project Name: ZXScript (Renamed & Customized from ZeroScript)
+Date of Modification: October 2026
+
+NOTICE OF MODIFICATION & REBRANDING (GPLv3 Section 5a):
+This software was originally created as ZeroScript. It has been extensively
+modified, restructured, enhanced, and rebranded under the name "ZXScript"
+by zxd44 (ZirconX).
+
+Key modifications and enhancements:
+1. Rebranded codebase, metadata, user interfaces, and documentation to ZXScript.
+2. Implemented dynamic Bloxstrap Studio MCP auto-discovery and version tracking.
+3. Added Anti-Ban Shield with randomized humanized request delays (1000ms - 2200ms).
+4. Added persistent tool caching and automated context/system prompt resend.
+5. Developed self-healing autonomous launcher (scripts/start.bat) with 6-stage checks.
+6. Localized browser extension UI 100% to Thai with compact glassmorphic styling.
+7. Modularized project directory architecture (bridge/, scripts/, dist/, docs/).
+8. Integrated Caveman mode prompt efficiency presets.
+
+Original Work Copyright (C) ZeroScript Contributors.
+Modifications & Current Maintenance Copyright (C) 2026 zxd44.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+================================================================================
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 

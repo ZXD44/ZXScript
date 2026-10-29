@@ -3,10 +3,11 @@
 setlocal enabledelayedexpansion
 chcp 65001 >nul
 title ZXScript Bridge - by ZXD44
-cd /d "%~dp0"
+set "ROOT=%~dp0..\"
+cd /d "%ROOT%"
 
-if not exist "%~dp0logs" mkdir "%~dp0logs" >nul 2>nul
-set "LOGFILE=%~dp0logs\start.log"
+if not exist "%ROOT%logs" mkdir "%ROOT%logs" >nul 2>nul
+set "LOGFILE=%ROOT%logs\start.log"
 call :log "===== %DATE% %TIME%  start.bat launched ====="
 for /f "tokens=*" %%v in ('ver') do call :log "%%v"
 
@@ -19,14 +20,14 @@ echo.
 
 REM --- 1. Verify Project Files --------------------------------------------
 echo   [1/6] Verifying project integrity...
-if not exist "%~dp0bridge.py" (
-    echo   [ERROR] bridge.py not found next to start.bat!
+if not exist "%ROOT%bridge\bridge.py" (
+    echo   [ERROR] bridge\bridge.py not found!
     echo   Make sure you extracted the complete folder before running.
-    call :log "FATAL: bridge.py missing."
+    call :log "FATAL: bridge\bridge.py missing."
     pause
     exit /b 1
 )
-if not exist "%~dp0zxscript-extension\manifest.json" (
+if not exist "%ROOT%zxscript-extension\manifest.json" (
     echo   [WARNING] zxscript-extension folder not found!
     call :log "WARN: zxscript-extension missing."
 ) else (
@@ -122,7 +123,7 @@ echo   [5/6] Inspecting Roblox Studio and Bloxstrap MCP engine...
 set "STUDIO_MCP="
 set "STUDIO_EXE="
 
-for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m; p = m.find_studio_mcp(); print(p if p else \"\")"') do (
+for /f "tokens=*" %%a in ('%PY% -c "import sys; sys.path.insert(0, r'%ROOT%bridge'); import launch_studio_mcp as m; p = m.find_studio_mcp(); print(p if p else \"\")"') do (
     set "STUDIO_MCP=%%a"
 )
 
@@ -130,7 +131,7 @@ if defined STUDIO_MCP (
     echo         [OK] Detected StudioMCP binary:
     echo              !STUDIO_MCP!
     call :log "Detected StudioMCP at !STUDIO_MCP!"
-    for /f "tokens=*" %%a in ('%PY% -c "import launch_studio_mcp as m, os; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else \"\"; s = os.path.join(d, \"RobloxStudioBeta.exe\"); print(s if os.path.isfile(s) else \"\")"') do (
+    for /f "tokens=*" %%a in ('%PY% -c "import sys, os; sys.path.insert(0, r'%ROOT%bridge'); import launch_studio_mcp as m; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else \"\"; s = os.path.join(d, \"RobloxStudioBeta.exe\"); print(s if os.path.isfile(s) else \"\")"') do (
         set "STUDIO_EXE=%%a"
     )
 ) else (
@@ -164,7 +165,7 @@ echo    STATUS: Bridge is ONLINE and ready!
 echo.
 echo    1. Load Extension in Chrome:
 echo       chrome://extensions -^> Developer Mode -^> Load unpacked:
-echo       %~dp0zxscript-extension
+echo       %ROOT%zxscript-extension
 echo.
 echo    2. Open your Place in Roblox Studio:
 echo       Assistant AI -^> ... -^> Manage MCP Servers -^> Enable Studio as MCP Server
@@ -178,7 +179,7 @@ echo  =====================================================================
 echo.
 
 call :log "Launching bridge.py with %PY%"
-%PY% "%~dp0bridge.py"
+%PY% "%ROOT%bridge\bridge.py"
 
 set "BRIDGE_EXIT=%errorlevel%"
 call :log "bridge.py exited with code %BRIDGE_EXIT%"
