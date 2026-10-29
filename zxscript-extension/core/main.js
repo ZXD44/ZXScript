@@ -612,6 +612,17 @@
       // A turn that has produced NOTHING yet is still warming up - never
       // finalize it as empty/truncated/text (a premature retry interrupts it).
       if (!sawContent) {
+        // Last-resort fallback: if provider has a reply turn item, salvage raw text
+        if (d && d.item) {
+          const raw = (d.item.innerText || d.item.textContent || "").trim();
+          if (raw) {
+            sawContent = true;
+            d.reply = raw;
+            lastGoodReply = raw;
+          }
+        }
+      }
+      if (!sawContent) {
         if (!warmSince) warmSince = Date.now();
         if (Date.now() - warmSince < WARMUP_MS) { await sleep(200); continue; }
         diag("empty.why", { branch: "warmup", rep: (d.reply||"").length, lastGood: lastGoodReply.length });
@@ -778,6 +789,15 @@
       // The site caps output length and shows a native "Continue" button when it
       // truncates. We try clicking it directly (same turn) in the loop.
       if (P.findContinueBtn()) return { kind: "truncated", text: r, item: d.item };
+      if (r === "") {
+        if (d && d.item) {
+          const raw = (d.item.innerText || d.item.textContent || "").trim();
+          if (raw) {
+            r = raw;
+            diag("reply.rawTextFallback", { len: r.length });
+          }
+        }
+      }
       if (r === "") { diag("empty.why", { branch: "finalBlank" }); return { kind: "empty" }; }
       return { kind: "text", text: r };
     }

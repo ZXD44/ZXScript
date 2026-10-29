@@ -115,9 +115,44 @@ const ZSProvider = (() => {
   };
 
   // ── Turn classification ───────────────────────────────────────────────────
-  const role = (item) => (item && item.getAttribute ? item.getAttribute("data-message-author-role") : null);
-  const isUserItem = (item) => role(item) === S.userRole;
-  const isAssistantItem = (item) => role(item) === S.assistantRole;
+  const role = (item) => {
+    if (!item) return null;
+    if (item.getAttribute) {
+      const r = item.getAttribute("data-message-author-role");
+      if (r) return r;
+    }
+    const inner = item.querySelector && item.querySelector("[data-message-author-role]");
+    if (inner && inner.getAttribute) return inner.getAttribute("data-message-author-role");
+    return null;
+  };
+
+  const isUserItem = (item) => {
+    if (!item) return false;
+    const r = role(item);
+    if (r === S.userRole) return true;
+    if (r === S.assistantRole) return false;
+    const tid = (item.getAttribute && item.getAttribute("data-testid")) || "";
+    if (tid.includes("user")) return true;
+    if (tid.includes("assistant")) return false;
+    return false;
+  };
+
+  const isAssistantItem = (item) => {
+    if (!item) return false;
+    const r = role(item);
+    if (r === S.assistantRole) return true;
+    if (r === S.userRole) return false;
+    const tid = (item.getAttribute && item.getAttribute("data-testid")) || "";
+    if (tid.includes("assistant")) return true;
+    if (tid.includes("user")) return false;
+    if (item.matches && (item.matches("[data-message-model-slug]") || item.matches(".markdown"))) return true;
+    if (item.querySelector && (
+      item.querySelector("[data-message-model-slug]") ||
+      item.querySelector("[data-testid*='copy'], [data-testid*='good-response'], [data-testid*='bad-response']") ||
+      item.querySelector("button[aria-label*='Copy' i], button[aria-label*='คัดลอก' i]")
+    )) return true;
+    return false;
+  };
 
   // Text extraction that can skip our own chip (and any excluded subtree).
   //
@@ -195,29 +230,62 @@ const ZSProvider = (() => {
     return t;
   }
 
-  // Non-reasoning reply text only: join the .markdown container(s). Reasoning
-  // renders outside .markdown, so this never sees tool blocks the model merely
-  // drafts while thinking.
+  function getReplyContainers(item) {
+    if (!item) return [];
+    let mds = [];
+    if (item.querySelectorAll) {
+      try {
+        mds = [...item.querySelectorAll(".markdown, [class*='markdown'], [class*='prose'], div.text-base")];
+      } catch {
+        mds = [...item.querySelectorAll(".markdown")];
+      }
+    }
+    if (mds.length > 1) {
+      mds = mds.filter((m) => !mds.some((other) => other !== m && other.contains && other.contains(m)));
+    }
+    if (mds.length) return mds;
+
+    if (item.classList && (item.classList.contains("markdown") || item.classList.contains("prose"))) {
+      return [item];
+    }
+
+    if (item.querySelectorAll) {
+      const textMsgs = [...item.querySelectorAll("[class*='text-message'], [data-message-model-slug], .whitespace-pre-wrap")];
+      if (textMsgs.length) return textMsgs;
+    }
+
+    return [item];
+  }
+
+  // Non-reasoning reply text: join reply container(s) with fallback to item text.
   function itemText(item) {
     if (!item) return "";
     if (isAssistantItem(item)) {
-      // textWithout, never textContent - see the CodeMirror note there.
-      return [...item.querySelectorAll(S.reply)].map((m) => textWithout(m)).join("\n");
+      const mds = getReplyContainers(item);
+      const res = mds.map((m) => textWithout(m)).join("\n").trim();
+      return res || textWithout(item).trim();
     }
     return textWithout(item);
   }
 
   function classifyText(item, excludeSel) {
     if (isAssistantItem(item)) {
-      return [...item.querySelectorAll(S.reply)]
-        .filter((m) => !(excludeSel && m.closest(excludeSel)))
-        .map((m) => textWithout(m, excludeSel)).join("\n");
+      const mds = getReplyContainers(item)
+        .filter((m) => !(excludeSel && m.closest && m.closest(excludeSel)));
+      const res = mds.map((m) => textWithout(m, excludeSel)).join("\n").trim();
+      return res || textWithout(item, excludeSel).trim();
     }
     return textWithout(item, excludeSel);
   }
 
   // ── DOM primitives ────────────────────────────────────────────────────────
-  const allItems = () => [...document.querySelectorAll(S.msg)];
+  const allItems = () => {
+    let items = [...document.querySelectorAll("[data-message-author-role]")];
+    if (items.length) return items;
+    items = [...document.querySelectorAll("article[data-testid*='conversation-turn'], [data-testid*='conversation-turn']")];
+    if (items.length) return items;
+    return [...document.querySelectorAll("[data-message-id]")];
+  };
   const assistantItems = () => allItems().filter(isAssistantItem);
   const assistantCount = () => assistantItems().length;
   const userCount = () => allItems().filter(isUserItem).length;
@@ -261,8 +329,16 @@ const ZSProvider = (() => {
   // a monotonic number, so the core's numeric "old id" shortcut simply doesn't
   // apply here (Number(uuid) is NaN and that guard is skipped) - the
   // settled-history guard covers the same case provider-agnostically.
-  const itemKey = (item) =>
-    (item && item.getAttribute ? item.getAttribute("data-message-id") : null) || null;
+  const itemKey = (item) => {
+    if (!item) return null;
+    return (
+      (item.getAttribute && item.getAttribute("data-message-id")) ||
+      (item.querySelector && item.querySelector("[data-message-id]")?.getAttribute("data-message-id")) ||
+      (item.getAttribute && item.getAttribute("data-testid")) ||
+      item.id ||
+      null
+    );
+  };
   const lastAssistantId = () => itemKey(lastAssistant());
 
   const chatIsEmpty = () => allItems().length === 0;
@@ -372,6 +448,17 @@ const ZSProvider = (() => {
     return b && !isStopBtn(b) ? b : null;
   };
   const stopButton = () => {
+    for (const sel of [
+      "button[data-testid='stop-button']",
+      "button[data-testid*='stop']",
+      "#composer-submit-button[data-testid='stop-button']",
+      "button[aria-label*='Stop' i]",
+      "button[aria-label*='Interrompre' i]",
+      "button[aria-label*='หยุด' i]"
+    ]) {
+      const b = document.querySelector(sel);
+      if (b && b.offsetParent !== null) return b;
+    }
     const b = submitButton();
     return b && isStopBtn(b) ? b : null;
   };
@@ -467,18 +554,23 @@ const ZSProvider = (() => {
     try {
       const it = lastAssistant();
       if (!it) return { th: 0, rp: 0 };
-      const md = it.querySelector(S.reply);
-      return { th: 0, rp: md ? (md.textContent || "").length : 0 };
+      const mds = getReplyContainers(it);
+      const len = mds.reduce((sum, m) => sum + (m.textContent || "").length, 0);
+      return { th: 0, rp: len || (it.textContent || "").length };
     } catch { return {}; }
   }
 
   function readAssistant() {
     const item = lastAssistant();
     if (!item) return { present: false, reply: "", thinking: "", item: null };
-    const mds = [...item.querySelectorAll(S.reply)];
+    const mds = getReplyContainers(item);
+    let reply = mds.map((m) => textWithout(m, ".zs-chip")).join("\n").trim();
+    if (!reply) {
+      reply = textWithout(item, ".zs-chip").trim();
+    }
     return {
       present: true,
-      reply: mds.map((m) => textWithout(m, ".zs-chip")).join("\n").trim(),
+      reply,
       thinking: "", // reasoning is gated by the stop button, not parsed as text
       item,
     };

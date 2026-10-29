@@ -123,3 +123,12 @@ const withChip = P.textWithout(
   ".zs-chip"
 );
 ok("excluded subtree is skipped", withChip.includes("real reply") && !withChip.includes("execute_luau"));
+
+// ── Fallback reply extraction (no .markdown class) ─────────────────────────
+const noMarkdownTurn = el("div", { attrs: { "data-message-author-role": "assistant" } }, [
+  el("p", {}, ['เริ่มแก้ไขโดยตรวจสอบคำสั่ง Roblox Studio ก่อน']),
+  el("p", {}, ['{"command":"list_commands"}'])
+]);
+const extractedText = P.itemText(noMarkdownTurn);
+ok("extracts reply even without .markdown wrapper", extractedText.includes('{"command":"list_commands"}'));
+ok("identifies assistant item correctly", P.isAssistantItem(noMarkdownTurn));
