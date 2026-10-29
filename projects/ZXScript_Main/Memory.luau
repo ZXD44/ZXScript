@@ -16,6 +16,7 @@ local Memory = {
     
     Achievements = {
         "Elevated all UI surfaces and custom scrollbars (5px slim pill) across popup and overlay to Impeccable Style standards",
+        "Fixed 'ChatGPT mode not ready' bug by adding locked contenteditable selectors and hydration retry",
         "Verified and hardened bar mounting across all 8 supported AI web providers (Gemini, ChatGPT, DeepSeek, Qwen, Kimi, GLM, Meta AI, Arena)",
         "Eliminated DOM layout thrashing in 60-144 FPS rAF positioning loops, resulting in buttery-smooth performance",
         "Integrated Autonomous Rest / Stop Intent detection ('พัก', 'เสร็จแล้ว', 'ไปนอน') with automatic local project archiving",

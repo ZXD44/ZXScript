@@ -8,6 +8,7 @@ All notable changes to ZXScript are documented here.
 - **ZXScript Release by zxd44 (ZirconX)**.
 - Integrated Native Messaging & direct browser runner.
 - **Impeccable Style UI Upgrade**: Dark Zinc-950 aesthetic, 5px custom slim pill scrollbars (::-webkit-scrollbar and scrollbar-width: thin), subtle inner highlights (box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04)), and tactile click feedback (scale(0.985)).
+- **ChatGPT Mode Fix**: Resolved "ChatGPT mode not ready" error by supporting locked contenteditable state (.ProseMirror, [data-zs-locked='1'], div[contenteditable]) and adding composer hydration retry.
 - **All-Provider Start Button Verification**: Fortified barMount and barAnchor across all 8 supported AI web providers (DeepSeek, ChatGPT, Gemini, Qwen, Kimi, GLM / Z.ai, Meta AI, Arena) ensuring '▶︎ เริ่มทำงาน' reliably displays on every platform.
 - **Performance & Smoothness Optimization**: Eliminated 60-144 FPS DOM layout thrashing and reflow churn in core/main.js (placeBar and placeUnstable), added deepseek.com to background routes, and optimized style mutation passes.
 - **Autonomous Rest & Project Archiving**: Automatic intent detection ('พัก', 'เสร็จแล้ว', 'ไปนอน'), syncing game.ServerStorage.ZXScript.Memory in Studio, and mirroring local markdown documentation to projects/<PlaceName>/.
