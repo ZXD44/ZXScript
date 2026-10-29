@@ -1,6 +1,6 @@
 # คู่มือการใช้งาน ZXScript ฉบับสมบูรณ์ (โดย zxd44 / ZirconX)
 > **ผู้พัฒนาและเจ้าของโครงการ:** [zxd44](https://github.com/zxd44) (ZirconX)  
-> **เว็บไซต์:** [www.zirconx.my](https://www.zirconx.my)  
+> **เว็บไซต์:** [www.zirconx.xyz](https://www.zirconx.xyz)  
 > **คลังโค้ดทางการ:** [https://github.com/zxd44/ZXScript](https://github.com/zxd44/ZXScript)  
 > **อีเมล:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)  
 > **เวอร์ชัน:** `0.0.1` | **สิทธิ์การใช้งาน:** GPL-3.0
