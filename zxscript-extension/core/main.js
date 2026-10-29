@@ -25,8 +25,8 @@
   // signal alongside the necessarily-synthetic input events. This adds a
   // small randomized human-reaction-time delay before each send.
   // REVERT: flip HUMANIZE_SEND to false - single toggle, no other changes needed.
-  const HUMANIZE_SEND = false; // didn't prevent Arena's captcha (fires on turn 1 already) - revert
-  const SEND_JITTER_MS = [400, 1400]; // [min, max] ms, randomized per send
+  const HUMANIZE_SEND = true; // didn't prevent Arena's captcha (fires on turn 1 already) - revert
+  const SEND_JITTER_MS = [1000, 2200]; // [min, max] ms, randomized per send
   function jitterBeforeSend() {
     if (!HUMANIZE_SEND) return Promise.resolve();
     const [lo, hi] = SEND_JITTER_MS;
@@ -1239,7 +1239,7 @@
     const MAX_TRUNC = 6;
     // Re-send the command list after this many successful tool calls. Kept high
     // so the reminder does not bloat the context too often.
-    const REMIND_TOOLS_EVERY = 20;
+    const REMIND_TOOLS_EVERY = 8;
     ui.showStop(true);
     P.setInputLock(true); // prevent user from typing while the agent is active
     ui.inputCover(true);  // keep the "Agent is working" cover up for the WHOLE loop
@@ -1658,9 +1658,9 @@
   // this exists for (a model that has forgotten it can call tools stops calling
   // them, so no results flow), so a fallback sends it as its own masked turn
   // once the window has elapsed with nothing to piggyback on.
-  const RESEND_SYS_EVERY = P.resendSystemEvery || 0;
+  const RESEND_SYS_EVERY = P.resendSystemEvery || 6;
   // Injected tool results get their own, larger budget (see sysResendDue).
-  const RESEND_SYS_EVERY_RESULTS = 12;
+  const RESEND_SYS_EVERY_RESULTS = 8;
 
   // How much conversation has accumulated since the operating instructions were
   // last stated. PERSISTED per conversation, because both simpler designs failed
