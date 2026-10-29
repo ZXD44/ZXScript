@@ -326,19 +326,13 @@ const ZSProvider = (() => {
   }
 
   function barMount() {
-    const ed = getEditor();
-    if (!ed) return null;
-    const box = ed.closest("[class*='composer-surface'], #composer-background, [class*='composer'], form");
-    if (!box) return null;
-    const area = topArea(box);
-    if (area) {
-      const bar = document.getElementById("zs-bar");
-      if (bar && bar.style.gridArea !== area) bar.style.gridArea = area;
-    }
-    // Skip our own bar if already mounted, otherwise we'd insert it before itself.
-    let before = box.firstElementChild;
-    if (before && before.id === "zs-bar") before = before.nextElementSibling;
-    return { parent: box, before, inside: true };
+    // Mount ABOVE the composer form as a dedicated card (like Gemini),
+    // completely outside the text input box so it never crowds user typing.
+    const frm = composerFrame();
+    if (!frm || !frm.parentElement) return null;
+    const bar = document.getElementById("zs-bar");
+    if (bar && bar.style.gridArea) bar.style.gridArea = "";
+    return { parent: frm.parentElement, before: frm, inside: false };
   }
 
   function barAnchor() {
