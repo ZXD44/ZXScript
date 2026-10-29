@@ -267,6 +267,7 @@ html.zs-light #zs-unstable {
   transition: background 0.14s ease, color 0.14s ease;
 }
 #zs-discord:hover, #zs-support:hover { background: rgba(255, 255, 255, 0.11); color: #ededf0; }
+#zs-discord:active, #zs-support:active, #zs-switch:active { transform: scale(0.96); }
 
 /* model switcher: names the current AI and opens the panel at Switch AI */
 #zs-switch {
@@ -294,17 +295,64 @@ html.zs-light #zs-unstable {
   animation: zs-pop 0.16s ease-out;
 }
 @keyframes zs-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-/* discreet dark scrollbar (default white one looks out of place) */
-#zs-menu { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.22) transparent; }
-#zs-menu::-webkit-scrollbar { width: 8px; }
-#zs-menu::-webkit-scrollbar-track { background: transparent; }
-#zs-menu::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.18); border-radius: 8px;
-  border: 2px solid transparent; background-clip: padding-box;
+/* ── Impeccable Custom Scrollbars (5px slim pill) ── */
+#zs-menu, #zs-root *, .zs-chip-body, .zs-shot-body, #zs-set-text {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
 }
-#zs-menu::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.30); background-clip: padding-box; }
-html.zs-light #zs-menu { scrollbar-color: rgba(0,0,0,0.25) transparent; }
-html.zs-light #zs-menu::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); background-clip: padding-box; }
+#zs-menu::-webkit-scrollbar,
+#zs-root *::-webkit-scrollbar,
+.zs-chip-body::-webkit-scrollbar,
+.zs-shot-body::-webkit-scrollbar,
+#zs-set-text::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#zs-menu::-webkit-scrollbar-track,
+#zs-root *::-webkit-scrollbar-track,
+.zs-chip-body::-webkit-scrollbar-track,
+.zs-shot-body::-webkit-scrollbar-track,
+#zs-set-text::-webkit-scrollbar-track {
+  background: transparent;
+}
+#zs-menu::-webkit-scrollbar-thumb,
+#zs-root *::-webkit-scrollbar-thumb,
+.zs-chip-body::-webkit-scrollbar-thumb,
+.zs-shot-body::-webkit-scrollbar-thumb,
+#zs-set-text::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  transition: background 0.15s ease;
+}
+#zs-menu::-webkit-scrollbar-thumb:hover,
+#zs-root *::-webkit-scrollbar-thumb:hover,
+.zs-chip-body::-webkit-scrollbar-thumb:hover,
+.zs-shot-body::-webkit-scrollbar-thumb:hover,
+#zs-set-text::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+html.zs-light #zs-menu,
+html.zs-light #zs-root *,
+html.zs-light .zs-chip-body,
+html.zs-light .zs-shot-body,
+html.zs-light #zs-set-text {
+  scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+}
+html.zs-light #zs-menu::-webkit-scrollbar-thumb,
+html.zs-light #zs-root *::-webkit-scrollbar-thumb,
+html.zs-light .zs-chip-body::-webkit-scrollbar-thumb,
+html.zs-light .zs-shot-body::-webkit-scrollbar-thumb,
+html.zs-light #zs-set-text::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.22);
+}
+html.zs-light #zs-menu::-webkit-scrollbar-thumb:hover,
+html.zs-light #zs-root *::-webkit-scrollbar-thumb:hover,
+html.zs-light .zs-chip-body::-webkit-scrollbar-thumb:hover,
+html.zs-light .zs-shot-body::-webkit-scrollbar-thumb:hover,
+html.zs-light #zs-set-text::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.36);
+}
 /* header strip: quiet product line, no coloured chips */
 .zs-menu-head {
   display: flex; align-items: baseline; gap: 7px;
