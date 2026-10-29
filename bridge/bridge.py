@@ -1376,6 +1376,83 @@ def _autoroute_datamodel(args):
         pass
     return args
 
+def _get_active_place_name() -> str:
+    """Returns the sanitized name of the currently active place in Roblox Studio."""
+    try:
+        text = _probe_tool_text(STUDIO_PROBE_TOOL)
+        if text:
+            studios = json.loads(text).get("studios") or []
+            if studios and studios[0].get("name"):
+                raw_name = str(studios[0]["name"]).strip()
+                clean = re.sub(r'[\\/*?:"<>|]', "_", raw_name)
+                return clean or "Current_Place"
+    except Exception:
+        pass
+    return "Default_Place"
+
+
+def _sync_project_memory_to_disk(name: str, arguments: dict):
+    """Automatically mirrors game.ServerStorage.ZXScript.Memory to local projects/<place>/ directory."""
+    try:
+        if not isinstance(arguments, dict):
+            return
+
+        content = ""
+        if name == "multi_edit":
+            target = str(arguments.get("target_file", "")).lower()
+            if "zxscript.memory" not in target and not target.endswith(".memory"):
+                return
+            edits = arguments.get("edits") or []
+            for edit in edits:
+                ns = edit.get("new_string", "")
+                if len(ns) > len(content):
+                    content = ns
+
+        elif name == "execute_luau":
+            code = str(arguments.get("code", ""))
+            if "zxscript.memory" in code.lower() or "zxscript" in code.lower():
+                m = re.search(r"\[=*\[(.*?)\]=*\]", code, re.DOTALL)
+                if m:
+                    content = m.group(1).strip()
+
+        if not content or len(content) < 20:
+            return
+
+        place_name = _get_active_place_name()
+        proj_dir = os.path.join(HERE, "..", "projects", place_name)
+        os.makedirs(proj_dir, exist_ok=True)
+
+        # 1. Save Memory.luau
+        lua_path = os.path.join(proj_dir, "Memory.luau")
+        with open(lua_path, "w", encoding="utf-8") as f:
+            if not content.startswith("return"):
+                f.write(f"return [==[\n{content}\n]==]\n")
+            else:
+                f.write(content)
+
+        # 2. Extract clean markdown body
+        md_body = content
+        m = re.search(r"\[=*\[(.*?)\]=*\]", content, re.DOTALL)
+        if m:
+            md_body = m.group(1).strip()
+
+        now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+        readme_path = os.path.join(proj_dir, "README.md")
+        with open(readme_path, "w", encoding="utf-8") as f:
+            f.write(f"# Project Memory: {place_name}\n")
+            f.write(f"> **Owner:** zxd44 | **Last Synced:** {now_str}\n\n")
+            f.write(md_body + "\n")
+
+        # 3. Session log
+        log_path = os.path.join(proj_dir, "sessions.log")
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"[{now_str}] Project memory synchronized ({len(content)} bytes)\n")
+
+        log(f"[project] Auto-synced {place_name} memory -> projects/{place_name}/", "gr")
+    except Exception as e:
+        log(f"[project] Sync warning: {e}", "yl")
+
+
 def safe_call(name, arguments, timeout):
     """Never raises. Always returns a dict the extension can feed back to DeepSeek."""
     try:
@@ -1396,6 +1473,9 @@ def safe_call(name, arguments, timeout):
 
         if name == "search_game_tree" and text:
             text = _prune_game_tree(text)
+
+        if result.get("ok"):
+            _sync_project_memory_to_disk(name, arguments)
 
         if name == "script_read" and text and isinstance(arguments, dict):
             text = _slice_script_output(text, arguments)
