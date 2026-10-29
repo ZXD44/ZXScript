@@ -43,6 +43,7 @@ This file guides AI coding agents working directly on the ZXScript codebase itse
 
 ## 📚 Reference Documents
 - Master Operational Rules: [../docs/RULES.md](../docs/RULES.md)
+- Development Roadmap: [../docs/ROADMAP.md](../docs/ROADMAP.md)
 - Agent Constraints: [rules.md](./rules.md)
 - System Architecture & Context: [context.md](./context.md)
 - User Documentation & Prompt Library: [../docs/ZXScript_Guide.md](../docs/ZXScript_Guide.md)

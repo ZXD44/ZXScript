@@ -28,6 +28,7 @@ ZXScript/
 ├── dist/                   # Packed extension artifacts (.crx, .pem)
 ├── docs/                   # Documentation & guides
 │   ├── CHANGELOG.md        # Version history
+│   ├── ROADMAP.md          # Future development roadmap (zxd44)
 │   ├── RULES.md            # Operational rules & Luau coding standards (TH/EN)
 │   └── ZXScript_Guide.md   # Complete installation & prompt guide (TH)
 ├── logs/                   # Bridge and runtime logs

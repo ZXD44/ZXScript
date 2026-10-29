@@ -118,9 +118,10 @@
   }
 
   // Ko-fi tip link.
-  const KOFI_URL = "https://ko-fi.com/sebattfg";
+  // Ko-fi / Community links
+  const KOFI_URL = "https://github.com/zxd44/ZXScript";
   // GitHub releases page - where users download the Bridge + start.bat.
-  const GITHUB_URL = "https://github.com/sebattfg/ZXScript-Free";
+  const GITHUB_URL = "https://github.com/zxd44/ZXScript";
   // Shown in the panel instead of a static "Free" label, so a user's screenshot
   // alone tells us which build they're on for debugging. Pulled from
   // manifest.json (single source of truth) rather than duplicated here.
