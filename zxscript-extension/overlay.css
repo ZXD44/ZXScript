@@ -727,7 +727,12 @@ message-content.zs-cmd-mask code-block { display: none !important; }
    every token, wiping any per-element .zs-tool-hide class. The .markdown
    container keeps its identity, so the provider marks IT with .zs-cmd-mask and
    this rule keeps every recreated <pre> hidden with no flash. Inert elsewhere. */
-.markdown.zs-cmd-mask pre { display: none !important; }
+/* ChatGPT (React): Mask <pre> AND outer code container (language bar + copy button) with no flash */
+.markdown.zs-cmd-mask pre,
+.markdown.zs-cmd-mask div[class*="bg-token"]:has(pre),
+.markdown.zs-cmd-mask div:has(> pre),
+.markdown.zs-cmd-mask div:has(> div > pre),
+.markdown.zs-cmd-mask div[class*="code-block"] { display: none !important; }
 /* ChatGPT, UNFENCED command block: when the model writes ###LUA###…###END_LUA###
    as plain prose instead of a fenced block, the renderer splits it into dozens of
    sibling <p>/<pre> nodes (seen live 2026-08: 68 of them for a 208-line payload).

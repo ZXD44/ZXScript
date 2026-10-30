@@ -67,13 +67,14 @@ const ZSProvider = (() => {
     userRole: "user",
     assistantRole: "assistant",
     reply: ".markdown",
+    thinking: "[data-testid*='thought'], [class*='thought'], [class*='reasoning']",
     editor: "#prompt-textarea",
     // The ONE submit control; its data-testid says whether it is currently a
     // send or a stop button (see isStopBtn). Id first - it survives testid churn.
-    submitBtn: "#composer-submit-button, button[data-testid='send-button'], button[data-testid='stop-button']",
+    submitBtn: "#composer-submit-button, button[data-testid='send-button'], button[data-testid='stop-button'], button[aria-label*='Send' i], button[aria-label*='ส่ง' i]",
     // Kept for installSendHooks, which needs to recognise a click on the native
     // stop control wherever it lives.
-    stopBtn: "button[data-testid='stop-button']",
+    stopBtn: "button[data-testid='stop-button'], button[aria-label*='Stop' i], button[aria-label*='Interrompre' i], button[aria-label*='หยุด' i]",
     codeWrap: "pre",
     // composer frame: the <form> that wraps the ProseMirror editor.
     errorSurfaces: '[role="alert"],[data-testid*="error"],[class*="error-message"]',
@@ -239,6 +240,9 @@ const ZSProvider = (() => {
       } catch {
         mds = [...item.querySelectorAll(".markdown")];
       }
+    }
+    if (S.thinking) {
+      mds = mds.filter((m) => !m.closest(S.thinking));
     }
     if (mds.length > 1) {
       mds = mds.filter((m) => !mds.some((other) => other !== m && other.contains && other.contains(m)));
@@ -700,6 +704,12 @@ const ZSProvider = (() => {
   // Typing is the ONLY path for injected sends: it is slower, but it produces a
   // real inline message instead of a file attachment (see pasteEditorText).
   async function setEditorText(ed, text) {
+    if (typeof ed === "string" && text === undefined) {
+      text = ed;
+      ed = getEditor();
+    }
+    if (!ed) ed = getEditor();
+    if (!ed) return;
     await typeEditorText(ed, text);
   }
 
@@ -895,26 +905,24 @@ const ZSProvider = (() => {
 
   // ── User-send interception ────────────────────────────────────────────────
   function installSendHooks(handlers) {
+    if (!handlers) return;
+    const isFn = typeof handlers === "function";
+
     document.addEventListener(
       "keydown",
       (e) => {
         if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
         const ed = getEditor();
-        if (!ed || !ed.contains(e.target)) return;
+        if (!ed || (e.target !== ed && !ed.contains(e.target))) return;
         if (editorText().trim() === "") return;
-        if (handlers.isBlocked()) return;
-        // No session yet → nudge toward Start, but NEVER block the send. The
-        // user is entitled to just chat with ChatGPT; the extension is opt-in.
-        // This used to preventDefault + stopImmediatePropagation (ported from an
-        // older, stricter pattern), which made a blank ChatGPT tab impossible to
-        // type in until an agent was started - a regression against every other
-        // provider. Matches deepseek.js: "nudge only; never block plain chat".
-        if (!handlers.isStarted()) {
-          if (!chatIsEmpty()) return; // existing conversation → not ours to gate
-          handlers.onBlockedAttempt();
+        if (isFn) { handlers(); return; }
+        if (handlers.isBlocked && handlers.isBlocked()) return;
+        if (handlers.isStarted && !handlers.isStarted()) {
+          if (!chatIsEmpty()) return;
+          if (handlers.onBlockedAttempt) handlers.onBlockedAttempt();
           return;
         }
-        handlers.onUserMessage(assistantCount());
+        if (handlers.onUserMessage) handlers.onUserMessage(assistantCount());
       },
       true
     );
@@ -927,23 +935,26 @@ const ZSProvider = (() => {
         // Native "Continue generating" = a clear intent to RESUME after truncation.
         const cont = t && t.closest && t.closest("button");
         if (cont && RE.continueBtn.test((cont.innerText || "").trim())) {
-          handlers.onNativeContinue();
+          if (!isFn && handlers.onNativeContinue) handlers.onNativeContinue();
           return;
         }
         // Stop is tested FIRST: it is the same node as send, just in its other
         // role, so a stop click would otherwise read as a user send.
         const stop = t && t.closest && t.closest(S.stopBtn);
-        if (stop) { handlers.onNativeStop(); return; }
-        const btn = t && t.closest && t.closest(S.submitBtn);
-        if (!btn || isStopBtn(btn)) return;
-        if (handlers.isBlocked()) return;
-        // Same as the keydown path: nudge, never block (see the comment there).
-        if (!handlers.isStarted()) {
-          if (!chatIsEmpty()) return;
-          handlers.onBlockedAttempt();
+        if (stop) {
+          if (!isFn && handlers.onNativeStop) handlers.onNativeStop();
           return;
         }
-        handlers.onUserMessage(assistantCount());
+        const btn = t && t.closest && t.closest(S.submitBtn);
+        if (!btn || isStopBtn(btn)) return;
+        if (isFn) { handlers(); return; }
+        if (handlers.isBlocked && handlers.isBlocked()) return;
+        if (handlers.isStarted && !handlers.isStarted()) {
+          if (!chatIsEmpty()) return;
+          if (handlers.onBlockedAttempt) handlers.onBlockedAttempt();
+          return;
+        }
+        if (handlers.onUserMessage) handlers.onUserMessage(assistantCount());
       },
       true
     );
@@ -965,12 +976,33 @@ const ZSProvider = (() => {
   const CMD_CLOSE = /###\s*END_(?:LUA|MCP_TOOL)\s*###/i;
 
   function findToolBlockSpot(item /*, chip */) {
-    const replies = [...item.querySelectorAll(S.reply)];
+    const replies = [...item.querySelectorAll(S.reply)].filter((m) => !S.thinking || !m.closest(S.thinking));
     let hidAny = null;
+
+    const getCodeWrapper = (pre, container) => {
+      let cur = pre;
+      while (cur && cur.parentElement && cur.parentElement !== container) {
+        const p = cur.parentElement;
+        if (
+          p.querySelector && (
+            p.querySelector("button[aria-label*='Copy' i], button[data-testid*='copy' i], [class*='copy' i], button[aria-label*='คัดลอก' i]") ||
+            p.matches("[class*='code-block'], [class*='code'], [class*='contain'], [class*='rounded'], [class*='bg-token']")
+          )
+        ) {
+          cur = p;
+        } else {
+          break;
+        }
+      }
+      return cur;
+    };
+
     const hide = (el, mc) => {
-      el.classList.add("zs-tool-hide");
+      const target = getCodeWrapper(el, mc);
+      target.classList.add("zs-tool-hide");
+      if (target !== el) el.classList.add("zs-tool-hide");
       if (mc) mc.classList.add("zs-cmd-mask");
-      hidAny = hidAny || { parent: el.parentElement, ref: el };
+      hidAny = hidAny || { parent: target.parentElement, ref: target };
     };
     for (const mc of replies) {
       // 1. Fenced code blocks carrying a command.
@@ -1037,7 +1069,7 @@ const ZSProvider = (() => {
     // so screen_capture would work sometimes and fail the rest of the time - the
     // worst kind of behaviour to hand a model. The core blocks the vision tools
     // outright instead (see main.js VISION_TOOLS).
-    supportsVision: false,
+    supportsVision: true,
     // No coverOffsetY: the cover is centred on coverTarget(), the scrolling text
     // band, whose rect centre already lines up with the composer's icons. (Sizing
     // it to the EDITOR needed a -paddingBottom/2 nudge, because that node carries
