@@ -562,7 +562,7 @@ const ZSProvider = (() => {
 
   return {
     id: "glm",
-    displayName: "GLM",
+    displayName: "Z.ai / GLM",
     // GLM-5.2 is multimodal and z.ai's composer accepts image uploads (png/jpg via
     // the always-mounted file input; chip staged in .chip-scroll, upload complete
     // when its <img> src flips to the z-cdn-media CDN url - see attachImages). So

@@ -279,7 +279,7 @@
     { name: "Claude", url: "https://claude.ai/new" },
     { name: "Gemini", url: "https://gemini.google.com/app" },
     { name: "Kimi", url: "https://www.kimi.ai/" },
-    { name: "GLM", url: "https://chat.z.ai/" },
+    { name: "Z.ai / GLM", url: "https://chat.z.ai/" },
     { name: "Qwen", url: "https://chat.qwen.ai/" },
     { name: "Arena", url: "https://arena.ai/text/direct" },
     { name: "Meta AI", url: "https://www.meta.ai/" },
@@ -3424,6 +3424,9 @@
       // layout, making the bar fall back to fixed positioning and overlap).
       bar.classList.remove("tone-standby", "tone-active", "tone-warn", "tone-noagent", "tone-starting");
       bar.classList.add(`tone-${toneClass}`);
+      const isBusyOrRunning = busy || A.running || A.starting;
+      bar.classList.toggle("zs-island-active", isBusyOrRunning);
+      bar.classList.toggle("is-busy", isBusyOrRunning);
       stateEl.innerHTML = indicator + `<span class="zs-state-txt">${msg}</span>`;
       stateEl.classList.toggle("zs-state-warn", warn);
       actionBtn.textContent = label;

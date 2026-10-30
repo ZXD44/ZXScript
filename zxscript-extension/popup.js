@@ -199,7 +199,7 @@ document.getElementById("btn-open-overlay").addEventListener("click", () => {
     "gemini.google.com",
     "chat.qwen.ai",
     "kimi.ai", "www.kimi.ai",
-    "chat.z.ai",
+    "chat.z.ai", "z.ai", "www.z.ai",
     "meta.ai", "www.meta.ai",
     "arena.ai"
   ];
