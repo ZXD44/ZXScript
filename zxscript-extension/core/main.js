@@ -2828,7 +2828,7 @@
       root.innerHTML = `
         <div id="zs-bar">
           <span id="zs-dot" class="off" title=""></span>
-          <span id="zs-brand">⚡ ZXScript <span class="zs-free">v${EXT_VERSION}</span></span>
+          <span id="zs-brand"><svg class="zs-rbx-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><path d="M5.26 2L2 18.74 18.74 22 22 5.26 5.26 2zm8.28 11.23l-3.27-.63.63-3.27 3.27.63-.63 3.27z"/></svg>Studio <span class="zs-free">v${EXT_VERSION}</span></span>
           <span id="zs-state"></span>
           <button id="zs-action"></button>
           <button id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">■ หยุด</button>

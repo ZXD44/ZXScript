@@ -67,7 +67,7 @@ const ZSProvider = (() => {
     userRole: "user",
     assistantRole: "assistant",
     reply: ".markdown",
-    thinking: "[data-testid*='thought'], [class*='thought'], [class*='reasoning']",
+    thinking: "[data-testid='thought-container'], [data-testid='thought'], [data-testid*='thought-container'], [data-testid*='reasoning-content']",
     editor: "#prompt-textarea",
     // The ONE submit control; its data-testid says whether it is currently a
     // send or a stop button (see isStopBtn). Id first - it survives testid churn.
@@ -442,7 +442,15 @@ const ZSProvider = (() => {
   // sendButton() cheerfully returns the stop square and every guarded click is
   // refused. That is exactly what stranded a tool result in the composer and
   // raised "ChatGPT did not accept the injected message after 4 attempts".
-  const isStopBtn = (b) => !!b && b.getAttribute("data-testid") === "stop-button";
+  const isStopBtn = (b) => {
+    if (!b) return false;
+    if (b.closest && b.closest("#zs-root")) return false;
+    const tid = b.getAttribute("data-testid") || "";
+    if (tid === "stop-button" || tid.includes("stop")) return true;
+    const aria = b.getAttribute("aria-label") || "";
+    if (/stop|interrompre|หยุด/i.test(aria)) return true;
+    return false;
+  };
   const submitButton = () => {
     const b = document.querySelector(S.submitBtn);
     return b && b.offsetParent !== null ? b : null;
@@ -461,6 +469,7 @@ const ZSProvider = (() => {
       "button[aria-label*='หยุด' i]"
     ]) {
       const b = document.querySelector(sel);
+      if (b && b.closest && b.closest("#zs-root")) continue;
       if (b && b.offsetParent !== null) return b;
     }
     const b = submitButton();
@@ -571,6 +580,9 @@ const ZSProvider = (() => {
     let reply = mds.map((m) => textWithout(m, ".zs-chip")).join("\n").trim();
     if (!reply) {
       reply = textWithout(item, ".zs-chip").trim();
+    }
+    if (!reply) {
+      reply = (item.innerText || item.textContent || "").trim();
     }
     return {
       present: true,
@@ -980,21 +992,24 @@ const ZSProvider = (() => {
     let hidAny = null;
 
     const getCodeWrapper = (pre, container) => {
-      let cur = pre;
-      while (cur && cur.parentElement && cur.parentElement !== container) {
-        const p = cur.parentElement;
-        if (
-          p.querySelector && (
-            p.querySelector("button[aria-label*='Copy' i], button[data-testid*='copy' i], [class*='copy' i], button[aria-label*='คัดลอก' i]") ||
-            p.matches("[class*='code-block'], [class*='code'], [class*='contain'], [class*='rounded'], [class*='bg-token']")
-          )
-        ) {
-          cur = p;
-        } else {
-          break;
+      if (!pre || pre.tagName !== "PRE") return pre;
+      const wrap = pre.closest("div[class*='code-block']");
+      if (wrap && (!container || (container.contains(wrap) && wrap !== container))) {
+        return wrap;
+      }
+      let p = pre.parentElement;
+      if (p && (!container || (container.contains(p) && p !== container))) {
+        if (p.querySelector && p.querySelector("button[aria-label*='Copy' i], button[data-testid*='copy' i], button[aria-label*='คัดลอก' i]")) {
+          return p;
+        }
+        let gp = p.parentElement;
+        if (gp && (!container || (container.contains(gp) && gp !== container))) {
+          if (gp.querySelector && gp.querySelector("button[aria-label*='Copy' i], button[data-testid*='copy' i], button[aria-label*='คัดลอก' i]")) {
+            return gp;
+          }
         }
       }
-      return cur;
+      return pre;
     };
 
     const hide = (el, mc) => {
@@ -1015,7 +1030,7 @@ const ZSProvider = (() => {
       kids.forEach((el) => {
         if (el.classList.contains("zs-chip") || el.querySelector(S.codeWrap)) return;
         const t = el.textContent || "";
-        if (t.length < 600 && CMD_SHAPE.test(t)) hide(el, null);
+        if (t.length < 600 && CMD_SHAPE.test(t)) hide(el, mc);
       });
       // 3. UNFENCED command block spanning MANY siblings. Seen live 2026-08: the
       // model wrote ###LUA###…###END_LUA### as plain prose instead of a fenced
