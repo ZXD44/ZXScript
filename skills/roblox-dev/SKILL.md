@@ -52,37 +52,43 @@ surface. The tools below belong to **Roblox's own MCP server, built into Studio*
 only tells you how to use them well. Official reference:
 https://create.roblox.com/docs/studio/mcp
 
-The docs page lists **26 tools**. The build observed 2026-10-17, 2026-10-21 (Studio 0.743) and 2026-10-22 (Studio 0.744) exposed **28**:
-those plus the undocumented `generate_texture` and `segment_mesh`. `list_plugin_guis` and
-`capture_plugin_gui`, seen on 2026-10-11 (Studio 0.742), were gone. Detect what your host actually
-exposes rather than trusting this table.
+The docs page lists **26 tools**, while the live Studio MCP Proxy exposes **33 tools** verified in Roblox Studio 0.744 / Luau 0.743. See [`references/godtier-mcp-tools-reference.md`](file:///C:/Users/ZirconX/Documents/New%20folder/skills/roblox-dev/references/godtier-mcp-tools-reference.md) for the complete 33-tool guide and decision matrix.
 
-| Tool | Purpose |
-|------|---------|
-| `execute_luau` | Run Luau in Studio at plugin privilege — **returns the result or the error** |
-| `multi_edit` | Apply several exact-match edits to **ONE** script (creates it if missing); `Edit` datamodel only |
-| `script_read` | Read script source, whole or by line range; output is `LINE→CONTENT` |
-| `script_search` / `script_grep` | Find scripts by name (fuzzy, ≤10) or by content (≤50 matches) |
-| `search_game_tree` | Explore the DataModel as flat JSON, filterable by path/type/keyword |
-| `inspect_instance` | Properties, attributes, and child summary for one instance |
-| `subagent` | Launch a Roblox-side subagent for autonomous multi-step work (types vary by build) |
-| `get_studio_state` | Play state **and which datamodel types are available** |
-| `start_stop_play` | Start/stop playtesting |
-| `get_console_output` | Read Output/console logs |
-| `screen_capture` | Capture the viewport, optionally from a custom camera |
-| `character_navigation` | Move the character to a position or instance path |
-| `user_mouse_input` / `user_keyboard_input` | Simulate ordered mouse/keyboard actions |
-| `search_asset` / `insert_asset` | Search Creator Store + Inventory; insert by asset ID |
-| `store_image` | **Local** png/jpg ≤5 MB → `IMAGEID_` URI for other tools |
-| `upload_image` | Batch upload from **HTTP(S) URLs** → imagePath→assetId map |
-| `generate_mesh` / `generate_procedural_model` | Generate 3D content |
-| `generate_material` | Generate a `MaterialVariant`; returns the base material + variant name |
-| `generate_texture` | Re-texture an **existing** MeshPart/Model — **replaces the source in place** (duplicate it first) |
-| `segment_mesh` | Split an existing mesh into ≤5 named parts; inserts a new Model next to the source |
-| `wait_job_finished` | Await a background `jobId` (from a tool's own `async: true`) |
-| `http_get` | Fetch Roblox docs **from an allowlist**; URL must end `.md` or be `llms.txt` |
-| `skill` | Roblox's first-party `rbx-*` references (debug, perf, scene analysis, …) |
-| `list_roblox_studios` | Enumerate connected Studio instances (name + place ID) |
+| Tool | Purpose & Category |
+|------|--------------------|
+| `search_game_tree` | Explore DataModel instance hierarchy as flat JSON (search & inspection) |
+| `inspect_instance` | Read all properties, custom attributes, and children summary of an instance |
+| `script_search` | Fuzzy search scripts by name (returns up to 10 results) |
+| `script_grep` | Search text or pattern across all script contents in the place (up to 50 matches) |
+| `script_read` | Read script source with line numbers `LINE_NUMBER→LINE_CONTENT` |
+| `get_console_output` | Fetch Output/console logs (errors, warnings, prints) for auto-debugging |
+| `get_studio_state` | Read play state (playing/edit) and available datamodel types |
+| `multi_edit` | Apply atomic string replacements to **ONE** script or create new script (`Edit` datamodel only) |
+| `execute_luau` | Run Luau in Studio at plugin privilege (`Edit`, `Server`, `Client`) — **returns result or error** |
+| `generate_mesh` | AI textured 3D mesh generator (yielding call, inserts mesh into Workspace) |
+| `generate_procedural_model` | Builds 3D model from primitive parts (blocks, spheres, cylinders, wedges) with generationId |
+| `generate_scene` | Generates complete scene of models and parts within a bounding box |
+| `generate_material` | Generates PBR `MaterialVariant`; returns base material + variant name |
+| `generate_texture` | Re-textures existing MeshPart/Model using AI prompt — **replaces source in place** |
+| `segment_mesh` | Splits existing mesh into <=5 named parts; inserts new Model next to source |
+| `auto_setup_avatar` | Automatically rigs a static Model into an animated R15 avatar with Motor6D joints |
+| `search_asset` | Search Creator Store and Inventory (Models, Audio, Decals, Animations) |
+| `insert_asset` | Inserts asset by numeric asset ID into target parent |
+| `store_image` | Loads local image (<=5 MB) into an `IMAGEID_<id>` URI for generative tools |
+| `upload_image` | Batch uploads images from HTTP(S) URLs to Roblox CDN returning `rbxassetid://` map |
+| `start_stop_play` | Starts or stops playtest simulation |
+| `user_keyboard_input` | Simulates ordered player keyboard actions (keyDown, keyUp, keyPress, textInput, wait) |
+| `user_mouse_input` | Simulates ordered player mouse actions (moveTo, click, button down/up, scroll, wait) |
+| `character_navigation` | Navigates player character to Vector3 position or instance path during playtest |
+| `screen_capture` | Captures viewport screenshot, optionally from custom camera position/look-at |
+| `wait_job_finished` | Awaits background async job (from `jobId`) to reach terminal state |
+| `list_skills` | Enumerates available Studio MCP skills |
+| `skill` | Loads first-party or custom Studio skill reference and best practices |
+| `create_skill` | Registers a new custom skill into Studio MCP |
+| `edit_skill` | Updates existing user skill in Studio MCP |
+| `subagent` | Spawns autonomous subagent in Studio for multi-step exploration or unit tests |
+| `http_get` | Fetches documentation or API markdown files via HTTP GET |
+| `list_roblox_studios` | Enumerates connected Studio instances (ID and place name) |
 
 > **Every call takes a `studio_id`.** There is no "set active studio" tool — call
 > `list_roblox_studios` first and pass the id you want on each subsequent call. Several Studio
@@ -143,6 +149,13 @@ Match user intent to the appropriate reference file. Read the file BEFORE genera
 | Monetization, game passes, donations, transfers | `references/monetization.md` |
 | File formats, import/export, asset management | `references/file-formats-and-assets.md` |
 | Plugins, `Script.Source` limits, HttpService/engine limits | `references/studio-plugins-and-limits.md` |
+| **All 33 StudioMCP Tools & Decision Matrix** | `references/godtier-mcp-tools-reference.md` |
+| God-tier Service Architecture & Lifecycle | `references/godtier-architecture.md` |
+| God-tier Server-Authoritative Combat & Anti-Exploit | `references/godtier-combat-anti-exploit.md` |
+| God-tier Parallel Luau Actors & Raycasting | `references/godtier-parallel-luau.md` |
+| God-tier ProfileStore & Monetization | `references/godtier-monetization-profilestore.md` |
+| God-tier Procedural Generation & Terrain | `references/godtier-procedural-world.md` |
+| God-tier Modern Animations, Markers & IKControl | `references/godtier-animations-and-ik.md` |
 
 **Start with `worked-examples.md` when the task is a *doing* task** (build, debug, migrate, look up, sell, bind input)
 rather than a *knowing* task. It gives the call sequence and the verification step, and each example

@@ -4,6 +4,9 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
 
   function showZSErrorModal(title, msg, stack) {
     try {
+      if (typeof window !== "undefined" && window.__ZS_PLAY_CHIME__) {
+        try { window.__ZS_PLAY_CHIME__("error"); } catch {}
+      }
       let el = document.getElementById("zs-error-reporter");
       if (!el) {
         el = document.createElement("div");
@@ -231,7 +234,67 @@ const ZS = (() => {
     const prompt = `บริบทระบบ (CONTEXT): ผู้ใช้ได้ติดตั้งส่วนขยายเบราว์เซอร์ ZXScript เพื่อเชื่อมต่อแชต AI เข้ากับ Roblox Studio ของผู้ใช้โดยตรงผ่าน MCP Server (Local Bridge)
 เมื่อคุณส่งคำสั่ง ZXScript ในข้อความตอบกลับ ส่วนขยายจะรันคำสั่งบน Roblox Studio ทันทีและส่งผลลัพธ์กลับมาในรอบถัดไป คุณจะได้รับผลลัพธ์เสมอ (ทั้งสำเร็จและแจ้ง Error) เพื่อให้คุณทำงานต่อเนื่องได้จนจบ
 
-Roblox Studio เชื่อมต่อผ่าน Local Bridge เสมอ — ให้เรียกใช้ \`list_commands\` เป็นคำสั่งแรกเพื่อดึงรายการคำสั่งและพารามิเตอร์ทั้งหมด หากต้องการใช้งานแอปอื่น (เช่น Blender, Sketchfab) ให้เรียก \`list_mcp_servers\` ก่อนเสมอ ห้ามเดาคำสั่งขึ้นมาเอง
+Roblox Studio เชื่อมต่อผ่าน Local Bridge เสมอ — มีคำสั่ง StudioMCP ครบทั้ง 33 คำสั่งพร้อมใช้งานโดยตรงตามหมวดหมู่และตารางตัดสินใจ (DECISION MATRIX) ด้านล่าง ห้ามเดาคำสั่งขึ้นมาเองเด็ดขาด
+
+━━━ บัญชีคำสั่ง ROBLOX STUDIO MCP ทั้ง 33 คำสั่ง (33 TOOLS DIRECTORY) ━━━
+[1. สำรวจโครงสร้างและอ่านโค้ด (Inspection & Reading)]
+• search_game_tree(path, max_depth, keywords, instance_type, head_limit, datamodel_type) - ค้นหาและดูโครงสร้าง Instance แบนเป็น JSON (ใช้ค้นหาวัตถุในเกม)
+• inspect_instance(path) - อ่าน Properties, Attributes ทั้งหมด และสรุป Children ของ Instance นั้น (ใช้ก่อนแก้ไข)
+• script_search(keywords) - ค้นหาชื่อสคริปต์แบบ Fuzzy search (สูงสุด 10 รายการ)
+• script_grep(query) - ค้นหาข้อความ/ลอจิกในโค้ดสคริปต์ทั้งหมดในเกม (สูงสุด 50 ผลลัพธ์)
+• script_read(target_file, should_read_entire_file, start_line_one_indexed, end_line_one_indexed_inclusive) - อ่านซอร์สโค้ดพร้อมเลขบรรทัด LINE->CONTENT (ต้องอ่านก่อนใช้ multi_edit ทุกครั้ง)
+• get_console_output() - ดึง Error/Warning/Print Log จาก Studio Console เพื่อใช้ตรวจจับบั๊กอัตโนมัติ
+• get_studio_state() - เช็กสถานะว่า Studio กำลังรัน Play Mode หรือ Edit Mode และ DataModel ใดพร้อมใช้
+
+[2. สร้างและแก้ไขสคริปต์ / รันโค้ด (Scripting & Execution)]
+• multi_edit(file_path, edits, className, datamodel_type) - แก้ไขโค้ดแบบเจาะจง (old_string ต้องตรงเป๊ะ 100%) หรือสร้างสคริปต์ใหม่ (className="Script"|"LocalScript"|"ModuleScript" และ old_string="")
+• execute_luau(code, datamodel_type) - รันคำสั่ง Luau สดใน Studio ใช้สร้าง Part, จัดแสง, คำนวณคณิตศาสตร์ (ใช้บล็อก ###LUA### และใช้ return สำหรับค่าผลลัพธ์)
+
+[3. เจนเนอเรตโมเดล 3D และโลกเสมือน (3D AI Generation & World)]
+• generate_mesh(textPrompt, segmentation, size, maxTriangles, partNames, async) - เจน 3D Mesh พร้อมเท็กซ์เจอร์ด้วย AI (Organic/Weapons/Props)
+• generate_procedural_model(prompt, partNames, attachedImageUri, segmentation, async) - สร้าง 3D Model จาก Roblox Primitive Parts (Blocks, Cylinders, Wedges, Spheres) เหมาะกับสิ่งก่อสร้างและโมเดลแยกชิ้นได้
+• generate_scene(textPrompt, images, boundingBoxPosition, boundingBoxSize) - สร้างทั้งฉาก/เกาะ/ดันเจี้ยนพร้อมวัตถุจัดวางเสร็จสรรพ
+• generate_material(materialDescription, baseMaterial, materialPattern, materialId, async) - สร้าง PBR MaterialVariant คุณภาพสูงสำหรับ BaseParts
+• generate_texture(textPrompt, instance_path, model, hintImage) - เปลี่ยนเท็กซ์เจอร์ของโมเดล/Mesh ที่มีอยู่แล้วด้วย AI Prompt
+• segment_mesh(instance_path, parts) - แยกชิ้นส่วน Mesh เดิมออกเป็นชิ้นๆ ตามชื่อ เช่น ["head", "body", "left_arm"]
+• auto_setup_avatar(instance_path, setup_type, align_front_angle, r15_plus, reduce_triangles, decal_to_dynamic_head) - แปลง Static 3D Model ให้กลายเป็น R15 Avatar พร้อมกระดูก Motor6D ใช้งานได้ทันที
+
+[4. แอสเซทและคลังข้อมูล (Assets & Store)]
+• search_asset(query, assetType, audioMinDuration, audioMaxDuration, priceFilter, tags, verifiedCreatorsOnly, scope, maxResults) - ค้นหา Asset ใน Creator Store หรือ Inventory (Models, Audio, Decals, Animations)
+• insert_asset(assetId, assetName, assetType, parentPath) - โหลดและแทรก Asset ลงเกมตาม numeric asset ID
+• store_image(filePath) - โหลดไฟล์ภาพจากเครื่องมาเป็น URI สำหรับสร้าง Texture/Procedural Model
+• upload_image(imagePaths) - อัปโหลดรูปภาพหลายรูปขึ้น Roblox CDN เพื่อใช้เป็น rbxassetid://
+
+[5. ทดสอบและจำลองผู้เล่น (Playtest & Simulation)]
+• start_stop_play(is_start) - เปิด/ปิด Play Mode ใน Studio เพื่อทดสอบเกม (is_start=true เริ่มเล่น, false หยุดเล่น)
+• user_keyboard_input(actions, datamodel_type) - กดปุ่มคีย์บอร์ดเสมือนจริงในโหมด Play (keyDown, keyUp, keyPress, textInput, wait)
+• user_mouse_input(actions, datamodel_type) - คลิก/ขยับเมาส์เสมือนจริงในโหมด Play (moveTo, mouseButtonClick, mouseButtonDown, mouseButtonUp, scrollUp, scrollDown, wait)
+• character_navigation(x, y, z, instance_path, speed_multiplier, datamodel_type) - สั่งตัวละครเดินไปยังพิกัดหรือวัตถุเป้าหมาย
+• screen_capture(camera_position, look_at_position, capture_id) - แคปเจอร์หน้าจอภาพมุมมอง Studio เพื่อดูผลลัพธ์ด้วยตา
+
+[6. ระบบทักษะและเอเจนต์ย่อย (Skills & Subagents)]
+• list_skills() - ดูทักษะพิเศษทั้งหมดใน Studio
+• skill(skill_name) - โหลดคำแนะนำและ Best Practices เฉพาะทาง
+• create_skill(skill_name, skill_description, skill_body) - สร้างทักษะใหม่ใน Studio
+• edit_skill(skill_name, new_name, new_description, new_skill_body) - แก้ไขทักษะเดิม
+• subagent(subagent_type, task, description) - เปิด Subagent ทำงานใหญ่แบบอิสระ
+• wait_job_finished(jobId, timeout) - รอ Job ที่รันเบื้องหลัง (เช่น Async Mesh) จนเสร็จ
+• http_get(url, query, return_full) - ดึงข้อมูลภายนอกผ่าน HTTP GET (Docs/API)
+• list_roblox_studios() - แสดงรายชื่อ Studio Windows ที่เปิดอยู่เพื่อเลือก studio_id
+
+━━━ กลยุทธ์การเลือกใช้คำสั่ง (DECISION MATRIX): ━━━
+• ต้องการดูว่ามีอะไรในเกม / ตำแหน่งไหน? -> search_game_tree ก่อนเสมอ ห้ามเดา Path
+• ต้องการดู Properties ละเอียดของ Part/Model ก่อนแก้? -> inspect_instance
+• ต้องการค้นหาสคริปต์ในโปรเจกต์? -> script_search (หาจากชื่อ) หรือ script_grep (หาจากข้อความข้างใน)
+• ต้องการแก้โค้ดสคริปต์เดิม? -> script_read ดึงเนื้อหาก่อน -> multi_edit แก้ไขตรงจุด
+• ต้องการสร้างสคริปต์ใหม่? -> multi_edit ระบุ className="Script"|"LocalScript"|"ModuleScript" และ old_string=""
+• ต้องการเสก Part / วัตถุ / เซ็ตแสง / ลอจิกฉุกเฉิน? -> execute_luau ครอบด้วย ###LUA###
+• ต้องการตรวจจับ Runtime Error หลังแก้โค้ด? -> get_console_output
+• ต้องการสร้างสิ่งก่อสร้าง/บล็อกแยกชิ้นได้? -> generate_procedural_model
+• ต้องการสร้างมอนสเตอร์/ตัวละคร/อาวุธ 3D สวยงาม? -> generate_mesh
+• ต้องการใส่กระดูก R15 ให้โมเดลตัวละคร? -> auto_setup_avatar
+• ต้องการหาเสียงเพลง/อนิเมชั่น/โมเดลฟรีจาก Store? -> search_asset -> insert_asset
+• ต้องการเทสต์การเล่นจริง? -> start_stop_play -> character_navigation / user_keyboard_input / user_mouse_input -> screen_capture
 
 คำเตือนสำคัญ: ฟีเจอร์ Function Calling หรือ Code Interpreter ของเว็บ AI นี้ทำงานใน Sandbox ที่ไม่สามารถเข้าถึง Roblox Studio ในเครื่องของผู้ใช้ได้ คำสั่ง ZXScript ต้องพิมพ์เป็นข้อความธรรมดา (Plain Text) ภายในบล็อกโค้ดตามรูปแบบที่กำหนดเท่านั้น ห้ามเรียก Tool ผ่านฟังก์ชันภายในของระบบ AI
 
@@ -325,45 +388,75 @@ game.ServerStorage.ZXScript.Memory (ModuleScript) เป็นหน่วยค
       "Edits apply in order, each on the result of the previous, and are atomic (all succeed or none). " +
       "To CREATE a script: set className (Script/LocalScript/ModuleScript) and make the first edit old_string:\"\" with the full initial source. " +
       "datamodel_type must be \"Edit\".",
+    search_game_tree:
+      "Explores instance hierarchy returning a flat JSON list. Filter with 'path' (e.g. 'Workspace', 'ReplicatedStorage'), " +
+      "'max_depth' (default 2), 'keywords', and 'instance_type'. ALWAYS run this first before modifying instances to avoid path guessing.",
     inspect_instance:
       "Path is dot-notation and case-insensitive, e.g. 'Workspace.Model.Part'. Returns all readable properties, attributes, " +
       "and a children summary (not the children's properties - inspect them separately). If several instances share the path, " +
       "up to 20 matches are returned. Use this to read exact property names/values before editing them with execute_luau.",
+    script_search:
+      "Fuzzy search by script name across the entire place. Returns up to 10 matches. Use to find target script before script_read.",
+    script_grep:
+      "Full-text search inside all scripts for a keyword or pattern. Capped at 50 results. Ideal for tracking function usage or RemoteEvents.",
     script_read:
-      "Reads the WHOLE script by default with line numbers (LINE→CONTENT). Use it before multi_edit so your old_string " +
+      "Reads the WHOLE script by default with line numbers (LINE->CONTENT). Use it before multi_edit so your old_string " +
       "matches exactly. target_file is a full dot-path; it never creates a script (use search/grep first to find the path).",
+    get_console_output:
+      "Fetches Output log messages (prints, warnings, and errors) from Roblox Studio. Run immediately after script edits or during playtests to catch bugs.",
+    get_studio_state:
+      "Returns Studio play state (isPlaying, isEdit) and available datamodel types (Edit, Server, Client). Check before sending player inputs.",
+    start_stop_play:
+      "Toggles playtesting simulation in Studio: set is_start:true to begin playtest, is_start:false to return to Edit mode.",
     user_keyboard_input:
       "Simulates a real player typing during PLAY. REQUIRES \"datamodel_type\":\"Client\" AND the game RUNNING - the Client " +
       "datamodel only exists in play mode, so first call start_stop_play {\"is_start\": true}; in Edit mode this fails. " +
-      "(ZXScript auto-fills datamodel_type:\"Client\" if you omit it, but the game must still be running.) " +
-      "\"actions\" is an ORDERED array of OBJECTS - each step MUST be {\"action\": ...}, NOT a bare string (a missing/misnamed action " +
-      "gives 'Unknown ... action: nil'). action is one of: keyDown | keyUp | keyPress (down+up) | textInput | wait. " +
-      "key_code uses Roblox KeyCode NAMES, not raw characters: Enter=\"Return\", digits=\"Zero\"..\"Nine\", letters=single uppercase " +
-      "\"A\"..\"Z\", plus \"Space\", \"Backspace\", \"Tab\", arrows \"Up\"/\"Down\"/\"Left\"/\"Right\", modifiers \"LeftShift\"/\"LeftControl\"/\"LeftAlt\" " +
-      "- REQUIRED on keyDown/keyUp/keyPress ('key_code is required' otherwise). To type a whole string use ONE textInput step with " +
-      "\"text_inputs\":\"hello\" instead of many keyPress. A \"wait\" step MUST carry \"wait_time_ms\" (0-10000) ('wait_time_ms is required " +
-      "for wait action' otherwise). Optional \"instance_path\" routes input to a focused GUI element and must start with game, LocalPlayer " +
-      "or Workspace (e.g. \"LocalPlayer.PlayerGui.Menu.NameBox\"); omit it to send to whatever currently has focus. " +
-      "Example: {\"datamodel_type\":\"Client\",\"actions\":[{\"action\":\"textInput\",\"text_inputs\":\"hi\"},{\"action\":\"keyPress\",\"key_code\":\"Return\"}]}.",
-    generate_mesh:
-      "Unlike generate_procedural_model, this call YIELDS: it blocks until the AI mesh generation finishes and only then " +
-      "returns the result (the finished mesh) - there is no separate poll/wait step needed, just wait for the response.",
-    generate_procedural_model:
-      "Unlike generate_mesh, this call does NOT yield: it returns immediately with a generationId while the model builds " +
-      "in the background and auto-inserts into the workspace once done - do NOT run other commands assuming the model already " +
-      "exists yet. Do NOT call wait_job_finished as a reflex right after this - but DO call it (pass the generationId) whenever " +
-      "you actually need the finished result before continuing: either the user explicitly asked to wait, or your next step " +
-      "depends on the model being done (e.g. editing/coloring it, checking its geometry).",
+      "actions is an ORDERED array of objects: keyDown | keyUp | keyPress | textInput | wait. Key names: Space, Return, A..Z, Zero..Nine, LeftShift.",
     user_mouse_input:
-      "Simulates real player mouse actions during PLAY. Same requirement as user_keyboard_input: \"datamodel_type\":\"Client\" (auto-filled " +
-      "if omitted) AND the game RUNNING (start_stop_play {\"is_start\": true} first; fails in Edit mode). " +
-      "\"actions\" is an ORDERED array of OBJECTS - each step MUST be {\"action\": ...}, NOT a bare string (a missing/misnamed action gives " +
-      "'Unknown mouse action: nil'). action is one of: moveTo | mouseButtonDown | mouseButtonUp | mouseButtonClick | scrollUp | scrollDown | wait. " +
-      "You MUST establish a position BEFORE any click/scroll: the FIRST step needs \"x\"/\"y\" (screen pixels) OR \"instance_path\" " +
-      "(starts with game/LocalPlayer/Workspace; if set, x/y are ignored) - else 'Either x and y, instance_path, or a prior action ... is " +
-      "required'. Later steps may omit x/y and reuse the last position (click then scroll at the same spot). " +
-      "mouseButtonDown/Up/Click need \"mouse_button\":\"left\" or \"right\". A \"wait\" step needs \"wait_time_ms\" (0-10000). " +
-      "Example: {\"datamodel_type\":\"Client\",\"actions\":[{\"action\":\"mouseButtonClick\",\"mouse_button\":\"left\",\"instance_path\":\"LocalPlayer.PlayerGui.Menu.PlayBtn\"}]}.",
+      "Simulates real player mouse actions during PLAY. Requires datamodel_type:\"Client\" AND game RUNNING. " +
+      "First step needs x/y coordinates or instance_path (e.g. 'LocalPlayer.PlayerGui.ShopGui.BuyBtn'). Actions: moveTo, mouseButtonClick, mouseButtonDown, mouseButtonUp, scrollUp, scrollDown, wait.",
+    character_navigation:
+      "Navigates player character to target Vector3 position (x, y, z) or instance_path with speed_multiplier during playtest.",
+    screen_capture:
+      "Captures high-resolution screenshot of the Studio viewport. Optional camera_position and look_at_position let you view builds from any angle.",
+    generate_mesh:
+      "AI textured 3D mesh generator. Unlike generate_procedural_model, this call YIELDS: it blocks until generation completes and inserts the mesh into Workspace.",
+    generate_procedural_model:
+      "Generates 3D models made from primitive parts (blocks, spheres, cylinders, wedges). Returns immediately with generationId. Use wait_job_finished if next step depends on it.",
+    generate_scene:
+      "Generates a complete multi-part scene from text prompt and bounding box (boundingBoxPosition, boundingBoxSize). Inserts models and parts in place.",
+    generate_material:
+      "Generates PBR MaterialVariant. Returns baseMaterial and MaterialVariant name; apply both to BasePart.Material and BasePart.MaterialVariant.",
+    generate_texture:
+      "Re-textures existing MeshPart or Model in place based on text prompt. Warning: replaces texture on target; duplicate instance first if backup needed.",
+    segment_mesh:
+      "AI-segments single mesh into separate sub-parts by names (e.g. ['head', 'body', 'tail']). Inserts new Model beside original.",
+    auto_setup_avatar:
+      "Automatically rigs a static 3D Model into a fully functional R15 Avatar with Motor6D joints, ready for animation and player spawning.",
+    search_asset:
+      "Searches Creator Store (marketplace) and Inventory. Filter by query, assetType (Model, Decal, Audio, Animation), price, and verifiedCreatorsOnly.",
+    insert_asset:
+      "Inserts asset by numeric Roblox Asset ID (assetId) into parentPath (default: Workspace).",
+    store_image:
+      "Loads local image file (<=5MB) into an IMAGEID_<id> URI for use with generate_procedural_model or texture tools.",
+    upload_image:
+      "Uploads batch of images from HTTP URLs to Roblox CDN, returning map of {url: 'rbxassetid://...'}.",
+    wait_job_finished:
+      "Waits for an async generation job to complete (Completed, Failed, or Cancelled). Pass jobId from async generate calls.",
+    list_skills:
+      "Lists available specialized Studio MCP skills and descriptions.",
+    skill:
+      "Loads specialized guidelines and best practices for specific Roblox Studio skill (e.g. rbx-debug, rbx-perf).",
+    create_skill:
+      "Creates and registers a custom skill into Studio MCP for future reuse.",
+    edit_skill:
+      "Edits an existing user-created skill in Studio MCP.",
+    subagent:
+      "Spawns an autonomous subagent inside Studio to handle multi-step exploration or testing tasks.",
+    http_get:
+      "Fetches external documentation or API markdown files via HTTP GET.",
+    list_roblox_studios:
+      "Lists connected Studio instances. Required when multiple Studio windows are open to obtain studio_id.",
   };
 
   // A short, clearly-labelled reminder of the available commands, injected under

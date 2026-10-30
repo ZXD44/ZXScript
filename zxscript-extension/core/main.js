@@ -133,6 +133,70 @@
         });
 
         setTimeout(() => { try { ctx.close(); } catch {} }, 1000);
+      } else if (kind === "error" || kind === "tool_error") {
+        // Distinct 2-pulse descending discordant tone for Studio Tool/Luau errors:
+        // Pulse 1: 440Hz -> 311.13Hz (Discordant tritone Eb4)
+        // Pulse 2: 369.99Hz (F#4) -> 261.63Hz (C4 tritone)
+        const vol = boost ? 0.32 : 0.22;
+        const pulses = [
+          { fStart: 440.00, fEnd: 311.13, t: 0.00, d: 0.12, type: "sawtooth" },
+          { fStart: 369.99, fEnd: 261.63, t: 0.15, d: 0.18, type: "sawtooth" },
+        ];
+        pulses.forEach(({ fStart, fEnd, t, d, type }) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(1400, now + t);
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(fStart, now + t);
+          osc.frequency.exponentialRampToValueAtTime(fEnd, now + t + d);
+
+          gain.gain.setValueAtTime(0.0001, now + t);
+          gain.gain.exponentialRampToValueAtTime(vol, now + t + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now + t);
+          osc.stop(now + t + d);
+        });
+        setTimeout(() => { try { ctx.close(); } catch {} }, 600);
+      } else if (kind === "offline" || kind === "fatal") {
+        // Deep resonant dual buzz alarm for Bridge/Studio disconnect or critical crash:
+        // Buzz 1: 160Hz -> 100Hz
+        // Buzz 2: 140Hz -> 80Hz
+        const vol = boost ? 0.38 : 0.26;
+        const buzzes = [
+          { fStart: 160.00, fEnd: 100.00, t: 0.00, d: 0.14 },
+          { fStart: 140.00, fEnd: 80.00,  t: 0.18, d: 0.24 },
+        ];
+        buzzes.forEach(({ fStart, fEnd, t, d }) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(800, now + t);
+
+          osc.type = "square";
+          osc.frequency.setValueAtTime(fStart, now + t);
+          osc.frequency.exponentialRampToValueAtTime(fEnd, now + t + d);
+
+          gain.gain.setValueAtTime(0.0001, now + t);
+          gain.gain.exponentialRampToValueAtTime(vol, now + t + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now + t);
+          osc.stop(now + t + d);
+        });
+        setTimeout(() => { try { ctx.close(); } catch {} }, 750);
       } else {
         // Crisp, distinct tick on tool execution finish (louder than before)
         const osc = ctx.createOscillator();
@@ -150,6 +214,12 @@
       }
     } catch {}
   }
+
+  try {
+    if (typeof window !== "undefined") {
+      window.__ZS_PLAY_CHIME__ = playChime;
+    }
+  } catch {}
 
 
   // ── Diagnostics ───────────────────────────────────────────────────────────
@@ -1639,7 +1709,7 @@
           const resultCat = hasImages ? "screen" : category;
           decorate.toolBox(res.item, call.tool, isErr ? "err" : "done", outSummary(feedback),
             true, outBody, resultCat);
-          if (!isErr) playChime("tool");
+          if (!isErr) playChime("tool"); else playChime("tool_error");
           // Snapshot the settled outcome. If the site swaps this turn's DOM node
           // while we wait for the model's next turn (wiping the chip AND the
           // zloop ownership dataset), the sweep re-owns the fresh node with this
@@ -3489,6 +3559,7 @@
         if (bridgeBannerEl) { bridgeBannerEl.remove(); bridgeBannerEl = null; }
         return;
       }
+      playChime("offline");
       if (bridgeBannerEl) return; // already shown
       const b = document.createElement("div");
       b.className = "zs-banner limit";
@@ -3918,6 +3989,7 @@
     }
 
     function banner(kind, title, msg, stack) {
+      if (kind === "warn" || kind === "limit") playChime("offline");
       const b = document.createElement("div");
       b.className = `zs-banner ${kind}`;
       b.innerHTML = `<div class="zs-banner-t"></div><div class="zs-banner-m"></div>

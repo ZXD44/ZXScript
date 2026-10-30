@@ -123,14 +123,8 @@ and re-check the JSON syntax. Any client that supports `stdio` works.
 
 ## Tool Reference
 
-**Counts, stated precisely.** The official docs page lists **26 tools** (recounted 2026-10-17;
-the page last changed 2026-08-21, still its latest commit on 2026-10-22). The build observed on
-2026-10-17 and again on 2026-10-21 (Studio 0.743.0.7431133) and 2026-10-22 (Studio 0.744.0.7441077,
-`StudioMCP` binary of 2026-10-20) exposes **28**: those 26 plus `generate_texture` and
-`segment_mesh`, which are present but undocumented. Their schemas were unchanged across the three
-dates. On 2026-10-11 (Studio 0.742) it also exposed
-`list_plugin_guis` and `capture_plugin_gui`; on 2026-10-17 both were gone. Tool sets move; when a call fails with an unknown-tool error, list what
-your host actually exposes instead of trusting this table.
+**Counts, stated precisely.** The official docs page lists **26 tools**, while the current live StudioMCP environment exposes **33 tools** (Studio 0.744 / Luau 0.743).
+For the exhaustive guide, schema shapes, parameter tables, and master decision tree, see [`references/godtier-mcp-tools-reference.md`](godtier-mcp-tools-reference.md).
 
 ### Scripts
 
