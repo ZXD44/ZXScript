@@ -36,7 +36,58 @@
 (() => {
   "use strict";
   if (window.__zsChatgptCm) return;
-  window.__zsChatgptCm = true;
+  window.__zsChatgptCm = true;
+
+  // ── Blocked Telemetry / Statsig Interceptor ─────────────────────────────────
+  // Adblockers (uBlock, AdGuard, Brave Shields) block ChatGPT telemetry endpoints
+  // (/ces/v1/telemetry, /ces/v1/rgstr), triggering ERR_BLOCKED_BY_CLIENT and
+  // unhandled StatsigTransportError in console. We intercept these early in the
+  // MAIN world and return a mock 200 Response so network calls never get dispatched.
+  try {
+    const isCesTelemetry = (u) => {
+      if (!u) return false;
+      const str = typeof u === 'string' ? u : (typeof u.url === 'string' ? u.url : '');
+      return /\/ces\/v1\//i.test(str);
+    };
+
+    const origFetch = window.fetch;
+    if (typeof origFetch === 'function') {
+      window.fetch = function (...args) {
+        if (isCesTelemetry(args[0])) {
+          return Promise.resolve(
+            new Response('{}', {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            })
+          );
+        }
+        return origFetch.apply(this, args);
+      };
+    }
+
+    if (navigator && typeof navigator.sendBeacon === 'function') {
+      const origBeacon = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = function (url, data) {
+        if (isCesTelemetry(url)) return true;
+        return origBeacon(url, data);
+      };
+    }
+
+    window.addEventListener('unhandledrejection', (e) => {
+      try {
+        const reason = e && e.reason;
+        const msg = String((reason && (reason.message || reason)) || '');
+        const stack = String((reason && reason.stack) || '');
+        if (
+          (reason && reason.name === 'StatsigTransportError') ||
+          msg.includes('StatsigTransportError') ||
+          (msg.includes('Failed to fetch') && (stack.includes('ces/v1') || stack.includes('Statsig')))
+        ) {
+          e.preventDefault();
+        }
+      } catch {}
+    });
+  } catch {}
 
   const ATTR = "data-zs-cm";
   const LEN = "data-zs-cm-len";
