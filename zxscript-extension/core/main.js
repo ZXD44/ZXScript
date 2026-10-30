@@ -3323,7 +3323,6 @@
           msg = `<b>AI พร้อม</b> · Bridge ออฟไลน์`;
         } else if ((placeDown || appDown || studioDown) && addonOk) {
           toneClass = "warn";
-          if (A.running) indicator = `<span class="zs-live-dot"></span>`;
           msg = A.running
             ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`)
             : `<b>พร้อมรับคำสั่ง</b> · Roblox ออฟไลน์`;
@@ -3335,7 +3334,6 @@
           msg = `<b>AI พร้อม</b> · กำลังรอเปิด Studio`;
         } else {
           toneClass = "active";
-          if (A.running) indicator = `<span class="zs-live-dot"></span>`;
           msg = A.running
             ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`)
             : `<b>พร้อมรับคำสั่ง</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;

@@ -194,29 +194,7 @@ html.zs-light #zs-brand .zs-free {
 html.zs-light #zs-state { color: #52525b; }
 html.zs-light #zs-state b { color: #18181b; }
 
-.zs-live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #00b06f;
-  flex: none;
-  box-shadow: 0 0 8px #00b06f;
-  position: relative;
-  display: inline-block;
-  vertical-align: middle;
-}
-.zs-live-dot::after {
-  content: "";
-  position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  border-radius: 50%;
-  border: 1.5px solid #00b06f;
-  animation: zs-radar-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-@keyframes zs-radar-ping {
-  0% { transform: scale(0.9); opacity: 0.9; }
-  100% { transform: scale(2.4); opacity: 0; }
-}
+.zs-live-dot { display: none !important; }
 .zs-live-dot.idle { background: #9ca3af; animation: none; box-shadow: none; }
 
 #zs-action {
