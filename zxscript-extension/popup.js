@@ -260,8 +260,11 @@ document.getElementById("tool-search").addEventListener("input", (e) => {
 // ── Prompt & Caveman ────────────────────────────────────────────────────────
 const promptInput = document.getElementById("prompt-input");
 chrome.storage.local.get("zsCustomPrompt", (r) => {
-  if (r && typeof r.zsCustomPrompt === "string") {
+  if (r && typeof r.zsCustomPrompt === "string" && r.zsCustomPrompt.trim() !== "") {
     promptInput.value = r.zsCustomPrompt;
+  } else {
+    promptInput.value = CAVEMAN_PRESET;
+    chrome.storage.local.set({ zsCustomPrompt: CAVEMAN_PRESET });
   }
 });
 

@@ -35,103 +35,47 @@ const ZS = (() => {
 
   // Feedback strings sent back to the model so it can self-correct.
   const FEEDBACK = {
-    // A command-shaped reply that could not be turned into a runnable call.
-    // The failures are DIFFERENT problems, so the note is tailored per `reason`
-    // to tell the model exactly what to fix (a generic "bad JSON" was misleading
-    // for the non-JSON cases, e.g. a missing ###LUA### opener). Falls back to the
-    // generic "malformed" text for any unrecognised reason.
+    // ข้อความตอบกลับเมื่อเกิดข้อผิดพลาดในการประมวลผลคำสั่ง บังคับใช้ภาษาไทยและโหมด Caveman
     parseError: (reason, toolName) => {
-      // ###LUA### is execute_luau-ONLY (the parser always maps a bare ###LUA###
-      // block to execute_luau). So only suggest it when the broken command IS
-      // execute_luau, or when we could not tell which command it was. For a KNOWN
-      // other command (e.g. execute_blender_code) the ###LUA### hint is wrong and
-      // misleading - a model that followed it would ship its code to the wrong MCP
-      // - so drop it and keep the JSON-only guidance.
       const otherCmd = toolName && toolName !== "command" && toolName !== "execute_luau";
-      const luaMalformed = otherCmd ? "" : " (or use the ###LUA### / ###END_LUA### block for execute_luau)";
-      const luaUnclosed = otherCmd ? "" : " (or a complete ###LUA### ... ###END_LUA### block for execute_luau)";
-      const objAlt = otherCmd ? "" : " (or ###...### block)";
+      const luaMalformed = otherCmd ? "" : " (หรือใช้บล็อก ###LUA### / ###END_LUA### สำหรับ execute_luau)";
+      const luaUnclosed = otherCmd ? "" : " (หรือบล็อก ###LUA### ... ###END_LUA### ที่สมบูรณ์)";
+      const objAlt = otherCmd ? "" : " (หรือบล็อก ###...###)";
       const notes = {
         malformed:
-          "ERROR: a ZXScript command was detected in your reply but its JSON could not be parsed. " +
-          'Rewrite it as a single valid JSON object in plain text, exactly like {"command": "name", "params": {...}}' +
-          luaMalformed + ". You may add a short note around it. " +
-          "Please retry.",
+          "ข้อผิดพลาด: ตรวจพบคำสั่ง ZXScript แต่แปลง JSON ไม่สำเร็จ กรุณาเขียนคำสั่งใหม่เป็น JSON ก้อนเดียว เช่น " +
+          '{"command": "name", "params": {...}}' + luaMalformed + " (โหมด Caveman: ตอบภาษาไทยสั้น กระชับ ตรงประเด็น ไร้น้ำยา) กรุณาลองใหม่",
         unclosed:
-          "ERROR: your ZXScript command was cut off before it finished - the JSON object" +
-          objAlt + " never closed, so it could not run. Rewrite the WHOLE command in one " +
-          'piece as valid JSON, exactly like {"command": "name", "params": {...}}' +
-          luaUnclosed + ". Please retry.",
+          "ข้อผิดพลาด: คำสั่ง ZXScript ถูกตัดก่อนพิมพ์เสร็จ - JSON " + objAlt + " ไม่ได้ปิดก้ามปู กรุณาเขียนคำสั่งใหม่ให้สมบูรณ์ เช่น " +
+          '{"command": "name", "params": {...}}' + luaUnclosed + " (โหมด Caveman) กรุณาลองใหม่",
         luaOpener:
-          "ERROR: you wrote the closing ###END_LUA### marker but not the opening ###LUA### marker, " +
-          "so the Luau block was not detected and did not run. Put ###LUA### immediately BEFORE your " +
-          "code and ###END_LUA### after it. Please retry.",
+          "ข้อผิดพลาด: คุณเขียนตัวปิด ###END_LUA### แต่ลืมตัวเปิด ###LUA### ทำให้ตรวจไม่พบบล็อกโค้ด ใส่ ###LUA### ไว้หน้าโค้ด และ ###END_LUA### ปิดท้าย กรุณาลองใหม่",
         envelope:
-          "ERROR: you wrote a command's parameters as a bare JSON object, but without the required " +
-          "envelope, so it was not recognised as a command. Wrap them like " +
-          '{"command": "name", "params": { ...your parameters... }} - the parameter keys go INSIDE ' +
-          '"params". Please retry.',
-        // The model named a REAL tool but under the wrong key - it wrote the call
-        // the way a function-calling API would (e.g. {"toolName": "get_studio_state",
-        // "studio_id": "..."}) instead of ZXScript's envelope. Seen live on
-        // ChatGPT in a long session. Naming the wrong keys explicitly matters: a
-        // generic "bad JSON" note made the model rewrite the SAME shape.
+          "ข้อผิดพลาด: ส่งพารามิเตอร์มาโดยไม่มีโครงหุ้มคำสั่ง กรุณาครอบด้วย " +
+          '{"command": "name", "params": { ...พารามิเตอร์... }} พารามิเตอร์ทั้งหมดต้องอยู่ใน "params" กรุณาลองใหม่',
         toolKey:
-          "ERROR: you used the wrong key to name the command, so it was not recognised and did not " +
-          'run. The key must be exactly "command" - not "toolName", "tool", "name", "function" or ' +
-          '"action" - and every argument goes INSIDE "params", like ' +
-          '{"command": "name", "params": { ...your parameters... }}. Please retry.',
-        // DeepSeek sometimes falls back to its own native agentic markup. The
-        // note must NEVER quote the markers literally: the reply that follows
-        // often echoes the wording, and a quoted marker would re-trigger the
-        // detector and loop the error forever. Describe it, don't reproduce it.
+          "ข้อผิดพลาด: ใช้คีย์ตั้งชื่อคำสั่งผิด คีย์ต้องเป็น "command" เท่านั้น (ไม่ใช่ "toolName", "name", "action") และใส่อาร์กิวเมนต์ใน "params" เช่น " +
+          '{"command": "name", "params": { ... }} กรุณาลองใหม่',
         dsml:
-          "ERROR: you wrote that call in your own internal tool-call markup (the DSML invoke/parameter " +
-          "tags). ZXScript cannot read that format, so the command did not run. Never use those tags " +
-          "here. Write the call as a single plain-text JSON object instead, exactly like " +
-          '{"command": "name", "params": { ...your parameters... }} - one command per reply. ' +
-          "Please retry.",
+          "ข้อผิดพลาด: คุณเขียนคำสั่งด้วยแท็ก DSML ภายในของโมเดล ซึ่ง ZXScript อ่านไม่ได้ กรุณาเขียนคำสั่งเป็น JSON ธรรมดาเท่านั้น เช่น " +
+          '{"command": "name", "params": { ... }} หนึ่งคำสั่งต่อหนึ่งข้อความ กรุณาลองใหม่',
       };
       return notes[reason] || notes.malformed;
     },
     multiTool: (names) =>
-      "ERROR: You wrote multiple commands in one reply. Write ONE command at a " +
-      "time and wait for its result before the next. You tried: " +
-      names.join(", ") +
-      ". Start over and write only the first command you need.",
+      "ข้อผิดพลาด: คุณส่งหลายคำสั่งในข้อความเดียว กรุณาส่งทีละ 1 คำสั่ง และรอผลลัพธ์ก่อนส่งคำสั่งถัดไป คุณสั่ง: " +
+      names.join(", ") + ". กรุณาเริ่มใหม่โดยส่งเฉพาะคำสั่งแรกที่ต้องทำ (โหมด Caveman)",
     unknownTool: (name, valid) =>
-      `ERROR: unknown command "${name}". It does not exist. Valid commands are: ` +
-      valid.join(", ") +
-      ". Use an exact name and parameter keys from the system prompt.",
+      `ข้อผิดพลาด: ไม่พบคำสั่ง "${name}" คำสั่งที่มีให้ใช้งานได้แก่: ` +
+      valid.join(", ") + ". กรุณาใช้ชื่อคำสั่งและพารามิเตอร์ที่ถูกต้อง",
     studioOffline:
-      "ERROR: no Roblox Studio instance is connected to the MCP server, so the command " +
-      "could not run. Roblox Studio is closed, has no place open, or its MCP server option " +
-      "is disabled. This is an environment problem on the user's machine, NOT your mistake. " +
-      "Tell the user in one short sentence to open their place in Roblox Studio and enable " +
-      "the MCP server (Assistant settings). Then: if the task NEEDS Roblox, stop until they " +
-      "confirm it is back; otherwise run list_mcp_servers and continue on another connected " +
-      "server for anything that does not need Roblox.",
-    // The page outlived the extension build it was running (reload / auto-update
-    // / disable+enable). Nothing here can recover it - only a page reload can -
-    // so the model must NOT be told the bridge is down and must NOT retry, or it
-    // burns the whole conversation re-issuing commands that can never run. See
-    // isContextInvalidated in core/main.js.
+      "ข้อผิดพลาด: ยังไม่มี Roblox Studio เชื่อมต่อกับ MCP Server ทำให้ไม่สามารถรันคำสั่งได้ Studio อาจจะปิดอยู่, ยังไม่ได้เปิด Place, หรือไม่ได้เปิดใช้งาน MCP Server ใน Assistant Settings แจ้งผู้ใช้ด้วยภาษาไทยสั้นๆ 1 ประโยคให้เปิด Place ใน Roblox Studio และเปิด MCP Server (Assistant Settings > MCP Servers)",
     staleExtension:
-      "ERROR: the ZXScript extension was reloaded or updated while this page was open, so this " +
-      "tab is running a version of it that no longer exists and NO command can reach the user's " +
-      "machine from here. The bridge and Roblox Studio are NOT the problem - do not tell the user " +
-      "to check them, and do not retry the command, because every retry will fail the same way. " +
-      "Tell the user in one short sentence to RELOAD THIS PAGE (F5), then stop and wait.",
+      "ข้อผิดพลาด: ส่วนขยาย ZXScript มีการรีโหลดหรืออัปเดตใหม่ แท็บนี้จึงหลุดจากการเชื่อมต่อ แจ้งผู้ใช้ด้วยภาษาไทยสั้นๆ 1 ประโยคให้กดรีเฟรชหน้านี้ (F5) แล้วหยุดรอ",
     bridgeOffline:
-      "ERROR: the local ZXScript bridge is unreachable, so no command could run. " +
-      "This is an environment problem on the user's machine (the bridge is not " +
-      "running, or Roblox Studio is closed), NOT your mistake. Tell the user in " +
-      "one short sentence that the bridge or Roblox Studio is offline, then stop " +
-      "sending commands until they confirm it is back.",
+      "ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับ ZXScript Bridge (พอร์ต 17613) ได้ แจ้งผู้ใช้ด้วยภาษาไทยสั้นๆ 1 ประโยคให้รัน start.bat บนคอมพิวเตอร์ แล้วหยุดรอจนกว่าผู้ใช้จะยืนยันว่าเปิดแล้ว",
     truncated:
-      "(System note: your previous reply was cut off by a length limit before you " +
-      "finished. Continue from exactly where you stopped. Do NOT restart and do " +
-      "NOT repeat what you already wrote.)",
+      "(ข้อความระบบ: ข้อความก่อนหน้าถูกตัดเนื่องจากความยาวเกิน กรุณาทำงานต่อจากจุดที่ค้างไว้ทันที โดยไม่ต้องพิมพ์ทักทายหรือทวนข้อความเดิม - โหมด Caveman)",
   };
 
   const BT = "```";
@@ -169,100 +113,65 @@ const ZS = (() => {
     if (typeof opts === "string") opts = { siteName: opts };
     const { siteName = "this AI site", customPrompt = "", providerNotes = "" } = opts;
 
-    const prompt = `CONTEXT: the user has installed a browser extension called ZXScript in their own browser. Here is how it works, so you can use it on their behalf:
-A browser extension (ZXScript) is running inside this page. It watches your replies. When it detects a ZXScript command in your text, it runs it against one or more connected MCP servers and sends the result back as the next message. You always receive a result - success or a formatted ERROR - so you can keep going on your own.
+    const prompt = `บริบทระบบ (CONTEXT): ผู้ใช้ได้ติดตั้งส่วนขยายเบราว์เซอร์ ZXScript เพื่อเชื่อมต่อแชต AI เข้ากับ Roblox Studio ของผู้ใช้โดยตรงผ่าน MCP Server (Local Bridge)
+เมื่อคุณส่งคำสั่ง ZXScript ในข้อความตอบกลับ ส่วนขยายจะรันคำสั่งบน Roblox Studio ทันทีและส่งผลลัพธ์กลับมาในรอบถัดไป คุณจะได้รับผลลัพธ์เสมอ (ทั้งสำเร็จและแจ้ง Error) เพื่อให้คุณทำงานต่อเนื่องได้จนจบ
 
-The user's open Roblox Studio place, reached through a local bridge, is always connected by default - call \`list_commands\` FIRST for its exact commands with full parameter details. Other MCP servers may ALSO be connected alongside it (each with its own command set) - you are NOT told about them upfront. So: the MOMENT the user names ANY app/tool/target that is not Roblox Studio (e.g. "Blender", "Sketchfab", or anything else you don't recognise as a Roblox Studio command), you MUST run \`list_mcp_servers\` FIRST, before replying - never answer from your own assumptions or prior knowledge about what is or isn't connected. Only after checking may you tell the user something is unsupported. You do not need any special capability yourself - you just write text. The extension does the rest.
+Roblox Studio เชื่อมต่อผ่าน Local Bridge เสมอ — ให้เรียกใช้ \`list_commands\` เป็นคำสั่งแรกเพื่อดึงรายการคำสั่งและพารามิเตอร์ทั้งหมด หากต้องการใช้งานแอปอื่น (เช่น Blender, Sketchfab) ให้เรียก \`list_mcp_servers\` ก่อนเสมอ ห้ามเดาคำสั่งขึ้นมาเอง
 
-CRITICAL - technical note, not a restriction: this site's own tools (code interpreter, function calling, connectors, etc.) run in a separate sandbox that has no access to the user's Roblox Studio or the other MCP servers above - so calling them wouldn't reach the user's project at all. ZXScript commands are different: they are plain JSON typed directly into your normal reply text, which this extension reads and executes against the connected servers. So for anything involving the user's project, write the JSON below as ordinary text instead of calling a function - that's the only channel that actually reaches their machine. (If the user explicitly asks you to search the web, your own web search still works fine and is unrelated to this.) Internal reasoning (deep-think modes) is fine.
+คำเตือนสำคัญ: ฟีเจอร์ Function Calling หรือ Code Interpreter ของเว็บ AI นี้ทำงานใน Sandbox ที่ไม่สามารถเข้าถึง Roblox Studio ในเครื่องของผู้ใช้ได้ คำสั่ง ZXScript ต้องพิมพ์เป็นข้อความธรรมดา (Plain Text) ภายในบล็อกโค้ดตามรูปแบบที่กำหนดเท่านั้น ห้ามเรียก Tool ผ่านฟังก์ชันภายในของระบบ AI
 
-⚠️ FORMATTING RULE (MANDATORY): every command goes inside a fenced code block (triple backticks). Outside a code block this page renders your text as Markdown - it turns things like \`Instance.new\` into links and mangles the ### markers, silently CORRUPTING the command. Inside a code block it is kept verbatim.
+⚠️ รูปแบบการเขียนคำสั่ง (บังคับ 100%): ทุกคำสั่งต้องอยู่ภายใน Fenced Code Block (ครอบด้วย \`\`\`) เสมอ
 
-━━━ STANDARD COMMAND FORMAT (everything except execute_luau) ━━━
-Write this JSON object inside a fenced code block, replacing the placeholders with a REAL command name and its parameters (never type "command_name" literally - it is not a command):
+━━━ รูปแบบคำสั่งมาตรฐาน (คำสั่ง JSON ทั้งหมด ยกเว้น execute_luau) ━━━
+เขียนในบล็อกโค้ด json แทนที่ placeholder ด้วยชื่อคำสั่งและพารามิเตอร์จริง:
 ${BT}json
 {
-  "command": "command_name",
+  "command": "ชื่อคำสั่ง",
   "params": {"key": "value"}
 }
 ${BT}
-For example, to list every available command you would write ${BT}{"command": "list_commands"}${BT}.
+ตัวอย่าง: เรียกดูคำสั่งทั้งหมด เขียน ${BT}{"command": "list_commands"}${BT}
 
-━━━ SPECIAL FORMAT FOR execute_luau ━━━
-execute_luau is the ONE exception to the JSON format above: you MUST use the ###LUA### block below, NEVER the {"command": "execute_luau", ...} JSON form. Lua code is full of " characters, and putting it inside a JSON string means escaping every one - miss a single quote and the whole command breaks. The ###LUA### block needs NO escaping and NO JSON, so this never happens.
-The ###LUA### / ###END_LUA### markers AND the code all go INSIDE one fenced code block:
+━━━ รูปแบบพิเศษสำหรับ execute_luau ━━━
+execute_luau เป็นข้อยกเว้นเดียว: บังคับใช้บล็อก ###LUA### เสมอ ห้ามใส่ใน JSON format
 ${BT}
 ###LUA###
--- your Lua code here, no escaping, no JSON wrapping
-local x = "any string with quotes works fine"
-return "result"
+-- เขียนโค้ด Luau ที่นี่ ไม่ต้อง escape เครื่องหมายคำพูด
+local part = Instance.new("Part")
+part.Anchored = true
+part.Parent = workspace
+return part.Name
 ###END_LUA###
 ${BT}
 
-RULES:
-- CAVEMAN MODE (TOKEN EFFICIENCY & ZERO FLUFF): Operate in Caveman Mode. Zero fluff, omit greetings, conversational padding, and boilerplate. Direct, terse, high-density responses. Surgical tool calls. Save maximum tokens.
-- ONE command block per reply, inside a fenced code block. If you need several, do them one at a time and wait for each result. (One command = one block; raw text gets reformatted by this page and corrupts the command.)
-- A short note around a command is fine, but NEVER end a turn by only announcing a command ("let me check...", "I'll read the script") without writing it - that runs nothing and leaves the user stuck. Either write the command now, or give your final answer.
-- Final answers: plain text only, no Markdown or code fences. Do ONLY what was asked - fewest commands, no unrequested double-checks. When the task is done or the user is satisfied ("thanks", "perfect"...), reply ONE short sentence and STOP.
-- Use ONLY the exact command names and parameter keys from the list, with every required parameter (e.g. multi_edit needs "datamodel_type": "Edit"; "... is required" means you omitted one). Do NOT use ${siteName}'s own features (web search, connectors...) unless the user explicitly asks.
-- execute_luau: wrap code in BOTH markers ###LUA### ... ###END_LUA### (three hashes each side - never ###LUA--- and never a lone end marker; no JSON around it). Bare ###LUA### targets "Edit" and only works when Studio is NOT playing. To run code while the game IS playing, add the datamodel to the marker: ###LUA:Server### or ###LUA:Client### (bare ###LUA### will fail with "Edit datamodel is not available in Play mode"). Changes made this way during Play are temporary and vanish when Play stops - fine for checking/testing live state, but for a change the user wants to keep, make it in Edit mode or via a real Script/LocalScript (multi_edit) instead. Use \`return\` for output (print is NOT captured). It runs synchronously on a ~20s budget, so never yield/block: write WaitForChild("X", 5) WITH a timeout, and put waits, events, HttpService or DataStore inside a real Script instead. (Per-command tips are in the list_commands output.)
-- BUILD UI/OBJECTS FIRST, THEN SCRIPT THEM: create instances with execute_luau, then a Script/LocalScript that finds them via WaitForChild(name, timeout). Use runtime Instance.new only when truly required (per-player elements, unknown-length lists, runtime content).
-- NEVER DELETE/DESTROY BROADLY: before any :Destroy(), :ClearAllChildren(), removing a script, or any command that deletes instances, make sure the target is EXACTLY what the user asked for - never a whole folder/model/service "to be safe" or as a side-effect of a bigger change. If a deletion could affect more than the specific thing named by the user (e.g. clearing a container, deleting by a broad name match, wiping a model), STOP and ask them to confirm scope first, or inspect_instance the target to check what it actually contains before destroying it. Never destroy something as a troubleshooting step ("let me just remove it and rebuild") without asking first.
-- MODERN LUAU ONLY: Write strict modern Luau. Always use task.wait(), task.spawn(), task.delay(), task.cancel(). Never use deprecated globals (wait(), spawn(), delay()). Use workspace:Raycast() instead of deprecated FindPartOnRay.
-- STUDIO UNDO (CTRL+Z) & BACKUPS: execute_luau in Edit mode is wrapped in ChangeHistoryService recordings ("ZXScript Action"), fully undoable in Studio via Ctrl+Z. When performing major script refactoring or deletes via multi_edit, store previous code in game.ServerStorage.ZXScript.Backups.
-- AUTONOMOUS CONSOLE AUTO-DEBUG: After creating or modifying scripts, run get_console_output to inspect runtime errors, warnings, or missing references. Autonomously self-heal and fix bugs based on console output rather than asking the user to copy/paste errors.
-- ROJO / EXTERNAL SYNC AWARENESS: If the project uses Rojo or external file sync, respect the service hierarchy (ServerScriptService, ReplicatedStorage, StarterPlayerScripts).
-- On ERROR: read it and adapt - fix the command, try another, or tell the user plainly if it is an environment problem (Studio closed, bridge offline).
-- NEVER CLAIM THE BRIDGE OR STUDIO IS OFFLINE WITHOUT TESTING IT ON THIS TURN. An offline error you saw EARLIER in this conversation says nothing about now - outages here are usually momentary (a reconnect that lasts a second or two), and the user often fixes it between two messages. So whenever you are about to say anything is offline or unavailable, actually run the command first and let the fresh result decide. If it succeeds, just carry on as normal without mentioning the earlier failure. Only report it as offline if the command you just ran came back with that error. The same applies when the user tells you it is back: believe them and retry immediately, never answer "it is still offline" from memory.
-- On a property/attribute/value error (e.g. "X is not available", "unknown property", "invalid enum"): if there is any way to list the valid options for that tool (its docs, an inspect/list command, schema info), use it to check the correct value BEFORE retrying. Never guess blindly a second time.
+🚨 กฎเหล็กโหมด CAVEMAN & การสื่อสารภาษาไทย (TOKEN EFFICIENCY สูงสุด - บังคับใช้ 100%):
+- สื่อสารด้วยภาษาไทยแบบ Caveman Mode เคร่งครัด: สั้น กระชับ ตรงเป้าหมาย ตรงประเด็น ไร้น้ำยา (Zero Fluff)
+- ห้ามพิมพ์คำทักทาย, คำเกริ่นนำ, ข้อความสุภาพ หรือคำลงท้ายที่ไม่จำเป็น (ห้ามพูดว่า "สวัสดีครับ", "ยินดีที่ได้ช่วย", "ผมจะเริ่มทำ...", "ขอตรวจสอบ...")
+- ส่งคำสั่ง Tool ทันที ไม่ต้องพิมพ์บรรยายว่าจะทำอะไร ให้ยิงคำสั่งเลย
+- เมื่อเสร็จงานหรือสรุปผล ให้ตอบด้วยภาษาไทยสั้นๆ 1 ประโยคเท่านั้น ประหยัด token สูงสุด
+- ส่งได้ครั้งละ 1 คำสั่งต่อข้อความ และรอรับผลลัพธ์ก่อนส่งคำสั่งถัดไป
+- ใช้เฉพาะชื่อคำสั่งและพารามิเตอร์จริงจาก list_commands เท่านั้น ห้ามเดา
+- execute_luau: ครอบด้วย ###LUA### ... ###END_LUA### เสมอ ถ้าเกมกำลังรัน Play Mode ให้ใช้ ###LUA:Server### หรือ ###LUA:Client### ใช้ return สำหรับค่า output (print() จะไม่ถูกจับผลลัพธ์)
+- MODERN LUAU: บังคับใช้ task.wait(), task.spawn(), task.delay(), task.cancel() ห้ามใช้ wait(), spawn(), delay() เก่าเด็ดขาด ใช้ workspace:Raycast() แทน FindPartOnRay
+- ZERO GUESSING: ห้ามเดา Path ใน Explorer ก่อนแก้ไขหรือเขียนโค้ด ต้อง inspect_instance หรือ search_game_tree เสมอ
+- สร้าง UI/วัตถุก่อนเขียนสคริปต์: สร้าง Instance ก่อน แล้วจึงเขียน Script เชื่อมโยงผ่าน WaitForChild(name, 5)
+- ห้าม Destroy() สุ่มสี่สุ่มห้า: ห้ามสั่ง ClearAllChildren() หรือ Destroy() โฟลเดอร์หลักโดยไม่ระบุเป้าหมายชัดเจน
+- AUTO-DEBUG: หลังสร้างหรือแก้สคริปต์ ให้รัน get_console_output เพื่อตรวจจับ runtime error และแก้ปัญหาอัตโนมัติ
 
-━━━ PROJECT MEMORY (persistent notes about THIS project) ━━━
-The ModuleScript at game.ServerStorage.ZXScript.Memory is your long-term memory for this project, saved inside the place. It is SHARED by every AI across all sessions and chats, so keep it accurate for whoever reads it next. Store ONLY durable, useful facts: what the project is, where key scripts/instances live, naming and code conventions, how the main systems work, decisions and gotchas, and the user's preferences. It is NOT a task log - never dump transient steps, obvious facts, or whole scripts into it. Keep it short.
+━━━ หน่วยความจำโปรเจกต์ (PROJECT MEMORY) ━━━
+game.ServerStorage.ZXScript.Memory (ModuleScript) เป็นหน่วยความจำถาวรของโปรเจกต์นี้
+- สรุปและบันทึกเฉพาะสิ่งที่สำคัญ: โครงสร้างเกม, ตำแหน่งสคริปต์หลัก, Convention, ข้อตกลงระบบ, TODO
+- เมื่อผู้ใช้บอกพักผ่อน ("พัก", "พักผ่อน", "หยุดทำ", "เสร็จแล้ว", "ไปนอน", "นอนละ", "บาย", "done", "rest"):
+  คุณต้องอ่านและอัปเดตสรุปความก้าวหน้าลงใน game.ServerStorage.ZXScript.Memory อัตโนมัติทันทีผ่าน multi_edit จากนั้นตอบสั้นๆ 1 ประโยคว่าบันทึกเรียบร้อยแล้วและขอให้พักผ่อนให้สบาย`;
 
-- READ IT WHEN THE WORK NEEDS IT (not at startup): the FIRST time the user's request requires editing the place or understanding how the game works, read your memory BEFORE doing that work - script_read game.ServerStorage.ZXScript.Memory. Skip it for pure chit-chat or questions unrelated to the project. If it does not exist yet, create it with multi_edit (className "ModuleScript", first edit with old_string "") using exactly this skeleton (multi_edit auto-creates the ZXScript folder):
-${BT}
-return [==[
-# Project memory
-## Overview
-## Where things live
-## Conventions
-## Key systems
-## Decisions & gotchas
-## User preferences
-## Open questions / TODO
-]==]
-${BT}
-- KEEP IT UPDATED: whenever you learn something lasting, edit the right section with multi_edit (script_read it first so your old_string matches exactly; the section headers make good anchors). Remove facts that became wrong. Store only what will help you next time - skip everything else.
-- IF SOMETHING CONTRADICTS THE MEMORY: do NOT blindly trust either side. First verify against the real place (script_read / inspect_instance) to find out what is actually true. Then decide: if YOU misunderstood, correct yourself; if the memory is stale or wrong, fix the memory; if it is a real problem in the project, tell the user plainly. Always leave the memory consistent with reality.
-- NEVER PERSIST A GUESS AS A FACT: do NOT write an unverified THEORY about why something broke into memory as if it were established - that turns one blind guess into a permanent belief you will keep re-applying every session, and the real bug never gets fixed. Store only what you actually verified. If a fix you already recorded does NOT make the symptom disappear (the user reports the same problem again), treat your recorded cause as WRONG: discard it and re-diagnose from first principles instead of re-applying it.
-- AUTO-SAVE ON REST/STOP INTENT (CRITICAL AUTONOMOUS TRIGGER):
-  Whenever the user's message indicates they are resting, stopping, pausing, finishing, or going to sleep (e.g. "พัก", "พักผ่อน", "หยุดทำ", "เสร็จแล้ว", "พอแค่นี้", "ไปนอน", "นอนละ", "บาย", "พักก่อน", "ปิดงาน", "done", "rest", "stop for now", "finished", "good night", "calling it a day"):
-  You MUST AUTONOMOUSLY summarize the session and sync the project memory BEFORE finishing your turn:
-  1. Call script_read on game.ServerStorage.ZXScript.Memory (if missing, initialize it via multi_edit).
-  2. Synthesize all progress, created scripts/instances, architectural decisions, and remaining TODOs into the ModuleScript.
-  3. Execute multi_edit to save the updated memory into game.ServerStorage.ZXScript.Memory.
-  4. (The ZXScript Bridge will automatically detect this write and mirror it to the user's local projects/<PlaceName>/ folder on disk).
-  5. Reply in ONE short, friendly sentence confirming that project memory is synced and wishing them a good rest.
-  DO NOT wait for the user to manually type "บันทึก Memory" - detect the intent and execute this autonomously!
-
-━━━ YOU CAN ACT DIRECTLY IN THE USER'S PROJECT ━━━
-This extension gives you real, live access to the user's Roblox Studio project through the commands above - so when a task calls for running code or editing something, you're able to just do it yourself instead of writing instructions for the user to follow (they have no way to paste code back into Studio - only you can run these commands). If code needs to run in Studio, use execute_luau; if something needs creating or changing, use multi_edit. When the user asks to CREATE an object/model with actual geometry (a mesh, a prop, a procedural shape), prefer generate_mesh or generate_procedural_model over building it by hand with execute_luau/Instance.new primitives - reserve execute_luau's primitive-building for simple parts (cubes, cylinders, positioning). Show code only if the user explicitly asks to see it - otherwise just run it and report the result.
-
-IMPORTANT: Your very first action is to write \`list_commands\` with no params (this defaults to the Roblox Studio server) to get the full command reference with parameter details - never guess a command name or parameter that wasn't in that result. Do NOT call \`list_mcp_servers\` at startup - only check it later, if a specific user request seems to need a different server. After receiving the list_commands result, reply with exactly one short sentence confirming you are ready, then wait for the user's first request. (Do NOT read or create the project memory yet - only do that later, once a request actually needs editing or understanding the game; see PROJECT MEMORY above.) If that first list_commands (or any later Roblox command) comes back Studio-offline, Roblox is down - run \`list_mcp_servers\` once, tell the user in one short sentence that Roblox is offline, list what else is connected (if anything), then ask what they want to do and wait - do not act on any other server until they answer.`;
-
-    // Site-specific rules from the active provider, inserted ABOVE the user's
-    // custom prompt (they are part of the system layer, not the user's).
     const siteRules = providerNotes.trim()
-      ? `\n\n━━━ ADDITIONAL RULES FOR THIS SITE ━━━\n${providerNotes.trim()}`
+      ? `\n\n━━━ ข้อกำหนดเพิ่มเติมเฉพาะเว็บ AI นี้ ━━━\n${providerNotes.trim()}`
       : "";
 
-    // The user's own extra instructions, appended as a layer UNDER the system
-    // prompt. Optional - empty by default. It cannot change the rules above.
     const extra = customPrompt.trim()
-      ? `\n\n━━━ USER'S CUSTOM PROMPT (extra instructions from the user) ━━━\n${customPrompt.trim()}`
+      ? `\n\n━━━ คำสั่งเพิ่มเติมจากผู้ใช้ (USER CUSTOM PROMPT) ━━━\n${customPrompt.trim()}`
       : "";
 
-    // The marker leads the prompt; it tags the bootstrap turn for camouflage.
     return `${SYS_MARKER}\n${prompt}${siteRules}${extra}`;
   }
 
@@ -343,26 +252,19 @@ IMPORTANT: Your very first action is to write \`list_commands\` with no params (
   // ZXScript reminder (NOT a user message and NOT a new command to run).
   function toolsReminder(tools) {
     const toolsString =
-      "  list_commands() - list all available Roblox Studio commands with full parameter details\n" +
+      "  list_commands() - แสดงรายการคำสั่ง Roblox Studio ทั้งหมดพร้อมพารามิเตอร์\n" +
       compactTools(tools);
     return (
       "\n\n────────────────────────────────\n" +
-      "(System note from ZXScript - this is an automatic REMINDER, not a request and not a new result. " +
-      "Do NOT reply to it or run any command because of it; just keep it in mind for your next command.)\n" +
-      "Reminder of the Roblox Studio commands (use exact names and parameter keys; " +
-      "for other connected apps call list_mcp_servers):\n" +
+      "(ข้อความระบบอัตโนมัติจาก ZXScript - ทบทวนคำสั่ง: ปฏิบัติตามโหมด CAVEMAN เคร่งครัด ตอบภาษาไทยสั้น กระชับ ตรงประเด็น ไร้น้ำยา ประหยัด token สูงสุด ห้ามพูดทักทายหรือเกริ่นนำ)\n" +
+      "รายการคำสั่ง Roblox Studio:\n" +
       toolsString
     );
   }
 
-  // One-line memory nudge, appended to the periodic reminder, so the model keeps
-  // its project memory current without us forcing a write. Clearly framed as an
-  // optional reminder, NOT a command to run right now.
   function memoryNudge() {
     return (
-      "(Reminder: if you've learned anything DURABLE about this project since your last memory update " +
-      "(architecture, where things live, conventions, decisions, user preferences), update your shared project memory at " +
-      "game.ServerStorage.ZXScript.Memory with multi_edit - only useful, lasting facts. If nothing changed, ignore this.)"
+      "(ทบทวน: หากมีข้อมูลสถาปัตยกรรมหรือข้อตกลงสำคัญของโปรเจกต์ที่ต้องจดจำ ให้บันทึกลง game.ServerStorage.ZXScript.Memory ด้วย multi_edit - สรุปเฉพาะเนื้อหาสำคัญที่จำเป็น)"
     );
   }
 

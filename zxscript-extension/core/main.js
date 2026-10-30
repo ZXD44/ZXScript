@@ -1300,7 +1300,7 @@
     if (!/^[[{]/.test(body) || body.length > 200000) return null;
     let v;
     try { v = JSON.parse(body); } catch { return null; }
-    if (Array.isArray(v)) return `${v.length} item${v.length === 1 ? "" : "s"}`;
+    if (Array.isArray(v)) return `${v.length} รายการ`;
     if (!v || typeof v !== "object") return null;
     const keys = Object.keys(v);
     // The common MCP shape: one wrapper key holding the list. Its name is already
@@ -1316,7 +1316,7 @@
       .filter((k) => v[k] === null || typeof v[k] !== "object")
       .map((k) => `${k}: ${v[k]}`);
     if (scalars.length) return scalars.join(", ").slice(0, 44);
-    return `${keys.length} field${keys.length === 1 ? "" : "s"}`;
+    return `${keys.length} ฟิลด์`;
   }
 
   function outSummary(feedback) {
@@ -1336,7 +1336,7 @@
     }
     first = first.slice(0, 44);
     if (isErr) return first;
-    return lines > 1 ? `${first} · ${lines} lines` : first;
+    return lines > 1 ? `${first} · ${lines} บรรทัด` : first;
   }
 
   // Full args / code, shown in a tool chip's expandable body.
@@ -1392,18 +1392,18 @@
         if (A.stop || res.kind === "stopped") break;
 
         if (res.kind === "context_limit") {
-          ui.banner("limit", `${P.displayName} reached its context limit`,
-            (res.detail || "") + "  -  open a new chat to start fresh.");
+          ui.banner("limit", `${P.displayName} เกินขีดจำกัด Context`,
+            (res.detail || "") + " - กรุณาเปิดแชตใหม่เพื่อเริ่มเซสชันใหม่");
           break;
         }
         if (res.kind === "too_long") {
-          ui.banner("limit", "Conversation too long",
-            `${P.displayName} reports the conversation is getting too long. Start a new session.`);
+          ui.banner("limit", "การสนทนายาวเกินไป",
+            `${P.displayName} แจ้งว่าการสนทนายาวเกินไป กรุณาเริ่มเซสชันใหม่`);
           break;
         }
         if (res.kind === "timeout") {
-          ui.banner("warn", `No response from ${P.displayName}`,
-            `${P.displayName} did not respond in time. The loop has stopped.`);
+          ui.banner("warn", `ไม่มีการตอบกลับจาก ${P.displayName}`,
+            `${P.displayName} ไม่ตอบสนองตามเวลาที่กำหนด หยุดการวนลูปแล้ว`);
           break;
         }
         // A genuinely empty turn is effectively never produced (the warm-up guard
@@ -1413,9 +1413,8 @@
         // explanation anywhere. Say what happened.
         if (res.kind === "empty") {
           diag("empty.end");
-          ui.banner("warn", `${P.displayName} returned an empty reply`,
-            `The turn produced no text, so the agent loop stopped. Nothing was run. ` +
-            `Ask ${P.displayName} to continue, or press Start again in a new chat.`);
+          ui.banner("warn", `${P.displayName} ส่งข้อความว่างเปล่า`,
+            `ข้อความตอบกลับว่างเปล่า ลูปจึงหยุดทำงาน กรุณาสั่งให้ ${P.displayName} ทำต่อ หรือกดเริ่มทำงานใหม่`);
           break;
         }
 
@@ -1433,13 +1432,13 @@
               continue; // same turn resumes (base unchanged)
             }
             diag("truncated.sendFallback");
-            ui.toast("Reply was cut off, resuming…");
+            ui.toast("ข้อความถูกตัด กำลังทำงานต่อ…");
             base = await submitAndGetBase(ZS.FEEDBACK.truncated);
             continue;
           }
           if (res.text) break; // give up resuming; keep what we have as the answer
-          ui.banner("warn", "Reply kept getting cut off",
-            "The model repeatedly hit its length limit. Try a shorter request or start a new session.");
+          ui.banner("warn", "ข้อความถูกตัดหลายครั้ง",
+            "โมเดลแตะขีดจำกัดความยาวซ้ำๆ กรุณาลองใช้คำสั่งที่สั้นลง หรือเปิดแชตใหม่");
           break;
         }
         truncCount = 0;
@@ -1452,14 +1451,11 @@
           // execute_blender_code).
           const failName = ZSParse.toolNameFromText(res.raw || "") || "command";
           if (res.item) {
-            const detail = res.reason === "unclosed" ? "cut off"
-              : res.reason === "luaOpener" ? "missing ###LUA###"
-              : res.reason === "envelope" ? "bad format"
-              // DSML is not JSON at all - it is DeepSeek's own markup - so the
-              // default "bad JSON" would send the user (and anyone reading a bug
-              // report) looking for a syntax slip that does not exist.
-              : res.reason === "dsml" ? "wrong format"
-              : "bad JSON";
+            const detail = res.reason === "unclosed" ? "ข้อความถูกตัด"
+              : res.reason === "luaOpener" ? "ลืม ###LUA###"
+              : res.reason === "envelope" ? "รูปแบบผิด"
+              : res.reason === "dsml" ? "รูปแบบผิด"
+              : "JSON ไม่ถูกต้อง";
             decorate.toolBox(res.item, failName, "err", detail, true, "", ZS.toolCategory(failName));
           }
           // Pass the detected command name so the feedback only offers the
@@ -1523,7 +1519,7 @@
             // never repaints it ✓ done once generation ends (the real cause of a
             // stopped call still going green a moment later).
             if (res.item) { res.item.dataset.zStopped = "1"; rememberHalted(res.item); }
-            decorate.toolBox(res.item, call.tool, "err", "stopped", true, "", category);
+            decorate.toolBox(res.item, call.tool, "err", "หยุดแล้ว", true, "", category);
             break;
           }
           const isErr = feedbackIsError(feedback);
@@ -1603,7 +1599,7 @@
       }
     } catch (e) {
       diag("loop.error", { msg: String((e && e.message) || e) });
-      ui.banner("warn", "Internal loop error", String((e && e.message) || e));
+      ui.banner("warn", "ข้อผิดพลาดภายในลูป", String((e && e.message) || e));
     } finally {
       A.running = false;
       A.stop = false;
@@ -1752,7 +1748,7 @@
     }
     ui.markStopping();    // instant feedback: button → "⏳ Stopping…", disabled
     P.stopGeneration();
-    ui.toast("Stopping…");
+    ui.toast("กำลังหยุดทำงาน…");
   }
 
   // The full system prompt for the CURRENT provider and user settings. One
@@ -1987,7 +1983,7 @@
       const firstName = startRes.calls && startRes.calls[0] && startRes.calls[0].tool;
       if (startRes.kind === "tool" && startRes.calls && startRes.calls.length === 1 &&
           (firstName === "list_commands" || firstName === "list_tools")) {
-        decorate.toolBox(startRes.item, "Loading commands", "run", "", true);
+        decorate.toolBox(startRes.item, "กำลังโหลดคำสั่ง", "run", "", true);
         const toolFeedback = await runTool(startRes.calls[0]);
         // Roblox down short-circuits list_commands into a plain "offline" note
         // (main.js, list_commands handler) instead of the real catalogue - detect
@@ -1996,7 +1992,7 @@
         // attached, so A.toolList still has 25+ entries that were never actually
         // usable this boot).
         if (/Roblox Studio is currently OFFLINE/.test(toolFeedback)) {
-          decorate.toolBox(startRes.item, "Loading commands", "err", "Roblox offline", true);
+          decorate.toolBox(startRes.item, "กำลังโหลดคำสั่ง", "err", "Roblox ออฟไลน์", true);
         } else {
           // Count what the model ACTUALLY received: list_commands is scoped to the
           // primary Roblox server (main.js ~629), so showing A.toolList.length (every
@@ -2004,7 +2000,7 @@
           // count and made it look like all servers were loaded at once. Count the
           // Roblox-scoped tools instead, matching the real result.
           const robloxCount = A.toolList.filter((t) => (t.server || "roblox") === "roblox").length;
-          decorate.toolBox(startRes.item, "Loading commands", "done", `${robloxCount} commands`, true);
+          decorate.toolBox(startRes.item, "โหลดคำสั่งแล้ว", "done", `${robloxCount} คำสั่ง`, true);
         }
         const base2 = await submitAndGetBase(toolFeedback);
         const readyRes = await waitForResponse(base2); // wait for "I'm ready" reply
@@ -2014,9 +2010,9 @@
       A.started = true;
       rememberSession(P.conversationKey()); // survives virtualization AND reloads
       ui.setStarted(true);
-      ui.toast(`Agent ready. Ask ${P.displayName} to build something in Roblox.`);
+      ui.toast(`AI พร้อมทำงานแล้ว บอกให้ ${P.displayName} สร้างแมพใน Roblox ได้เลย`);
     } catch (e) {
-      if (alive()) ui.banner("warn", "Startup failed", String((e && e.message) || e));
+      if (alive()) ui.banner("warn", "เริ่มต้นระบบไม่สำเร็จ", String((e && e.message) || e));
     } finally {
       // Only tear down our OWN starting state. If we were superseded (the user
       // opened another chat), the newer flow / syncSessionState owns it now.
@@ -2262,7 +2258,7 @@
           const m = txt.match(/Output of '([^']+)'/);
           this.chip(item, {
             label: "ทบทวนคำสั่ง",
-            detail: m ? `with ${m[1]} result` : "",
+            detail: m ? `พร้อมผลลัพธ์ ${m[1]}` : "",
             category: "remind", phase: "remind", cls: "sys", whole: true,
           });
           item.dataset.zs = "resend";
@@ -2294,7 +2290,7 @@
         const sig = (m ? m[1] : "note") + "|" + (isErr ? "err" : hasImg ? "img" : "result");
         if (item.dataset.zsig !== sig || !item.classList.contains("zs-hidden") || chipGone) {
           this.chip(item, {
-            label: m ? `${m[1]} · result` : "result",
+            label: m ? `${m[1]} · ผลลัพธ์` : "ผลลัพธ์",
             category: hasImg ? "screen" : m ? ZS.toolCategory(m[1]) : "tool",
             body: txt, phase: isErr ? "err" : "result",
             cls: isErr ? "err" : "result", whole: true,
@@ -2351,7 +2347,7 @@
           const expired = Date.now() - armedAt > 6000;    // safety fallback
           if (!replaced && !expired) {
             const nm = ZSParse.toolNameFromText(txt) || "command";
-            this.toolBox(item, nm, "err", "stopped", false);
+            this.toolBox(item, nm, "err", "หยุดแล้ว", false);
             return;
           }
           delete item.dataset.zRegenLen;
@@ -2483,7 +2479,7 @@
         const pendingExec = !stopped && !orphanPending && !live &&
           neverRun && item === P.lastAssistant() && Date.now() - A.lastGenAt <= RESUME_FRESH_MS;
         let phase = stopped ? "err" : (orphanPending ? "idle" : ((live || pendingExec) ? "run" : "done"));
-        let detail = stopped ? "stopped" : (orphanPending ? "not run" : "");
+        let detail = stopped ? "หยุดแล้ว" : (orphanPending ? "ไม่ได้รัน" : "");
         // A DSML turn is the model calling a tool in its OWN markup, which can
         // never be executed - it always resolves to the "dsml" parse_error. So
         // once it has FINISHED streaming, "waiting to run" (spinner) and "not
@@ -2498,7 +2494,7 @@
         // error-aware settle just below is skipped (phase is no longer "done") so
         // the more precise "bad format" wording survives.
         if (!stopped && !live && phase !== "err" && ZSParse.DSML_RE.test(txt)) {
-          phase = "err"; detail = "wrong format";
+          phase = "err"; detail = "รูปแบบผิด";
         }
         // Error-aware settle: a command whose injected result RIGHT BELOW is an
         // ERROR must never wear a green ✓. The loop paints this correctly while
@@ -2512,7 +2508,7 @@
           // test would miss - the Blender case), so a revisited conversation
           // re-settles it red, matching what the loop painted live.
           if (ZSParse.isInjectedFeedback(nt) && feedbackIsError(nt)) {
-            phase = "err"; detail = "error";
+            phase = "err"; detail = "ข้อผิดพลาด";
             if (item.dataset.zphase !== "err") diag("chip.errSettle", { name: ZSParse.toolNameFromText(txt) });
           }
         }
@@ -2757,8 +2753,11 @@
     let customPrompt = "";
     try {
       chrome.storage.local.get("zsCustomPrompt", (r) => {
-        if (r && typeof r.zsCustomPrompt === "string") {
+        if (r && typeof r.zsCustomPrompt === "string" && r.zsCustomPrompt.trim() !== "") {
           customPrompt = r.zsCustomPrompt;
+          syncMenuPrompt();
+        } else {
+          customPrompt = "CAVEMAN MODE: ตอบภาษาไทยสั้นกระชับ ตรงประเด็น ห้ามเยิ่นเย้อ ห้ามทักทาย สั่งรันคำสั่ง Roblox Studio MCP ทันที ประหยัด token สูงสุด";
           syncMenuPrompt();
         }
       });
@@ -2863,7 +2862,7 @@
         const current = s.name.toLowerCase() === here;
         const label = `<span class="zs-site-name"><span>${s.name}</span><span class="zs-site-host">${hostOf(s.url)}</span></span>`;
         sites += current
-          ? `<div class="zs-site-opt zs-site-here">${label}<span class="zs-site-badge">active</span></div>`
+          ? `<div class="zs-site-opt zs-site-here">${label}<span class="zs-site-badge">ใช้งานอยู่</span></div>`
           : `<button class="zs-site-opt" data-u="${s.url}">${label}<span class="zs-site-go">&rarr;</span></button>`;
       }
       
@@ -2878,8 +2877,8 @@
         // alive === undefined -> the bridge hasn't reported this server's health
         // yet (just added/removed, still restarting) - shown neutral, not red.
         const healthClass = s.alive === true ? "on" : s.alive === false ? "off" : "unknown";
-        const healthTitle = s.alive === true ? `${s.tools || 0} tools available` : s.alive === false ? "offline" : "status unknown";
-        mcpList += `<div class="zs-mcp-item"><span class="zs-mcp-health zs-mcp-health-${healthClass}" title="${healthTitle}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">${esc(s.name)}</span><span class="zs-mcp-url">${esc(s.command || s.id)}</span></div><button class="zs-mcp-remove" data-id="${esc(s.id)}" title="Remove">✕</button></div>`;
+        const healthTitle = s.alive === true ? `พร้อมใช้งาน ${s.tools || 0} คำสั่ง` : s.alive === false ? "ออฟไลน์" : "ไม่ทราบสถานะ";
+        mcpList += `<div class="zs-mcp-item"><span class="zs-mcp-health zs-mcp-health-${healthClass}" title="${healthTitle}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">${esc(s.name)}</span><span class="zs-mcp-url">${esc(s.command || s.id)}</span></div><button class="zs-mcp-remove" data-id="${esc(s.id)}" title="ลบ">✕</button></div>`;
       });
       menuEl.innerHTML =
         `<div class="zs-menu-head"><span class="zs-menu-logo">ZXScript</span><span class="zs-menu-tag">v${EXT_VERSION}</span></div>
@@ -2920,11 +2919,11 @@
          </section>
          <section class="zs-menu-sec">
            <div class="zs-sec-label"><span>เซิร์ฟเวอร์ MCP ทั้งหมด</span></div>
-           <div class="zs-menu-note">Roblox Studio is always connected (primary). Add another MCP server (e.g. Blender, Sketchfab) as an addon - the bridge restarts briefly to load it. Experimental.</div>
+           <div class="zs-menu-note">Roblox Studio เชื่อมต่อเป็นหลักเสมอ สามารถเพิ่มเซิร์ฟเวอร์ MCP เสริม (เช่น Blender, Sketchfab) ได้ โดย Bridge จะรีสตาร์ตเพื่อโหลดคำสั่งใหม่</div>
            ${mcpList}
            <div class="zs-mcp-sep"></div>
-           <input id="zs-mcp-name" class="zs-mcp-field" placeholder="Name, e.g. Blender" />
-           <input id="zs-mcp-url" class="zs-mcp-field" placeholder="Start command, e.g. npx -y @some/mcp-server" />
+           <input id="zs-mcp-name" class="zs-mcp-field" placeholder="ชื่อเซิร์ฟเวอร์ เช่น Blender" />
+           <input id="zs-mcp-url" class="zs-mcp-field" placeholder="คำสั่งรัน เช่น npx -y @some/mcp-server" />
            <div class="zs-set-row"><button id="zs-mcp-add">เพิ่มเซิร์ฟเวอร์</button><span id="zs-mcp-status"></span></div>
          </section>`;
       const open = (url) => { try { window.open(url, "_blank", "noopener"); } catch {} menuEl.hidden = true; };
@@ -2953,7 +2952,7 @@
         mcpAddBtn.disabled = on;
         menuEl.querySelectorAll(".zs-mcp-remove").forEach((b) => (b.disabled = on));
         mcpStatus.innerHTML = on
-          ? `<span class="zs-mcp-spin-row"><span class="zs-mcp-spin"></span>${label || "Restarting bridge…"}</span>`
+          ? `<span class="zs-mcp-spin-row"><span class="zs-mcp-spin"></span>${label || "กำลังรีสตาร์ต Bridge…"}</span>`
           : "";
       }
 
@@ -2962,11 +2961,11 @@
           if (mcpBusy) return;
           const id = b.dataset.id;
           if (!id) return;
-          setMcpBusy(true, "Restarting bridge…");
+          setMcpBusy(true, "กำลังรีสตาร์ต Bridge…");
           const r = await bg({ type: "remove_server", server_id: id });
           if (!r || !r.ok) {
             setMcpBusy(false);
-            mcpStatus.textContent = (r && r.error) || "Couldn't remove server";
+            mcpStatus.textContent = (r && r.error) || "ลบเซิร์ฟเวอร์ไม่สำเร็จ";
             setTimeout(() => { if (!mcpBusy) mcpStatus.textContent = ""; }, 2400);
             return;
           }
@@ -2981,17 +2980,17 @@
         const name = mcpNameEl.value.trim();
         const command = mcpUrlEl.value.trim();
         if (!name || !command) {
-          mcpStatus.textContent = "Name and command required";
+          mcpStatus.textContent = "กรุณาระบุชื่อและคำสั่งรัน";
           setTimeout(() => { if (!mcpBusy) mcpStatus.textContent = ""; }, 1800);
           return;
         }
         const id = mcpSlug(name);
         const { command: cmd, args } = splitCommand(command);
-        setMcpBusy(true, "Restarting bridge…");
+        setMcpBusy(true, "กำลังรีสตาร์ต Bridge…");
         const r = await bg({ type: "add_server", server_id: id, command: cmd, args });
         if (!r || !r.ok) {
           setMcpBusy(false);
-          mcpStatus.textContent = (r && r.error) || "Couldn't add server";
+          mcpStatus.textContent = (r && r.error) || "เพิ่มเซิร์ฟเวอร์ไม่สำเร็จ";
           setTimeout(() => { if (!mcpBusy) mcpStatus.textContent = ""; }, 2400);
           return;
         }
@@ -3015,7 +3014,7 @@
       setupCard.id = "zs-setup";
       setupCard.hidden = true;
       const videoBtn = VIDEO_URL
-        ? `<a id="zs-setup-video" href="${VIDEO_URL}" target="_blank" rel="noopener">▶︎ Watch tutorial</a>`
+        ? `<a id="zs-setup-video" href="${VIDEO_URL}" target="_blank" rel="noopener">▶︎ ดูคลิปสอนใช้งาน</a>`
         : "";
       setupCard.innerHTML =
         `<div id="zs-setup-head"><span id="zs-setup-logo">ZXScript</span><span id="zs-setup-tag">Setup</span></div>` +
@@ -3027,7 +3026,7 @@
         `</ol>` +
         `<div class="zs-setup-copy-row">` +
           `<input type="text" id="zs-setup-link" readonly value="${GITHUB_URL}">` +
-          `<button id="zs-setup-copy">Copy</button>` +
+          `<button id="zs-setup-copy">คัดลอก</button>` +
         `</div>` +
         videoBtn +
         `<button id="zs-setup-dismiss">เข้าใจแล้ว</button>`;
@@ -3039,8 +3038,8 @@
           inp.select(); try { document.execCommand("copy"); } catch {}
         }
         const btn = setupCard.querySelector("#zs-setup-copy");
-        btn.textContent = "Copied!";
-        setTimeout(() => { btn.textContent = "Copy"; }, 1600);
+        btn.textContent = "คัดลอกแล้ว!";
+        setTimeout(() => { btn.textContent = "คัดลอก"; }, 1600);
       });
 
       setupCard.querySelector("#zs-setup-dismiss").addEventListener("click", () => {
@@ -3143,7 +3142,7 @@
           // session (warn=false → no zs-state-warn red text). The full nag
           // still shows when NO server is usable (the branches below).
           toneClass = "warn";
-          msg = `<b>Agent active</b>${tools ? ` · ${tools} คำสั่ง` : ""} · Roblox offline`;
+          msg = `<b>AI กำลังทำงาน</b>${tools ? ` · ${tools} คำสั่ง` : ""} · Roblox ออฟไลน์`;
         } else if (placeDown) {
           toneClass = "warn"; warn = true;
           msg = `<b>Agent พร้อม</b> · กรุณาเปิดแมพใน Roblox Studio`;
@@ -3157,7 +3156,7 @@
           // No inline dot here: the leading status dot already shows green, two
           // dots side by side looked cluttered. The green "Agent active" text
           // carries it.
-          msg = `<b>Agent active</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
+          msg = `<b>AI กำลังทำงาน</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
         }
       } else if (P.isFreshChat() || P.chatIsEmpty()) {
         // Treat ANY empty chat (no turns yet) as the standby/start case - not just
@@ -3179,8 +3178,8 @@
           msg = !A.bridge.connected
             ? `กรุณารันไฟล์ <b>start.bat</b> บนคอมพิวเตอร์`
             : studioProcUp
-              ? `<b>Studio open but not connected</b> - open <b>Assistant Settings &gt; MCP Servers</b> in Studio, or start without it.`
-              : `<b>Roblox Studio offline</b> - start with your other MCP server(s).`;
+              ? `<b>เปิด Studio แล้วแต่ยังไม่เชื่อมต่อ</b> - เปิด <b>Assistant Settings &gt; MCP Servers</b> ใน Studio หรือเริ่มทำงานโดยไม่มี Studio`
+              : `<b>Roblox Studio ออฟไลน์</b> - เริ่มทำงานกับเซิร์ฟเวอร์ MCP อื่นที่มี`;
           label = "▶︎ เริ่มทำงาน (Roblox ออฟไลน์)"; kind = "start-degraded";
         } else {
           toneClass = "warn"; warn = true;
@@ -3377,7 +3376,7 @@
         : "";
       b.innerHTML = `<div class="zs-banner-t">⚠ Lost connection to ZXScript</div>
         <div class="zs-banner-m">The ZXScript bridge stopped on your PC. Restart it (run start.bat and keep Roblox Studio open): the agent will reconnect automatically as soon as it is detected again.</div>
-        <div class="zs-banner-acts">${videoLink}<button class="zs-banner-x">Close</button></div>`;
+        <div class="zs-banner-acts">${videoLink}<button class="zs-banner-x">ปิด</button></div>`;
       b.querySelector(".zs-banner-x").addEventListener("click", () => { b.remove(); if (bridgeBannerEl === b) bridgeBannerEl = null; });
       root.appendChild(b);
       bridgeBannerEl = b;
@@ -3399,7 +3398,7 @@
       // active turn (not a stop-in-progress).
       if (allow && !A.stopping && stopBtn.dataset.state === "stopping") {
         stopBtn.disabled = false;
-        stopBtn.textContent = "■ Stop";
+        stopBtn.textContent = "■ หยุดการทำงาน";
         delete stopBtn.dataset.state;
       }
       if (was !== stopBtn.hidden) renderBar(); // reflect the action/stop swap
@@ -3413,7 +3412,7 @@
       stopBtn.hidden = false;
       stopBtn.disabled = true;
       stopBtn.dataset.state = "stopping";
-      stopBtn.textContent = "⏳ Stopping…";
+      stopBtn.textContent = "⏳ กำลังหยุด…";
       renderBar();
     }
 
@@ -3425,7 +3424,7 @@
       if (A.started || !P.isFreshChat()) return;
       if (!nudged) {
         nudged = true;
-        toast("Tip: click “▶︎ Start Roblox agent” to let the AI control Roblox Studio.");
+        toast("คำแนะนำ: กดปุ่ม “▶︎ เริ่มต้น AI Roblox” เพื่อให้ AI เริ่มควบคุม Roblox Studio");
       }
       if (!actionBtn) return;
       actionBtn.classList.add("zs-flash");
@@ -3731,7 +3730,7 @@
       if (!cover) {
         cover = document.createElement("div");
         cover.id = "zs-input-cover";
-        cover.innerHTML = `<span class="zs-cover-pulse"></span><span class="zs-cover-label">Agent is working…</span>`;
+        cover.innerHTML = `<span class="zs-cover-pulse"></span><span class="zs-cover-label">AI กำลังทำงานใน Studio…</span>`;
         document.documentElement.appendChild(cover);
       }
       cover.dataset.on = "1";
@@ -3796,7 +3795,7 @@
       b.className = `zs-banner ${kind}`;
       b.innerHTML = `<div class="zs-banner-t"></div><div class="zs-banner-m"></div>
         <div class="zs-banner-acts">
-          <button class="zs-banner-x">Close</button>
+          <button class="zs-banner-x">ปิด</button>
         </div>`;
       b.querySelector(".zs-banner-t").textContent = title;
       b.querySelector(".zs-banner-m").textContent = msg;
@@ -3816,7 +3815,7 @@
       hdr.className = "zs-shot-hdr";
       const ttl = document.createElement("span");
       ttl.className = "zs-shot-ttl";
-      ttl.textContent = `${toolName} · ${images.length} image${images.length > 1 ? "s" : ""}`;
+      ttl.textContent = `${toolName} · ${images.length} รูปภาพ`;
       const close = document.createElement("button");
       close.className = "zs-shot-x";
       close.textContent = "✕";
