@@ -4,11 +4,11 @@ Copyright (C) 2026 zxd44 (ZirconX) <gonhackergamer0@gmail.com>
 
 [OWNERSHIP, MODIFICATION, AND RENAMING NOTICE]
 Owner & Maintainer: zxd44 (ZirconX) <gonhackergamer0@gmail.com>
-Project Name: ZXScript (Renamed & Customized from ZeroScript)
+Project Name: ZXScript (Renamed & Customized from ZXScript)
 Date of Modification: October 2026
 
 NOTICE OF MODIFICATION & REBRANDING (GPLv3 Section 5a):
-This software was originally created as ZeroScript. It has been extensively
+This software was originally created as ZXScript. It has been extensively
 modified, restructured, enhanced, and rebranded under the name "ZXScript"
 by zxd44 (ZirconX).
 
@@ -22,7 +22,7 @@ Key modifications and enhancements:
 7. Modularized project directory architecture (bridge/, scripts/, dist/, docs/).
 8. Integrated Caveman mode prompt efficiency presets.
 
-Original Work Copyright (C) ZeroScript Contributors.
+Original Work Copyright (C) ZXScript Contributors.
 Modifications & Current Maintenance Copyright (C) 2026 zxd44.
 
 This program is free software: you can redistribute it and/or modify
