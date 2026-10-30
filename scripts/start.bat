@@ -112,7 +112,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :17613 ^| findstr LISTENING 2
 )
 if defined OLDPID (
     taskkill /F /T /PID !OLDPID! >nul 2>nul
-    timeout /t 1 /nobreak >nul
+    ping -n 2 127.0.0.1 >nul 2>nul
     call :log "Replaced previous bridge on PID !OLDPID!"
 )
 echo         [OK] เคลียร์พอร์ตและเบื้องหลังเรียบร้อย
@@ -150,9 +150,9 @@ if "!STUDIO_RUNNING!"=="1" (
         echo         Roblox Studio ยังไม่เปิด กำลังเปิด Roblox Studio ให้อัตโนมัติ...
         start "" "!STUDIO_EXE!"
         call :log "Auto-launched Roblox Studio from !STUDIO_EXE!"
-        echo         [OK] เปิด Studio แล้ว กรุณาเปิดแมพ (Place) ของคุณ
+        echo         [OK] เปิด Studio แล้ว กรุณาเปิดแมพ [Place] ของคุณ
     ) else (
-        echo         [คำแนะนำ] กรุณาเปิด Roblox Studio และเปิดแมพ (Place) ของคุณ
+        echo         [คำแนะนำ] กรุณาเปิด Roblox Studio และเปิดแมพ [Place] ของคุณ
     )
 )
 
@@ -175,12 +175,15 @@ echo       - เลือก Manage MCP Servers -^> ติ๊กเปิด "En
 echo.
 echo    3. เปิดแชต AI บนเว็บ:
 echo       - เข้าเว็บ https://chat.deepseek.com (แนะนำ) หรือ ChatGPT / Qwen
-echo       - รอจนแถบ ZXScript ด้านล่างขึ้นจุดสีเขียว 🟢
-echo       - กดปุ่ม "▶︎ เริ่มทำงาน" แล้วเริ่มสั่งงานสร้างแมพได้ทันที!
+echo       - รอจนแถบ ZXScript ด้านล่างขึ้นจุดสีเขียว [ONLINE]
+echo       - กดปุ่ม [เริ่มทำงาน] แล้วเริ่มสั่งงานสร้างแมพได้ทันที!
 echo.
 echo    [ข้อสำคัญ] ห้ามปิดหน้าต่างดำนี้ ให้พับย่อหน้าจอลงขณะใช้งาน
 echo  =====================================================================
 echo.
+
+call :log "Registering Native Messaging and Protocol Host"
+%PY% "%ROOT%bridge\register.py" >nul 2>nul
 
 call :log "Launching bridge.py with %PY%"
 %PY% "%ROOT%bridge\bridge.py"
@@ -206,3 +209,4 @@ exit /b %errorlevel%
 :log
 >>"%LOGFILE%" 2>nul echo(%~1
 exit /b 0
+
