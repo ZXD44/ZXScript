@@ -3727,7 +3727,10 @@
       if (!cover) {
         cover = document.createElement("div");
         cover.id = "zs-input-cover";
-        cover.innerHTML = `<span class="zs-cover-pulse"></span><span class="zs-cover-label">⚡ AI กำลังทำงานใน Studio…</span>`;
+        cover.innerHTML = `<span class="zs-cover-pulse-ring"><span class="zs-cover-pulse"></span></span>` +
+          `<span class="zs-hud-brand">Studio AI</span>` +
+          `<span class="zs-hud-sep"></span>` +
+          `<span class="zs-cover-label">⚡ AI กำลังทำงานใน Studio…</span>`;
         document.documentElement.appendChild(cover);
       }
       cover.dataset.on = "1";
@@ -3745,33 +3748,14 @@
           if (e.classList.contains("zs-typing")) e.classList.remove("zs-typing");
         }
 
-        const covNode = (P.coverTarget && P.coverTarget()) || e;
         if (
           (P.overlayBlocking && P.overlayBlocking()) ||
           (P.captchaPresent && P.captchaPresent())
         ) {
           cover.style.display = "none";
-          coverRaf = requestAnimationFrame(place);
-          return;
+        } else {
+          cover.style.display = "flex";
         }
-
-        const r = covNode.getBoundingClientRect();
-        if (r.width <= 0 || r.height <= 0) {
-          cover.style.display = "none";
-          coverRaf = requestAnimationFrame(place);
-          return;
-        }
-        cover.style.display = "flex";
-
-        // Sleek floating pill at top-right of composer - never blocks user typing or obscures text
-        const pillW = cover.offsetWidth || 135;
-        const pillH = cover.offsetHeight || 24;
-        const rightEdge = Math.round(r.right - pillW - 12);
-        const left = Math.max(Math.round(r.left + 8), rightEdge);
-        const top = Math.round(r.top + 6);
-
-        cover.style.left = left + "px";
-        cover.style.top = top + "px";
 
         coverRaf = requestAnimationFrame(place);
       };

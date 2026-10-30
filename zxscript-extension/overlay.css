@@ -459,53 +459,107 @@ button.zs-site-opt:hover .zs-site-go { opacity: 1; transform: translateX(0); }
 /* ── input cover: fully hides the text the extension types + sends ──
    background colour is set inline at runtime to match the input box,
    so the masked input simply looks empty. */
-/* ── modern non-blocking input cover indicator (Impeccable Style) ── */
+/* ── Impeccable Style Top HUD: Floating Island Status ── */
 #zs-input-cover {
   position: fixed;
-  z-index: 2147483500;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483600;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   box-sizing: border-box;
-  padding: 3px 11px 3px 9px;
-  height: 24px;
+  padding: 5px 14px 5px 10px;
+  height: 32px;
   border-radius: 9999px;
-  background: rgba(18, 18, 22, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  color: #ededf0;
-  font-size: 11px;
+  background: rgba(9, 9, 11, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #fafafa;
+  font-size: 11.5px;
   font-weight: 500;
-  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  letter-spacing: -0.01em;
   white-space: nowrap;
-  pointer-events: none; /* Never block user clicks or typing into composer */
+  pointer-events: none;
   user-select: none;
-  animation: zs-pop 0.15s ease-out;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: zs-hud-drop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.zs-cover-pulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
-  animation: zs-cover-glow 1.5s infinite ease-in-out;
+@keyframes zs-hud-drop {
+  from { opacity: 0; transform: translate(-50%, -10px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+.zs-cover-pulse-ring {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
 }
-@keyframes zs-cover-glow {
-  0%, 100% { opacity: 0.5; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 10px rgba(16, 185, 129, 0.9); }
+.zs-cover-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  flex: none;
+}
+.zs-cover-pulse-ring::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(16, 185, 129, 0.6);
+  animation: zs-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes zs-ping {
+  0% { transform: scale(1); opacity: 1; }
+  75%, 100% { transform: scale(2.6); opacity: 0; }
+}
+.zs-hud-brand {
+  font-size: 10px;
+  font-weight: 600;
+  color: #10b981;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  flex: none;
+}
+.zs-hud-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 0 1px;
+  flex: none;
 }
 .zs-cover-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #f4f4f5;
+  letter-spacing: -0.01em;
   line-height: 1;
-  letter-spacing: 0.1px;
 }
 html.zs-light #zs-input-cover {
   background: rgba(255, 255, 255, 0.94);
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
   color: #18181b;
+}
+html.zs-light .zs-cover-label {
+  color: #18181b;
+}
+html.zs-light .zs-hud-sep {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 /* belt-and-suspenders: the typed text itself is rendered invisible
