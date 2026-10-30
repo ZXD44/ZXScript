@@ -1398,38 +1398,22 @@ def _get_active_place_name() -> str:
     return "Default_Place"
 
 
-def _sync_project_memory_to_disk(name: str, arguments: dict):
-    """Automatically mirrors game.ServerStorage.ZXScript.Memory to local projects/<place>/ directory."""
+def _force_sync_memory_from_studio() -> tuple[bool, str]:
+    """Force reads game.ServerStorage.ZXScript.Memory directly from Studio and writes to projects/<PlaceName>/"""
     try:
-        if not isinstance(arguments, dict):
-            return
-
+        res = mgr.call("execute_luau", {
+            "code": "local s = game:GetService('ServerStorage'):FindFirstChild('ZXScript'); local m = s and s:FindFirstChild('Memory'); return m and m.Source or ''"
+        }, timeout=8)
         content = ""
-        if name == "multi_edit":
-            target = str(arguments.get("target_file", "")).lower()
-            if "zxscript.memory" not in target and not target.endswith(".memory"):
-                return
-            edits = arguments.get("edits") or []
-            for edit in edits:
-                ns = edit.get("new_string", "")
-                if len(ns) > len(content):
-                    content = ns
-
-        elif name == "execute_luau":
-            code = str(arguments.get("code", ""))
-            if "zxscript.memory" in code.lower() or "zxscript" in code.lower():
-                m = re.search(r"\[=*\[(.*?)\]=*\]", code, re.DOTALL)
-                if m:
-                    content = m.group(1).strip()
-
-        if not content or len(content) < 20:
-            return
+        if res.get("ok") and res.get("text"):
+            content = res["text"].strip()
+        if not content:
+            return False, "ยังไม่พบ game.ServerStorage.ZXScript.Memory ใน Studio"
 
         place_name = _get_active_place_name()
         proj_dir = os.path.join(HERE, "..", "projects", place_name)
         os.makedirs(proj_dir, exist_ok=True)
 
-        # 1. Save Memory.luau
         lua_path = os.path.join(proj_dir, "Memory.luau")
         with open(lua_path, "w", encoding="utf-8") as f:
             if not content.startswith("return"):
@@ -1437,7 +1421,6 @@ def _sync_project_memory_to_disk(name: str, arguments: dict):
             else:
                 f.write(content)
 
-        # 2. Extract clean markdown body
         md_body = content
         m = re.search(r"\[=*\[(.*?)\]=*\]", content, re.DOTALL)
         if m:
@@ -1450,7 +1433,76 @@ def _sync_project_memory_to_disk(name: str, arguments: dict):
             f.write(f"> **Owner:** zxd44 | **Last Synced:** {now_str}\n\n")
             f.write(md_body + "\n")
 
-        # 3. Session log
+        log_path = os.path.join(proj_dir, "sessions.log")
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"[{now_str}] Project memory synchronized ({len(content)} bytes)\n")
+
+        log(f"[project] Direct-synced {place_name} memory -> projects/{place_name}/", "gr")
+        return True, f"ซิงค์ {place_name} สำเร็จแล้ว"
+    except Exception as e:
+        return False, str(e)
+
+
+def _sync_project_memory_to_disk(name: str, arguments: dict):
+    """Automatically mirrors game.ServerStorage.ZXScript.Memory to local projects/<place>/ directory."""
+    try:
+        if not isinstance(arguments, dict):
+            return
+
+        is_mem_edit = False
+        content = ""
+        if name == "multi_edit":
+            target = str(arguments.get("target_file", "")).lower()
+            if "zxscript.memory" in target or target.endswith(".memory") or "memory" in target:
+                is_mem_edit = True
+                edits = arguments.get("edits") or []
+                for edit in edits:
+                    ns = edit.get("new_string", "")
+                    if len(ns) > len(content):
+                        content = ns
+
+        elif name == "execute_luau":
+            code = str(arguments.get("code", ""))
+            if "zxscript.memory" in code.lower() or ("zxscript" in code.lower() and "memory" in code.lower()):
+                is_mem_edit = True
+                m = re.search(r"\[=*\[(.*?)\]=*\]", code, re.DOTALL)
+                if m:
+                    content = m.group(1).strip()
+
+        if not is_mem_edit:
+            return
+
+        # Attempt high-fidelity sync directly from Studio first
+        ok, _ = _force_sync_memory_from_studio()
+        if ok:
+            return
+
+        if not content or len(content) < 20:
+            return
+
+        place_name = _get_active_place_name()
+        proj_dir = os.path.join(HERE, "..", "projects", place_name)
+        os.makedirs(proj_dir, exist_ok=True)
+
+        lua_path = os.path.join(proj_dir, "Memory.luau")
+        with open(lua_path, "w", encoding="utf-8") as f:
+            if not content.startswith("return"):
+                f.write(f"return [==[\n{content}\n]==]\n")
+            else:
+                f.write(content)
+
+        md_body = content
+        m = re.search(r"\[=*\[(.*?)\]=*\]", content, re.DOTALL)
+        if m:
+            md_body = m.group(1).strip()
+
+        now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+        readme_path = os.path.join(proj_dir, "README.md")
+        with open(readme_path, "w", encoding="utf-8") as f:
+            f.write(f"# Project Memory: {place_name}\n")
+            f.write(f"> **Owner:** zxd44 | **Last Synced:** {now_str}\n\n")
+            f.write(md_body + "\n")
+
         log_path = os.path.join(proj_dir, "sessions.log")
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(f"[{now_str}] Project memory synchronized ({len(content)} bytes)\n")
@@ -1607,6 +1659,12 @@ async def handler(ws):
                     "studio": _st["place"], "studio_app": _st["app"],
                     "studio_proc": await asyncio.to_thread(_roblox_studio_app_running),
                     "servers": mgr.health(),
+                }))
+
+            elif mtype == "sync_memory":
+                ok, res_msg = await asyncio.to_thread(_force_sync_memory_from_studio)
+                await ws.send(json.dumps({
+                    "type": "sync_memory_result", "id": rid, "ok": ok, "message": res_msg
                 }))
 
             elif mtype == "call_tool":

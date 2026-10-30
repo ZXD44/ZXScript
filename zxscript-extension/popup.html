@@ -29,7 +29,7 @@
     }
 
     body {
-      width: 320px;
+      width: 352px;
       padding: 13px 14px 12px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
       background: #09090b;
@@ -295,36 +295,91 @@
       display: block;
     }
 
-    /* AI Grid */
+    /* AI Models Grid - Impeccable Style */
+    .section-hint {
+      font-size: 9px;
+      color: #71717a;
+      margin-bottom: 7.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: 0.01em;
+    }
     .ai-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 7px;
+      gap: 6.5px;
+      margin-bottom: 9px;
     }
-    .ai-btn {
-      padding: 8px 6px;
-      font-size: 11px;
-      text-align: center;
-      flex-direction: row;
-      justify-content: center;
-      gap: 5px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.025);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+    .ai-card {
+      padding: 8px 9.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 7px;
+      background: #111114;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
-    .ai-btn:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.12);
+    .ai-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
-    .ai-btn span.badge {
-      font-size: 8.5px;
-      color: #10b981;
+    .ai-card:active {
+      transform: translateY(0);
+    }
+    .ai-card.active-tab {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: rgba(16, 185, 129, 0.04);
+    }
+    .ai-card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5px;
+    }
+    .ai-card-name {
       font-weight: 600;
-      padding: 1px 4.5px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #fafafa;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4.5px;
+      letter-spacing: -0.01em;
+    }
+    .ai-card-sub {
+      font-size: 8.5px;
+      color: #71717a;
+      letter-spacing: 0.01em;
+    }
+    .badge {
+      font-size: 8px;
+      font-weight: 600;
+      padding: 1.5px 5px;
       border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #a1a1aa;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: nowrap;
+    }
+    .badge-rec {
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.28);
+    }
+    .ai-tab-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.85);
+      flex-shrink: 0;
     }
 
     /* Search & Tools List */
@@ -491,22 +546,77 @@
 
   <!-- PANE 1: AI MODELS -->
   <div id="pane-ai" class="seg-pane active">
-    <div class="ai-grid">
-      <button class="ai-btn" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com">
-        <span>DeepSeek</span>
-        <span class="badge">แนะนำ</span>
-      </button>
-      <button class="ai-btn" data-url="https://chatgpt.com/" data-host="chatgpt.com">
-        <span>ChatGPT</span>
-      </button>
-      <button class="ai-btn" data-url="https://gemini.google.com/" data-host="gemini.google.com">
-        <span>Gemini</span>
-      </button>
-      <button class="ai-btn" data-url="https://chat.qwen.ai/" data-host="chat.qwen.ai">
-        <span>Qwen</span>
-      </button>
+    <div class="section-hint">
+      <span>โมเดล AI ที่รองรับ (8 แพลตฟอร์ม)</span>
+      <span style="font-size: 8.5px; color: #52525b;">คลิกเพื่อสลับ/เปิดแท็บ</span>
     </div>
-    <button id="btn-open-overlay" style="font-size: 10px; padding: 5px;">
+    <div class="ai-grid">
+      <div class="ai-card" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com">
+        <div class="ai-card-info">
+          <span class="ai-card-name">DeepSeek</span>
+          <span class="ai-card-sub">V3 / R1 Reasoner</span>
+        </div>
+        <span class="badge badge-rec">แนะนำ</span>
+      </div>
+
+      <div class="ai-card" data-url="https://chatgpt.com/" data-host="chatgpt.com">
+        <div class="ai-card-info">
+          <span class="ai-card-name">ChatGPT</span>
+          <span class="ai-card-sub">GPT-4o / o1</span>
+        </div>
+        <span class="badge">OpenAI</span>
+      </div>
+
+      <div class="ai-card" data-url="https://gemini.google.com/" data-host="gemini.google.com">
+        <div class="ai-card-info">
+          <span class="ai-card-name">Gemini</span>
+          <span class="ai-card-sub">Flash / Pro</span>
+        </div>
+        <span class="badge">Google</span>
+      </div>
+
+      <div class="ai-card" data-url="https://chat.qwen.ai/" data-host="chat.qwen.ai">
+        <div class="ai-card-info">
+          <span class="ai-card-name">Qwen</span>
+          <span class="ai-card-sub">2.5 Coder / Max</span>
+        </div>
+        <span class="badge">Aliyun</span>
+      </div>
+
+      <div class="ai-card" data-url="https://kimi.ai/" data-host="kimi.ai">
+        <div class="ai-card-info">
+          <span class="ai-card-name">Kimi</span>
+          <span class="ai-card-sub">K1.5 Long Context</span>
+        </div>
+        <span class="badge">Moonshot</span>
+      </div>
+
+      <div class="ai-card" data-url="https://chat.z.ai/" data-host="chat.z.ai">
+        <div class="ai-card-info">
+          <span class="ai-card-name">GLM / Z.ai</span>
+          <span class="ai-card-sub">GLM-4 / Plus</span>
+        </div>
+        <span class="badge">Zhipu</span>
+      </div>
+
+      <div class="ai-card" data-url="https://www.meta.ai/" data-host="meta.ai">
+        <div class="ai-card-info">
+          <span class="ai-card-name">Meta AI</span>
+          <span class="ai-card-sub">Llama 3.3 70B</span>
+        </div>
+        <span class="badge">Meta</span>
+      </div>
+
+      <div class="ai-card" data-url="https://arena.ai/" data-host="arena.ai">
+        <div class="ai-card-info">
+          <span class="ai-card-name">Arena</span>
+          <span class="ai-card-sub">Direct Evaluation</span>
+        </div>
+        <span class="badge">LMSYS</span>
+      </div>
+    </div>
+    <button id="btn-open-overlay" style="font-size: 10px; padding: 6px 10px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
       เปิดแถบควบคุมบนแท็บปัจจุบัน
     </button>
   </div>
@@ -524,6 +634,7 @@
     <div style="margin-bottom: 6px;">
       <select id="sel-template" class="sel-box">
         <option value="">-- เลือกเทมเพลตคำสั่งระบบ (1-Click) --</option>
+        <option value="rest">พักผ่อน & บันทึกความจำ (Auto-Save Memory to ServerStorage)</option>
         <option value="rules">กฎเหล็ก 5 ข้อ Roblox AI (ความปลอดภัย & กันโดนแบน)</option>
         <option value="caveman">Caveman Mode (กระชับ ประหยัด token สูงสุด)</option>
         <option value="datastore">ProfileStore Data Persistence (บันทึกข้อมูลปลอดภัย)</option>

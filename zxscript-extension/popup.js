@@ -145,8 +145,32 @@ document.querySelectorAll(".seg-btn").forEach((btn) => {
   });
 });
 
-// ── AI Quick Switch ─────────────────────────────────────────────────────────
-document.querySelectorAll(".ai-btn").forEach((btn) => {
+// ── AI Quick Switch & Active Detection ──────────────────────────────────────
+function highlightActiveTabs() {
+  chrome.tabs.query({}, (tabs) => {
+    document.querySelectorAll(".ai-card").forEach((card) => {
+      const host = card.dataset.host;
+      const isOpen = tabs.some((t) => t.url && t.url.includes(host));
+      card.classList.toggle("active-tab", isOpen);
+      const nameEl = card.querySelector(".ai-card-name");
+      if (nameEl) {
+        let dot = nameEl.querySelector(".ai-tab-dot");
+        if (isOpen) {
+          if (!dot) {
+            dot = document.createElement("span");
+            dot.className = "ai-tab-dot";
+            dot.title = "มีแท็บนี้เปิดอยู่";
+            nameEl.appendChild(dot);
+          }
+        } else if (dot) {
+          dot.remove();
+        }
+      }
+    });
+  });
+}
+
+document.querySelectorAll(".ai-card, .ai-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const targetUrl = btn.dataset.url;
     const targetHost = btn.dataset.host;
@@ -168,7 +192,16 @@ document.querySelectorAll(".ai-btn").forEach((btn) => {
 });
 
 document.getElementById("btn-open-overlay").addEventListener("click", () => {
-  const supported = ["chat.deepseek.com", "chatgpt.com", "gemini.google.com", "chat.qwen.ai"];
+  const supported = [
+    "chat.deepseek.com", "deepseek.com",
+    "chatgpt.com", "chat.openai.com",
+    "gemini.google.com",
+    "chat.qwen.ai",
+    "kimi.ai", "www.kimi.ai",
+    "chat.z.ai",
+    "meta.ai", "www.meta.ai",
+    "arena.ai"
+  ];
   chrome.tabs.query({}, (tabs) => {
     const match = tabs.find((t) => t.url && supported.some((h) => t.url.includes(h)));
     if (match) {
@@ -239,14 +272,14 @@ document.getElementById("btn-save-prompt").addEventListener("click", () => {
   });
 });
 
+const REST_PRESET = "AUTONOMOUS MEMORY SYNC & REST INTENT: ขณะนี้ผู้ใช้ต้องการหยุดพัก/บันทึกงาน กรุณาสรุปผลงาน สถาปัตยกรรม และ TODO ล่าสุดลงใน game.ServerStorage.ZXScript.Memory ทันที จากนั้นตอบสั้นๆ ว่าบันทึกเรียบร้อย";
+
 document.getElementById("btn-caveman").addEventListener("click", () => {
   promptInput.value = CAVEMAN_PRESET;
   chrome.storage.local.set({ zsCustomPrompt: CAVEMAN_PRESET }, () => {
     showToast("เปิดโหมด Caveman แล้ว");
   });
 });
-
-
 
 const btnRules = document.getElementById("btn-rules");
 if (btnRules) {
@@ -258,8 +291,26 @@ if (btnRules) {
   });
 }
 
+const btnRest = document.getElementById("btn-rest");
+if (btnRest) {
+  btnRest.addEventListener("click", () => {
+    promptInput.value = REST_PRESET;
+    chrome.storage.local.set({ zsCustomPrompt: REST_PRESET }, () => {
+      chrome.runtime.sendMessage({ type: "sync_memory" }, (res) => {
+        if (res && res.ok) {
+          showToast("✅ บันทึก Memory ของ Place ลงดิสก์สำเร็จ");
+        } else {
+          showToast("เปิดคำสั่งพักผ่อน/บันทึกแล้ว");
+        }
+      });
+      navigator.clipboard.writeText("พักผ่อนแล้ว ช่วยสรุปและบันทึก Memory ลง game.ServerStorage.ZXScript.Memory ให้เรียบร้อย").catch(() => {});
+    });
+  });
+}
+
 // ── System Prompt Templates ────────────────────────────────────────────────
 const PROMPT_TEMPLATES = {
+  rest: REST_PRESET,
   rules: RULES_PRESET,
   caveman: CAVEMAN_PRESET,
   datastore: "PROJECT FOCUS: วางระบบเซฟข้อมูลผู้เล่นโดยใช้ ProfileStore / DataStoreService ที่ปลอดภัย ป้องกัน Data Loss, รองรับ Session Locking, State Reconciliation, และจัดการ PlayerAdded/PlayerRemoving อย่างถูกต้องตามมาตรฐาน Luau",
@@ -289,4 +340,8 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 refresh();
 loadTools();
-setInterval(refresh, 2500);
+highlightActiveTabs();
+setInterval(() => {
+  refresh();
+  highlightActiveTabs();
+}, 2500);

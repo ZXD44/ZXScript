@@ -342,6 +342,15 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         sendResponse(r);
         break;
       }
+      case "sync_memory": {
+        try {
+          const r = await send({ type: "sync_memory" }, 10000);
+          sendResponse(r || { ok: true });
+        } catch (err) {
+          sendResponse({ ok: false, error: (err && err.message) || String(err) });
+        }
+        break;
+      }
       case "reconnect":
         reconnectDelay = RECONNECT_MIN;
         connect();
