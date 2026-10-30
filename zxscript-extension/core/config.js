@@ -273,6 +273,7 @@ ${BT}
 - SERVER-AUTHORITATIVE COMBAT: ห้ามให้ Client ส่งดาเมจ ให้ส่งเฉพาะ Action Intent แล้ว Server ยิง Raycast ตรวจ Line-of-sight, Distance, และ Cooldown Rate-Limiting
 - PROFILESTORE DATA PERSISTENCE: ข้อมูลผู้เล่นต้องเซฟผ่าน ProfileStore / DataStoreService ปลอดภัย รองรับ Session Locking, Auto-save ทุก 5 นาที, และ BindToClose
 - PARALLEL LUAU (ACTORS): งานคำนวณหนัก (AI/Pathfinding/Raycasts 100+ ตัว) ให้รันใน Actor ด้วย task.desynchronize() และ task.synchronize() เขียนค่ากลับ
+- MODERN ANIMATIONS & IK: บังคับใช้ Animator:LoadAnimation() บน Client (ห้ามใช้ Humanoid:LoadAnimation เก่าเด็ดขาด) และใช้ track:GetMarkerReachedSignal() สำหรับ sync ดาเมจ/เสียง ใช้ IKControl สำหรับหันศีรษะ/มองเป้าหมาย
 - สร้าง UI/วัตถุก่อนเขียนสคริปต์: สร้าง Instance ก่อน แล้วจึงเขียน Script เชื่อมโยงผ่าน WaitForChild(name, 5)
 - ห้าม Destroy() สุ่มสี่สุ่มห้า: ห้ามสั่ง ClearAllChildren() หรือ Destroy() โฟลเดอร์หลักโดยไม่ระบุเป้าหมายชัดเจน
 - AUTO-DEBUG: หลังสร้างหรือแก้สคริปต์ ให้รัน get_console_output เพื่อตรวจจับ runtime error และแก้ปัญหาอัตโนมัติ

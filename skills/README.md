@@ -36,3 +36,8 @@
 ### 6. [God-Tier Procedural World & Dungeon Generation](./roblox-dev/references/godtier-procedural-world.md)
 * อัลกอริทึมสร้างภูมิประเทศและดันเจี้ยนด้วย Perlin Noise / Voxel
 * การ Chunking และ Yielding ด้วย ChangeHistoryService ไม่ทำให้ Studio ค้าง
+
+### 7. [God-Tier Character Animations, Markers & Procedural IK](./roblox-dev/references/godtier-animations-and-ik.md)
+* การโหลดและจัดการอนิเมชั่นระดับ Production ผ่าน `Animator:LoadAnimation()` (ห้ามใช้ Humanoid:LoadAnimation เก่า)
+* การจับจังหวะโจมตี/เสียงที่แม่นยำระดับเฟรมด้วย `GetMarkerReachedSignal()`
+* ระบบหันหน้า/ลำตัวตามเป้าหมายแบบเรียลไทม์ด้วย `IKControl` และระบบเอียงตัวขณะวิ่ง (Procedural Lean/Tilt)

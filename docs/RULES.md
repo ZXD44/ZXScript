@@ -42,6 +42,12 @@
 ### 2.3 การห่อหุ้มข้อผิดพลาด (Pcall Protection)
 - งานที่ติดต่อกับ External Services เช่น `DataStoreService`, `HttpService`, `MarketplaceService` ต้องครอบด้วย `pcall()` หรือ `xpcall()` เสมอ
 
+### 2.4 มาตรฐานระบบอนิเมชั่นและท่าทาง (Character Animations & IKControl)
+- **ห้ามใช้ Humanoid:LoadAnimation():** ❌ ยกเลิกการใช้งานแล้ว → บังคับใช้ ✅ `Animator:LoadAnimation(animation)`
+- **รันบน Client เพื่อ Auto-Replication:** อนิเมชั่นตัวละครต้องโหลดและสั่งเล่นบน Client ผ่าน `LocalScript` เพื่อให้ Roblox ทำการ Replicate ท่าทางไปยัง Server และผู้เล่นอื่นอัตโนมัติด้วย Latency ต่ำสุด
+- **จับจังหวะด้วย Animation Markers:** ห้ามใช้ `task.wait()` สุ่มเดาจังหวะฟัน/ปล่อยพลัง → บังคับใช้ `track:GetMarkerReachedSignal("Hit")` เพื่อ sync Hitbox และดาเมจให้ตรงเฟรม 100%
+- **ระบบหันมองและเล็งเป้า:** ใช้ `IKControl` (`Enum.IKControlType.LookAt`) แทนการคำนวณ CFrame ของคอ/เอวแบบเดิม ช่วยลดภาระ CPU และเรนเดอร์ลื่นไหลด้วย GPU
+
 ---
 
 ## 🏗️ หมวดที่ 3: สถาปัตยกรรมและ Explorer Tree (Zero Guessing Policy)
