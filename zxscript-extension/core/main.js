@@ -1028,16 +1028,16 @@
       // Only reachable via a user Stop while parked; agentLoop's post-runTool
       // A.stop check breaks the loop and discards this, so it just needs to be
       // a non-crashing, clearly-labelled string.
-      if (!(await waitVisible()) || A.stop) return "ERROR: the command was not run - stopped by the user.";
+      if (!(await waitVisible()) || A.stop) return "[ข้อผิดพลาด: คำสั่งไม่ได้รัน - ผู้ใช้สั่งหยุด]";
     }
     // Blocked commands: refuse up-front with a clear, tailored error so the
     // model abandons it and continues instead of wasting/hanging a turn.
     const bareName = bareToolName(name);
     if (isBlockedTool(name)) {
       if (VISION_TOOLS.has(bareName)) {
-        return `ERROR: '${bareName}' is unavailable here - this assistant cannot see images. Do NOT call it again. Inspect the place programmatically instead (e.g. inspect_instance, get_studio_state, search_game_tree, script_read).`;
+        return `[ข้อผิดพลาด: คำสั่ง '${bareName}' ไม่รองรับ]\n• ผู้ช่วย AI นี้มองไม่เห็นรูปภาพ ห้ามเรียกคำสั่งนี้ซ้ำ\n• วิธีแก้: ใช้คำสั่งตรวจสอบแบบโค้ดแทน เช่น inspect_instance, get_studio_state, search_game_tree, script_read`;
       }
-      return `ERROR: the '${bareName}' command timed out and is unavailable in this environment. Do NOT call it again - complete the task yourself using the other commands (execute_luau, multi_edit, etc.).`;
+      return `[ข้อผิดพลาด: คำสั่ง '${bareName}' หมดเวลา]\n• คำสั่งนี้ไม่พร้อมใช้งานในระบบนี้ ห้ามเรียกซ้ำ\n• วิธีแก้: ใช้คำสั่งอื่นทำงานแทน (execute_luau, multi_edit เป็นต้น)`;
     }
     // Virtual command: list the MCP server(s) ZXScript is currently connected
     // to, with each one's REAL per-server health (from the bridge, never the
@@ -1174,7 +1174,7 @@
     // Re-shape those into a real ERROR so the model corrects the call instead
     // of misreading it as tool output.
     if (r.ok && r.text && /^[\w .'"-]{0,60}\bis (required|not available|invalid)\b[\w .'"-]{0,80}$/i.test(r.text.trim())) {
-      return `ERROR calling '${name}': ${r.text.trim()}.\nA required or invalid parameter - check the command's parameters with list_commands, fix the call and retry.`;
+      return `[ข้อผิดพลาดในการเรียกใช้ '${name}']\n• สาเหตุ: ${r.text.trim()}\n• วิธีแก้: พารามิเตอร์ไม่ถูกต้องหรือไม่ครบถ้วน ตรวจสอบด้วย list_commands แก้ไขแล้วส่งใหม่`;
     }
     // The Roblox MCP also reports Luau PARSE/RUNTIME errors as a SUCCESS whose
     // text is the executor's own stack trace ("…ExecuteLuauTool:139: …
@@ -1193,7 +1193,7 @@
         // generic catch: whatever just ran, if it handed back images and this
         // provider's model can't see them, refuse cleanly instead of silently
         // attaching a file it will never actually process.
-        return `ERROR: '${bareName}' returned an image, but this assistant cannot see images. Do NOT call it again. Use a different command to get the information as text instead.`;
+        return `[ข้อผิดพลาด: '${bareName}' คืนค่าเป็นรูปภาพ]\n• ผู้ช่วย AI นี้มองไม่เห็นภาพ ห้ามเรียกคำสั่งนี้ซ้ำ\n• วิธีแก้: ใช้คำสั่งอื่นเพื่อรับข้อมูลเป็นข้อความแทน`;
       }
       if (r.images && r.images.length) {
         // Show the capture in a left-hand ZXScript popup (from the in-memory
@@ -1228,30 +1228,33 @@
     }
     if (r.kind === "disconnected") return ZS.FEEDBACK.bridgeOffline;
     if (r.kind === "timeout") {
-      return `ERROR: คำสั่ง '${name}' หมดเวลาการทำงาน (${name === "execute_luau" ? 20 : 120}s)\n${r.error}\nกรุณาลองคำสั่งที่สั้นลง หรือตรวจสอบว่า Roblox Studio เปิดอยู่และไม่ค้าง`;
+      return `[ข้อผิดพลาด: คำสั่ง '${name}' หมดเวลา]\n• รายละเอียด: คำสั่งหมดเวลาการทำงาน (${name === "execute_luau" ? 20 : 120}s) - ${r.error}\n• วิธีแก้: กรุณาลองคำสั่งที่สั้นลง หรือตรวจสอบว่า Roblox Studio เปิดอยู่และไม่ค้าง`;
     }
     if (name === "execute_luau") {
-      const err = r.error || "";
-      // "Failed to parse command code" is StudioMCP's GENERIC parse rejection: an
-      // empty/mis-marked block is only ONE of its causes. The others are ordinary
-      // Luau syntax errors and - seen live on Meta AI 2026-08-13 - code that is
-      // syntactically fine but too big for the parser: a `return 1+1+1+…` chain
-      // ran at ~500 terms (1006 chars) and was rejected at ~1000 (2006 chars).
-      // Telling the model its block was empty when we DID send it a full code
-      // string sends it to fix something that isn't broken; it retries the same
-      // payload and fails again (the reported spam of parse errors). Only give the
-      // marker advice when the code we actually sent really was empty.
+      let err = (r.error || "").trim();
+      // แปลงชื่อ internal chunk ของ Roblox Studio ให้เป็นภาษาไทยเข้าใจง่าย
+      // เช่น "AssistantCommand:30: attempt to index nil with 'Parent'"
+      // -> "สคริปต์บรรทัดที่ 30: attempt to index nil with 'Parent'"
+      err = err.replace(/\bAssistantCommand:(\d+):/g, "สคริปต์บรรทัดที่ $1:");
+      err = err.replace(/\b(?:CommandExecution|ExecuteLuauTool):\d+:\s*/g, "");
+
       const luaCode = args.code || "";
-      const hint = err.includes("Failed to parse command code")
-        ? !luaCode.trim()
-          ? "Your code block was empty or the marker was wrong. Use exactly ###LUA### (three hashes) - never ###LUA---. The code must be between ###LUA### and ###END_LUA###."
-          : `Roblox refused to PARSE the code (${luaCode.length} chars sent, so it was not empty). Either the Luau syntax is invalid, or the code is too large/complex for the parser - a single huge expression or a very long script can be rejected outright. Check the syntax first; if it looks correct, split the work into several smaller calls.`
-        : err.includes("attempt to") || err.includes("nil value")
-          ? "Lua runtime error. Check that the API you are calling exists (use game:GetService() to access services). Make sure you use 'return' to output values, not 'print()'."
-          : "Check your Lua syntax, make sure you use 'return' to output values (not 'print()'), and that all APIs you call exist in the current Roblox Studio context.";
-      return `ERROR in execute_luau: ${err}\n\n${hint}\n\nFix the code and retry.`;
+      let hint = "";
+      if (err.includes("Failed to parse command code")) {
+        if (!luaCode.trim()) {
+          hint = "• สาเหตุ: บล็อกโค้ดว่างเปล่าหรือรูปแบบแท็กไม่ถูกต้อง\n• วิธีแก้: ใช้ ###LUA### นำหน้าโค้ด และปิดท้ายด้วย ###END_LUA### เสมอ";
+        } else {
+          hint = `• สาเหตุ: Roblox ปฏิเสธการ PARSE โค้ด (ส่งไป ${luaCode.length} ตัวอักษร)\n• วิธีแก้: ตรวจสอบไวยากรณ์ Luau หรือโค้ดอาจยาว/ซับซ้อนเกินไป ให้แบ่งงานออกเป็นชุดคำสั่งย่อยๆ`;
+        }
+      } else if (err.includes("attempt to") || err.includes("nil value") || err.includes("is not a valid member")) {
+        hint = "• สาเหตุ: เกิดข้อผิดพลาดขณะรัน (Runtime Error) ในสคริปต์\n• วิธีแก้: ตรวจสอบว่า Instance หรือ API ที่เรียกมีอยู่จริง (ใช้ game:GetService() เข้าถึง Services) และใช้ 'return' ส่งค่าผลลัพธ์ (ห้ามใช้ print)";
+      } else {
+        hint = "• คำแนะนำ: ตรวจสอบไวยากรณ์ Luau, ใช้ 'return' สำหรับส่งค่าผลลัพธ์ และตรวจสอบว่า API ที่เรียกมีอยู่ในบริบทปัจจุบันของ Roblox Studio";
+      }
+
+      return `[ข้อผิดพลาดใน execute_luau]\n• รายละเอียด: ${err}\n${hint}\n• คำแนะนำ: กรุณาแก้ไขโค้ดแล้วลองใหม่อีกครั้ง`;
     }
-    return `ERROR calling '${name}': ${r.error}\nRead the error carefully, fix the call or try a different approach.`;
+    return `[ข้อผิดพลาดในการเรียกใช้ '${name}']\n• รายละเอียด: ${r.error}\n• คำแนะนำ: ตรวจสอบข้อผิดพลาดอย่างละเอียด แล้วแก้ไขคำสั่งหรือเปลี่ยนวิธีดำเนินการ`;
   }
 
   function argSummary(call) {
@@ -1278,7 +1281,7 @@
   // not the bare words "error"/"failed", so a genuine success line like
   // "Failed: 0" / "Error count: 0" is NOT misread as a failure.
   const BODY_ERR_RE =
-    /^\s*(error executing|error:|erreur|exception|traceback|communication error|failed to|could ?not|cannot |unable to|fatal)\b/i;
+    /^\s*(error executing|error:|erreur|exception|traceback|communication error|failed to|could ?not|cannot |unable to|fatal|ข้อผิดพลาด)\b/i;
   const stripOutputPrefix = (feedback) => feedback.replace(/^Output of '[^']*':\n?/, "");
   function bodyLooksFailed(feedback) {
     if (!feedback || feedback.startsWith("ERROR")) return false; // wrapper already flags it
@@ -1286,7 +1289,11 @@
     return BODY_ERR_RE.test(first);
   }
   // True failure = OUR wrapper prefix OR an MCP tool's in-body error lead-in.
-  const feedbackIsError = (feedback) => feedback.startsWith("ERROR") || bodyLooksFailed(feedback);
+  const feedbackIsError = (feedback) =>
+    feedback.startsWith("ERROR") ||
+    feedback.startsWith("[ข้อผิดพลาด") ||
+    feedback.startsWith("ข้อผิดพลาด") ||
+    bodyLooksFailed(feedback);
 
   // Some tools answer with raw JSON on one line, and a 44-char slice of it makes
   // a chip that says nothing: list_roblox_studios read
@@ -1331,8 +1338,16 @@
     if (!isErr && lines > 1 && /^(warning|warn|note|deprecat|info)\b/i.test(first)) {
       first = all.find((l) => !/^(warning|warn|note|deprecat|info)\b/i.test(l)) || first;
     }
+    if (isErr) {
+      if (lines > 1 && /^\[?ข้อผิดพลาด/i.test(first)) {
+        const detailLine = all.find((l) => l.startsWith("• รายละเอียด:") || l.startsWith("• สาเหตุ:"));
+        if (detailLine) {
+          return detailLine.replace(/^• (?:รายละเอียด|สาเหตุ):\s*/, "").slice(0, 48);
+        }
+      }
+      return first.slice(0, 48);
+    }
     first = first.slice(0, 44);
-    if (isErr) return first;
     return lines > 1 ? `${first} · ${lines} บรรทัด` : first;
   }
 

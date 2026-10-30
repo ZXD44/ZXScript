@@ -1543,7 +1543,9 @@ def safe_call(name, arguments, timeout):
     except TimeoutError as e:
         return {"ok": False, "error": str(e), "kind": "timeout"}
     except Exception as e:
-        return {"ok": False, "error": str(e), "kind": type(e).__name__}
+        err_msg = str(e)
+        err_msg = re.sub(r'\bAssistantCommand:(\d+):', r'สคริปต์บรรทัดที่ \1:', err_msg)
+        return {"ok": False, "error": err_msg, "kind": type(e).__name__}
 
 
 async def run_tool_task(ws, name, args, timeout, rid):

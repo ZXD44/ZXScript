@@ -353,9 +353,7 @@ const ZSParse = (() => {
   // shapes we emit - never by command-like keywords, since a parse-error note
   // quotes a {"command": …} example that must NOT be read as a real command.
   function isInjectedFeedback(txt) {
-    return /^\s*Output of '/.test(txt) ||
-           /^\s*ERROR\b/.test(txt) ||
-           /^\s*\(System note:/.test(txt);
+    return /^\s*(?:Output of '|ผลลัพธ์ของ '|ERROR\b|\[?ข้อผิดพลาด|\(System note:|\(หมายเหตุระบบ:)/.test(txt);
   }
 
   // The assistant emitted a ZXScript command (JSON or a ###LUA### block), or a
