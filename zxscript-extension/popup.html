@@ -307,54 +307,107 @@
     }
     .ai-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6.5px;
-      margin-bottom: 9px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
     }
     .ai-card {
-      padding: 8px 9.5px;
+      padding: 7px 4px 6px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      border-radius: 7px;
+      text-align: center;
+      justify-content: center;
+      gap: 4px;
+      border-radius: 9px;
       background: #111114;
       border: 1px solid rgba(255, 255, 255, 0.07);
       cursor: pointer;
-      text-align: left;
-      transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
     .ai-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.16);
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(0, 162, 255, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 14px -2px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 162, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
     .ai-card:active {
       transform: translateY(0);
     }
     .ai-card.active-tab {
-      border-color: rgba(16, 185, 129, 0.45);
-      background: rgba(16, 185, 129, 0.04);
+      border-color: rgba(16, 185, 129, 0.6) !important;
+      background: rgba(16, 185, 129, 0.07) !important;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.22), inset 0 1px 0 rgba(16, 185, 129, 0.15) !important;
+    }
+    .ai-icon-wrap {
+      width: 25px;
+      height: 25px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--brand-color, #ffffff);
+      position: relative;
+      transition: all 0.18s ease;
+    }
+    .ai-card:hover .ai-icon-wrap {
+      background: var(--brand-bg, rgba(255, 255, 255, 0.09));
+      border-color: var(--brand-color, rgba(255, 255, 255, 0.2));
+      transform: scale(1.08);
     }
     .ai-card-info {
       display: flex;
       flex-direction: column;
-      gap: 1.5px;
+      align-items: center;
+      gap: 1px;
+      width: 100%;
+      min-width: 0;
     }
     .ai-card-name {
       font-weight: 600;
       color: #fafafa;
-      font-size: 11px;
+      font-size: 10px;
       display: flex;
       align-items: center;
-      gap: 4.5px;
+      justify-content: center;
+      gap: 3px;
       letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
     .ai-card-sub {
-      font-size: 8.5px;
+      font-size: 7.5px;
       color: #71717a;
       letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .ai-rec-dot {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #f59e0b;
+      box-shadow: 0 0 5px #f59e0b;
+    }
+    .ai-tab-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      display: inline-block;
+      flex: none;
     }
     .badge {
       font-size: 8px;
@@ -543,87 +596,107 @@
   <!-- SEGMENTED NAVIGATION -->
   <div class="nav-seg">
     <button class="seg-btn active" data-pane="pane-ai">โมเดล AI</button>
-    <button class="seg-btn" data-pane="pane-tools">เครื่องมือ (31)</button>
+    <button class="seg-btn" data-pane="pane-tools">เครื่องมือ (33)</button>
     <button class="seg-btn" data-pane="pane-prompt">คำสั่งระบบ</button>
   </div>
 
   <!-- PANE 1: AI MODELS -->
   <div id="pane-ai" class="seg-pane active">
     <div class="section-hint">
-      <span>โมเดล AI ที่รองรับ (8 แพลตฟอร์ม)</span>
+      <span>โมเดล AI ที่รองรับ (9 แพลตฟอร์ม)</span>
       <span style="font-size: 8.5px; color: #52525b;">คลิกเพื่อสลับ/เปิดแท็บ</span>
     </div>
     <div class="ai-grid">
-      <div class="ai-card" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com">
+      <div class="ai-card" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com" title="DeepSeek - แนะนำสำหรับ Roblox Code">
+        <div class="ai-icon-wrap" style="--brand-color: #0066ff; --brand-bg: rgba(0, 102, 255, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span class="ai-rec-dot" title="แนะนำเขียนโค้ด"></span>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">DeepSeek</span>
-          <span class="ai-card-sub">V3 / R1 Reasoner</span>
+          <span class="ai-card-sub">V3 / R1</span>
         </div>
-        <span class="badge badge-rec">แนะนำ</span>
       </div>
 
-      <div class="ai-card" data-url="https://chatgpt.com/" data-host="chatgpt.com">
+      <div class="ai-card" data-url="https://chatgpt.com/" data-host="chatgpt.com" title="ChatGPT - OpenAI">
+        <div class="ai-icon-wrap" style="--brand-color: #10a37f; --brand-bg: rgba(16, 163, 127, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">ChatGPT</span>
-          <span class="ai-card-sub">GPT-4o / o1</span>
+          <span class="ai-card-sub">4o / o1</span>
         </div>
-        <span class="badge">OpenAI</span>
       </div>
 
-      <div class="ai-card" data-url="https://claude.ai/new" data-host="claude.ai">
+      <div class="ai-card" data-url="https://claude.ai/new" data-host="claude.ai" title="Claude - Anthropic">
+        <div class="ai-icon-wrap" style="--brand-color: #d97706; --brand-bg: rgba(217, 119, 6, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path></svg>
+          <span class="ai-rec-dot" title="แนะนำเขียนโค้ด"></span>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Claude</span>
-          <span class="ai-card-sub">Claude 3.7 Sonnet</span>
+          <span class="ai-card-sub">3.7 Sonnet</span>
         </div>
-        <span class="badge badge-rec" style="background: rgba(217, 119, 6, 0.2); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);">Anthropic</span>
       </div>
 
-      <div class="ai-card" data-url="https://gemini.google.com/" data-host="gemini.google.com">
+      <div class="ai-card" data-url="https://gemini.google.com/" data-host="gemini.google.com" title="Gemini - Google">
+        <div class="ai-icon-wrap" style="--brand-color: #4e75ff; --brand-bg: rgba(78, 117, 255, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.373 5.627-12 12-12-6.373 0-12-5.373-12-12z"/></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Gemini</span>
           <span class="ai-card-sub">Flash / Pro</span>
         </div>
-        <span class="badge">Google</span>
       </div>
 
-      <div class="ai-card" data-url="https://chat.qwen.ai/" data-host="chat.qwen.ai">
+      <div class="ai-card" data-url="https://chat.qwen.ai/" data-host="chat.qwen.ai" title="Qwen - Aliyun">
+        <div class="ai-icon-wrap" style="--brand-color: #6366f1; --brand-bg: rgba(99, 102, 241, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Qwen</span>
-          <span class="ai-card-sub">2.5 Coder / Max</span>
+          <span class="ai-card-sub">2.5 Coder</span>
         </div>
-        <span class="badge">Aliyun</span>
       </div>
 
-      <div class="ai-card" data-url="https://kimi.ai/" data-host="kimi.ai">
+      <div class="ai-card" data-url="https://kimi.ai/" data-host="kimi.ai" title="Kimi - Moonshot">
+        <div class="ai-icon-wrap" style="--brand-color: #ec4899; --brand-bg: rgba(236, 72, 153, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Kimi</span>
-          <span class="ai-card-sub">K1.5 Long Context</span>
+          <span class="ai-card-sub">K1.5 Long</span>
         </div>
-        <span class="badge">Moonshot</span>
       </div>
 
-      <div class="ai-card" data-url="https://chat.z.ai/" data-host="chat.z.ai">
+      <div class="ai-card" data-url="https://chat.z.ai/" data-host="chat.z.ai" title="Z.ai / GLM - Zhipu AI">
+        <div class="ai-icon-wrap" style="--brand-color: #3b82f6; --brand-bg: rgba(59, 130, 246, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Z.ai / GLM</span>
           <span class="ai-card-sub">GLM-4 / Plus</span>
         </div>
-        <span class="badge">Zhipu</span>
       </div>
 
-      <div class="ai-card" data-url="https://www.meta.ai/" data-host="meta.ai">
+      <div class="ai-card" data-url="https://www.meta.ai/" data-host="meta.ai" title="Meta AI - Llama">
+        <div class="ai-icon-wrap" style="--brand-color: #0668e1; --brand-bg: rgba(6, 104, 225, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.26-8-12.355-8-5.096 0-5.096 8 0 8 5.095 0 7.26-8 12.355-8z"></path></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Meta AI</span>
-          <span class="ai-card-sub">Llama 3.3 70B</span>
+          <span class="ai-card-sub">Llama 3.3</span>
         </div>
-        <span class="badge">Meta</span>
       </div>
 
-      <div class="ai-card" data-url="https://arena.ai/" data-host="arena.ai">
+      <div class="ai-card" data-url="https://arena.ai/" data-host="arena.ai" title="Arena - LMSYS">
+        <div class="ai-icon-wrap" style="--brand-color: #8b5cf6; --brand-bg: rgba(139, 92, 246, 0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 2h12v7a6 6 0 0 1-12 0V2z"></path></svg>
+        </div>
         <div class="ai-card-info">
           <span class="ai-card-name">Arena</span>
-          <span class="ai-card-sub">Direct Evaluation</span>
+          <span class="ai-card-sub">Direct Eval</span>
         </div>
-        <span class="badge">LMSYS</span>
       </div>
     </div>
     <button id="btn-open-overlay" style="font-size: 10px; padding: 6px 10px;">
