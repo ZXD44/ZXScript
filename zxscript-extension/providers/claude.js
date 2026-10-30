@@ -258,16 +258,56 @@ const ZSProvider = (() => {
     return location.pathname;
   }
 
-  function installSendHooks(onSend) {
+  function installSendHooks(handlers) {
+    if (!handlers) return;
+    const isFn = typeof handlers === "function";
+
     document.addEventListener(
       "keydown",
       (e) => {
-        if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
-          const ed = getEditor();
-          if (ed && (document.activeElement === ed || ed.contains(document.activeElement))) {
-            if (onSend) onSend();
-          }
+        if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
+        const ed = getEditor();
+        if (!ed || (e.target !== ed && !ed.contains(e.target))) return;
+        if (editorText().trim() === "") return;
+
+        if (isFn) {
+          handlers();
+          return;
         }
+        if (handlers.isBlocked && handlers.isBlocked()) return;
+        if (handlers.isStarted && !handlers.isStarted()) {
+          if (!chatIsEmpty()) return;
+          if (handlers.onBlockedAttempt) handlers.onBlockedAttempt();
+          return;
+        }
+        if (handlers.onUserMessage) handlers.onUserMessage(assistantCount());
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (!getEditor()) return;
+        const t = e.target;
+        const stop = t && t.closest && t.closest(S.stopBtn);
+        if (stop) {
+          if (!isFn && handlers.onNativeStop) handlers.onNativeStop();
+          return;
+        }
+        const btn = t && t.closest && t.closest(S.sendBtn);
+        if (!btn) return;
+        if (isFn) {
+          handlers();
+          return;
+        }
+        if (handlers.isBlocked && handlers.isBlocked()) return;
+        if (handlers.isStarted && !handlers.isStarted()) {
+          if (!chatIsEmpty()) return;
+          if (handlers.onBlockedAttempt) handlers.onBlockedAttempt();
+          return;
+        }
+        if (handlers.onUserMessage) handlers.onUserMessage(assistantCount());
       },
       true
     );
