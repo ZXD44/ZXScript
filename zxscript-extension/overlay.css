@@ -7,270 +7,263 @@
   font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* ── status bar (anchored above the composer; left/top/width set inline) ──── */
-#zs-bar {
-  position: fixed;
+/* ── Top Dynamic Capsule Bar (Compact, Proportional, Island Pill) ── */
+#zs-bar,
+#zs-bar.zs-bar-inline,
+#zs-bar.zs-bar-inline.zs-prov-chatgpt,
+#zs-bar.zs-bar-inline.zs-prov-claude,
+#zs-bar.zs-bar-anchored {
+  position: fixed !important;
+  top: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2147483640 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  box-sizing: border-box !important;
+  padding: 4px 6px 4px 10px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(92vw, 560px) !important;
+  background: rgba(13, 16, 23, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  color: #f4f4f5 !important;
+  font-size: 11px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation: zs-bar-drop 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes zs-bar-drop {
+  from { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+html.zs-light #zs-bar,
+html.zs-light #zs-bar.zs-bar-inline,
+html.zs-light #zs-bar.zs-bar-inline.zs-prov-chatgpt,
+html.zs-light #zs-bar.zs-bar-inline.zs-prov-claude,
+html.zs-light #zs-bar.zs-bar-anchored {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  color: #18181b !important;
+}
+
+#zs-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+#zs-dot.on {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981, 0 0 14px rgba(16, 185, 129, 0.4);
+}
+#zs-dot.warn {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+#zs-dot.off {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+#zs-brand {
+  font-size: 10px;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  flex: none;
+}
+#zs-brand .zs-free {
+  font-size: 8.5px;
+  opacity: 0.75;
+  margin-left: 2px;
+}
+html.zs-light #zs-brand {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+#zs-state {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 220px;
   display: flex;
   align-items: center;
-  gap: 9px;
-  box-sizing: border-box;
-  padding: 5px 8px 5px 10px;
-  background: rgba(20, 20, 28, 0.97);
-  color: #e8e8ec;
-  border: 1px solid rgba(129, 140, 248, 0.30);
-  border-radius: 9px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(10px);
-  font-size: 11.5px;
-  user-select: none;
+  gap: 5px;
+  font-size: 11px;
+  color: #d4d4d8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-/* In-flow mode: the bar is a real, full-width node in the composer layout that
-   pushes content down instead of floating. Two looks:
-   • default (mounted ABOVE the input box, e.g. Gemini) → a subtle surface card so
-     it reads as a panel and doesn't float in empty space;
-   • .zs-bar-inside (mounted INSIDE the input box, e.g. DeepSeek) → transparent
-     with just a divider, so it blends into the composer surface it lives in. */
-#zs-bar.zs-bar-inline {
-  position: static;
-  width: 100%;
-  left: auto; top: auto;
-  margin: 0 0 8px;
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 12px;
-  box-shadow: none;
-  backdrop-filter: none;
-  padding: 7px 12px;
-}
-html.zs-light #zs-bar.zs-bar-inline {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.10);
-}
-#zs-bar.zs-bar-inline.zs-bar-inside {
-  margin: 0 0 6px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0;
-  /* Inset to match the composer's own text padding (≈16px) so the content lines
-     up with the input and the right-side buttons clear the rounded corner. */
-  padding: 4px 16px 10px;
-}
-html.zs-light #zs-bar.zs-bar-inline.zs-bar-inside {
-  background: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-/* Anchored mode: the bar keeps position:fixed (it must NOT enter the site's
-   framework-managed composer DOM, e.g. Kimi's Vue subtree) but the core sizes
-   and positions it to hug the composer's top edge at full width, with reserved
-   padding on the composer so it reads as in-flow. Transparent like the
-   .zs-bar-inside look, so it blends into the composer surface. */
-#zs-bar.zs-bar-anchored {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  /* A touch of vertical room so the bar doesn't feel cramped against the input
-     (matches the roomier DeepSeek inline look). The reserved strip in placeBar
-     (bar height + gap) tracks this automatically. */
-  padding: 9px 16px;
-}
-html.zs-light #zs-bar.zs-bar-anchored {
-  background: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-/* Per-site tuning. On Gemini the default system stack looked foreign next to
-   Google Sans, and weight 700 read heavy - match the host for a native feel.
-   DeepSeek is left exactly as-is (it already blends well). */
-#zs-bar.zs-prov-gemini {
-  font-family: "Google Sans Text", "Google Sans", Roboto, ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
-}
-#zs-bar.zs-prov-gemini #zs-brand,
-#zs-bar.zs-prov-gemini #zs-action,
-#zs-bar.zs-prov-gemini #zs-state b { font-weight: 500; }
-
-/* ChatGPT's composer surface is a CSS grid. Its template was, until 2026-09:
-     "header header header" / "leading primary trailing" / ". footer ."
-   and is now the single-column
-     "eyebrow" / "controls" / "body"
-   The bar mounts inside it (see chatgpt.js barMount) and must claim the
-   full-width TOP row - with an area name the template does not define, grid
-   auto-places it into implicit tracks: measured live 2026-09 on the new
-   template, `grid-area: header` grew the 1-column grid to three columns
-   (220px / 0px / 420px), pushed the bar to a stray row at the bottom right of
-   the composer and collapsed the editor to zero width.
-   The name below is the CURRENT one; chatgpt.js barMount also sets it inline
-   from the live grid-template-areas, so a rename does not have to break this.
-   The bottom margin keeps it off the input row; the negative side margins let
-   it reach the card's padding edges so it reads as part of the composer, like
-   on DeepSeek. */
-/* Selector carries .zs-bar-inline.zs-bar-inside on purpose: the generic
-   `#zs-bar.zs-bar-inline.zs-bar-inside` rule above is more specific than a plain
-   `#zs-bar.zs-prov-chatgpt`, so the margin below was silently losing to it. */
-/* ChatGPT: elevated panel card mounted ABOVE the composer form (like Gemini) */
-#zs-bar.zs-bar-inline.zs-prov-chatgpt {
-  position: static;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 0 10px;
-  box-sizing: border-box;
-  background: rgba(18, 18, 22, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  padding: 8px 14px;
-}
-html.zs-light #zs-bar.zs-bar-inline.zs-prov-chatgpt {
-  background: rgba(248, 249, 252, 0.98);
-  border-color: rgba(99, 102, 241, 0.25);
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
-}
-
-/* Meta AI's composer card has a large corner radius (rounded-32 = 32px), so the
-   full-width anchored bar's left/right ends run under the curve - the brand and
-   the Discord/switch/support icons crowd the rounding. Inset the content by ~the
-   radius so both edges clear the corners cleanly. */
-#zs-bar.zs-bar-anchored.zs-prov-meta { padding-left: 30px; padding-right: 30px; }
-
-#zs-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; cursor: help; }
-#zs-dot.on { background: #34d399; box-shadow: 0 0 8px #34d399; }
-#zs-dot.warn { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
-#zs-dot.off { background: #6b7280; }
-
-#zs-brand { font-weight: 700; letter-spacing: 0.2px; flex: none; font-size: 12.5px; }
-.zs-free {
-  font-size: 9.5px; font-weight: 500; letter-spacing: 0.2px;
-  color: rgba(255, 255, 255, 0.55); background: none; border: none;
-  padding: 0; margin-left: 3px; vertical-align: middle;
-}
-
-/* provider instability warning (Gemini / Kimi): a small amber pill that FLOATS
-   just above the bar (positioned by placeUnstable each frame) instead of sitting
-   inside it - so it never crowds the row on narrow composers. Click / hover for
-   the full explanation (toast + title tooltip). */
-#zs-unstable {
-  position: fixed; z-index: 2147483601;
-  display: inline-flex; align-items: center; cursor: pointer;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
-  color: #fbbf24; background: rgba(28, 24, 12, 0.97);
-  border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 6px;
-  padding: 3px 8px; line-height: 1.3;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-  transition: background 0.14s ease;
-}
-#zs-unstable:hover { background: rgba(44, 37, 16, 0.98); }
-html.zs-light #zs-unstable {
-  color: #92610a; background: rgba(255, 251, 240, 0.98);
-  border-color: rgba(180, 130, 10, 0.45);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
-}
-
-/* state line: takes the slack, single line, ellipsis if it can't fit */
-#zs-state {
-  flex: 1; min-width: 0;
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11.5px; line-height: 1.3; opacity: 0.85;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.zs-state-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-#zs-state b { font-weight: 700; opacity: 1; color: #c7d2fe; }
-#zs-state.zs-state-warn { opacity: 1; color: #fca5a5; }
+#zs-state b { font-weight: 600; color: #e4e4e7; }
+#zs-state.zs-state-warn { color: #fca5a5; }
 #zs-state.zs-state-warn b { color: #fecaca; }
-#zs-bar.tone-active #zs-state b { color: #6ee7b7; }
+html.zs-light #zs-state { color: #52525b; }
+html.zs-light #zs-state b { color: #18181b; }
 
-/* live + idle dots inside the state line */
 .zs-live-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: #34d399; flex: none;
-  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex: none;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
   animation: zs-live 1.8s ease-out infinite;
 }
 @keyframes zs-live {
-  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
-  100% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+  100% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
 }
 .zs-live-dot.idle { background: #9ca3af; animation: none; box-shadow: none; }
 
-/* primary action button (Start) */
 #zs-action {
   flex: none;
-  padding: 5px 11px;
-  border-radius: 7px; border: 1px solid transparent;
-  font-size: 11.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
-  transition: filter 0.15s ease, background 0.15s ease;
-  /* The label's "▶" (U+25B6) has both a text and an emoji presentation. On sites
-     whose font stack has no text glyph for it (ChatGPT), the browser falls back
-     to the colour emoji font and the arrow renders as a blue emoji instead of a
-     flat character like everywhere else. The labels also carry U+FE0E after the
-     arrow, which requests the same thing on browsers without this property. */
-  font-variant-emoji: text;
+  height: 26px;
+  padding: 3px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 #zs-action[data-kind="start"] {
-  background: linear-gradient(135deg, #10b981, #059669); color: #fff; border-color: transparent;
-  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
 }
-#zs-action[data-kind="start"]:hover { filter: brightness(1.08); }
-/* Degraded start: Roblox is down but another MCP server is live. Amber to signal
-   "startable, but not the full setup" - distinct from the blue full-ready start. */
+#zs-action[data-kind="start"]:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.55);
+  filter: brightness(1.08);
+}
+#zs-action[data-kind="start"]:active {
+  transform: translateY(0) scale(0.97);
+}
 #zs-action[data-kind="start-degraded"] {
-  background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff; border-color: transparent;
-  box-shadow: 0 2px 12px rgba(217, 119, 6, 0.45);
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.45);
 }
-#zs-action[data-kind="start-degraded"]:hover { filter: brightness(1.08); }
 #zs-action:disabled {
-  background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.45);
-  border-color: rgba(255, 255, 255, 0.10); box-shadow: none; cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  box-shadow: none;
 }
-/* attention flash when the user sends on a fresh chat without starting */
 #zs-action.zs-flash { animation: zs-flash 0.4s ease-in-out 3; }
 @keyframes zs-flash {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.6); }
 }
 
-/* stop button (replaces the action button while the agent is busy) */
 #zs-stop {
-  flex: none; padding: 5px 11px;
-  background: #ef4444; color: #fff; border: 0; border-radius: 7px;
-  font-size: 11.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  flex: none;
+  height: 24px;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #f87171;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
 }
-#zs-stop:hover { background: #dc2626; }
-/* Winding-down state: the loop is finishing its in-flight step after a Stop
-   click. Dimmed + not-allowed so it reads as "registered, please wait". */
+#zs-stop:hover {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.8);
+  color: #ffffff;
+  transform: scale(1.04);
+}
 #zs-stop[data-state="stopping"] {
   background: #b45309; cursor: progress; opacity: 0.85;
 }
-#zs-stop[data-state="stopping"]:hover { background: #b45309; }
 
-/* bar controls: one neutral icon-button family (Discord, support, switch) */
 #zs-discord, #zs-support {
-  flex: none; width: 28px; height: 28px; padding: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255, 255, 255, 0.06); color: #b8b8bf;
-  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px;
-  cursor: pointer; text-decoration: none;
-  transition: background 0.14s ease, color 0.14s ease;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
 }
-#zs-discord:hover, #zs-support:hover { background: rgba(255, 255, 255, 0.11); color: #ededf0; }
-#zs-discord:active, #zs-support:active, #zs-switch:active { transform: scale(0.96); }
+#zs-discord:hover, #zs-support:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  transform: scale(1.06);
+}
 
-/* model switcher: names the current AI and opens the panel at Switch AI */
 #zs-switch {
-  flex: none; display: flex; align-items: center; gap: 5px;
-  height: 28px; padding: 0 9px;
-  background: rgba(255, 255, 255, 0.06); color: #d0d0d6;
-  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px;
-  font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap;
-  transition: background 0.14s ease;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  color: #d0d0d6;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
-#zs-switch:hover { background: rgba(255, 255, 255, 0.11); }
-#zs-switch svg { opacity: 0.55; }
+#zs-switch:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  transform: scale(1.04);
+}
+#zs-switch svg { opacity: 0.6; }
+
+html.zs-light #zs-switch,
+html.zs-light #zs-support,
+html.zs-light #zs-discord {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #52525b;
+}
+html.zs-light #zs-switch:hover,
+html.zs-light #zs-support:hover,
+html.zs-light #zs-discord:hover {
+  background: rgba(0, 0, 0, 0.09);
+  color: #18181b;
+}
 
 /* ── the "more" menu popover (right/bottom set inline) ────────────────────── */
 #zs-menu {

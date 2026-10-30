@@ -2831,7 +2831,7 @@
           <span id="zs-brand">⚡ ZXScript <span class="zs-free">v${EXT_VERSION}</span></span>
           <span id="zs-state"></span>
           <button id="zs-action"></button>
-          <button id="zs-stop" hidden>■ หยุดการทำงาน</button>
+          <button id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">■ หยุด</button>
           <a id="zs-discord" href="https://www.zirconx.xyz" target="_blank" rel="noopener" title="เว็บไซต์ผู้พัฒนา: www.zirconx.xyz"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a>
           <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span id="zs-switch-name"></span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <button id="zs-support" aria-label="ผู้พัฒนา" title="ผู้พัฒนา: zxd44 (ZirconX)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
@@ -3348,7 +3348,7 @@
         // an EXISTING conversation (one that has turns) we did not start.
         if (bridgeOk) {
           toneClass = "standby";
-          msg = `พร้อมทำงาน · กดปุ่มเพื่อเริ่มสั่งงาน Studio หรือพิมพ์คุยปกติ`;
+          msg = `พร้อมเชื่อมต่อ Studio`;
           label = "▶︎ เริ่มให้ AI ทำงาน"; kind = "start";
         } else if (addonOk) {
           // Roblox is down but another MCP server is live: allow a DEGRADED start
@@ -3742,12 +3742,6 @@
       // reads where the bar ended up. One frame of lag is imperceptible.
       placeUnstable();
 
-      // While a bot-check challenge OR a blocking modal (login / consent) is on
-      // screen, get fully out of the way: the (often transparent) anchored bar is
-      // a real full-width element over the composer's top edge and would silently
-      // intercept clicks on the challenge's / modal's buttons (e.g. "Continue with
-      // Google" at sign-in). Hide the bar and drop the reserved padding strip; it
-      // reappears on the next frame once the overlay clears.
       if (
         (P.captchaPresent && P.captchaPresent()) ||
         (P.overlayBlocking && P.overlayBlocking())
@@ -3758,100 +3752,23 @@
         return;
       }
 
-      // Preferred: in-flow mount inside the composer (no overlap, full width).
-      const mount = computeBarMount();
-      if (mount) {
-        clearAnchorPad();
-        if (bar.parentElement !== mount.parent || bar.nextElementSibling !== mount.before) {
-          try { mount.parent.insertBefore(bar, mount.before || null); } catch {}
-        }
-        if (!bar.classList.contains("zs-bar-inline")) {
-          bar.classList.add("zs-bar-inline");
-          bar.style.cssText = ""; // drop any leftover float positioning
-        }
-        // Transparent (blends in) when mounted INSIDE the input box; surface card
-        // when mounted ABOVE it. The provider's barMount() signals which via .inside.
-        bar.classList.toggle("zs-bar-inside", !!mount.inside);
-        bar.style.display = "flex";
-        if (menuEl && !menuEl.hidden) {
-          const br = bar.getBoundingClientRect();
-          menuEl.style.right = Math.round(window.innerWidth - br.right) + "px";
-          menuEl.style.bottom = Math.round(window.innerHeight - br.top + 6) + "px";
-          menuEl.style.maxHeight = Math.max(140, Math.round(br.top - 16)) + "px";
-        }
-        return;
+      // Modern Dynamic Island: Action Bar permanently floats at top-center
+      if (root && bar.parentElement !== root) {
+        root.appendChild(bar);
       }
-
-      // Anchored mode: the provider wants the integrated, in-composer LOOK but
-      // its composer is a framework-reconciled subtree we must NOT insert our
-      // node into (e.g. Kimi's Vue tree - inserting #zs-bar there makes Vue's
-      // next diff reuse the bar node as a host and nest the editor inside it).
-      // So we keep the bar in our own #zs-root, position it (position:fixed) to
-      // hug the composer's top edge at full width, and RESERVE that strip with
-      // padding-top on the composer so it reads as in-flow without ever becoming
-      // a child of the framework's DOM. barAnchor() returns the element to hug.
-      const anchorEl = (P.barAnchor && P.barAnchor()) || null;
-      if (anchorEl && anchorEl.isConnected) {
-        bar.classList.remove("zs-bar-inline", "zs-bar-inside");
-        bar.classList.add("zs-bar-anchored");
-        if (root && bar.parentElement !== root) root.appendChild(bar);
-        const r = anchorEl.getBoundingClientRect();
-        if (!r.width) { bar.style.display = "none"; clearAnchorPad(); if (menuEl) menuEl.hidden = true; return; }
-        bar.style.display = "flex";
-        const bh = bar.offsetHeight || 34;
-        if (anchorPadEl && anchorPadEl !== anchorEl) clearAnchorPad();
-        anchorPadEl = anchorEl;
-        anchorEl.style.paddingTop = (bh + 6) + "px"; // reserve the strip the bar sits in (+gap)
-        const nL = Math.round(r.left) + "px";
-        const nT = Math.round(r.top) + "px";
-        const nW = Math.round(r.width) + "px";
-        if (bar.style.left !== nL) bar.style.left = nL;
-        if (bar.style.top !== nT) bar.style.top = nT;
-        if (bar.style.width !== nW) bar.style.width = nW;
-        if (menuEl && !menuEl.hidden) {
-          bar.classList.remove("zs-bar-inline"); // ensure fixed geometry for menu math
-          const mR = Math.round(window.innerWidth - (r.left + r.width)) + "px";
-          const mB = Math.round(window.innerHeight - r.top + 6) + "px";
-          const mMaxH = Math.max(140, Math.round(r.top - 16)) + "px";
-          if (menuEl.style.right !== mR) menuEl.style.right = mR;
-          if (menuEl.style.bottom !== mB) menuEl.style.bottom = mB;
-          if (menuEl.style.maxHeight !== mMaxH) menuEl.style.maxHeight = mMaxH;
-        }
-        return;
-      }
-      bar.classList.remove("zs-bar-anchored");
       clearAnchorPad();
-
-      // Fallback: float just above the editor (fixed positioning), for sites
-      // where no clean inline mount could be resolved.
-      if (bar.classList.contains("zs-bar-inline")) {
-        bar.classList.remove("zs-bar-inline");
-        if (root && bar.parentElement !== root) root.appendChild(bar);
-      }
-      const f = (P.getEditor && P.getEditor()) || (P.composerFrame && P.composerFrame());
-      if (!f) { bar.style.display = "none"; if (menuEl) menuEl.hidden = true; return; }
       bar.style.display = "flex";
-      const r = f.getBoundingClientRect();
-      if (!r.width) { bar.style.display = "none"; return; }
-      const w = Math.min(r.width, BAR_MAX_W);
-      const left = Math.round(r.left + (r.width - w) / 2);
-      const bh = bar.offsetHeight || 40;
-      const top = Math.max(4, Math.round(r.top - bh - BAR_GAP));
-      const fW = w + "px";
-      const fL = left + "px";
-      const fT = top + "px";
-      if (bar.style.width !== fW) bar.style.width = fW;
-      if (bar.style.left !== fL) bar.style.left = fL;
-      if (bar.style.top !== fT) bar.style.top = fT;
-      // Keep the open "more" menu anchored to the bar, opening upward.
+
+      // Position the menu dropdown right below the floating top capsule
       if (menuEl && !menuEl.hidden) {
         const br = bar.getBoundingClientRect();
-        const fR = Math.round(window.innerWidth - br.right) + "px";
-        const fB = Math.round(window.innerHeight - br.top + 6) + "px";
-        const fMaxH = Math.max(140, Math.round(br.top - 16)) + "px";
-        if (menuEl.style.right !== fR) menuEl.style.right = fR;
-        if (menuEl.style.bottom !== fB) menuEl.style.bottom = fB;
-        if (menuEl.style.maxHeight !== fMaxH) menuEl.style.maxHeight = fMaxH;
+        menuEl.style.position = "fixed";
+        menuEl.style.top = Math.round(br.bottom + 8) + "px";
+        menuEl.style.left = Math.round(br.left + br.width / 2) + "px";
+        menuEl.style.transform = "translateX(-50%)";
+        menuEl.style.bottom = "auto";
+        menuEl.style.right = "auto";
+        menuEl.style.maxHeight = Math.max(160, Math.round(window.innerHeight - br.bottom - 24)) + "px";
       }
     }
 
@@ -3948,6 +3865,12 @@
           });
         }
         document.documentElement.appendChild(cover);
+        // Also update state on top Action Bar directly
+        if (stateEl) {
+          stateEl.innerHTML = `<span class="zs-live-dot"></span><span class="zs-state-txt">${text || "⚡ AI กำลังทำงาน…"}</span>`;
+        }
+        if (stopBtn) stopBtn.hidden = false;
+        if (actionBtn) actionBtn.style.display = "none";
       }
       if (text) {
         const lbl = cover.querySelector(".zs-cover-label");
