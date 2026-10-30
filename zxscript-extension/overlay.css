@@ -535,6 +535,46 @@ button.zs-site-opt:hover .zs-site-go { opacity: 1; transform: translateX(0); }
   border: 1px solid rgba(16, 185, 129, 0.25);
   flex: none;
 }
+
+.zs-hud-stop {
+  margin-left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  font-size: 8.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  line-height: 1;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.zs-hud-stop:hover {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.8);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+.zs-hud-stop:active {
+  transform: scale(0.92);
+}
+html.zs-light .zs-hud-stop {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #dc2626;
+}
+html.zs-light .zs-hud-stop:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #b91c1c;
+}
+
 .zs-hud-sep {
   width: 1px;
   height: 12px;
@@ -558,7 +598,47 @@ html.zs-light #zs-input-cover {
 html.zs-light .zs-cover-label {
   color: #18181b;
 }
-html.zs-light .zs-hud-sep {
+html.zs-light 
+.zs-hud-stop {
+  margin-left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  font-size: 8.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  line-height: 1;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.zs-hud-stop:hover {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.8);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+.zs-hud-stop:active {
+  transform: scale(0.92);
+}
+html.zs-light .zs-hud-stop {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #dc2626;
+}
+html.zs-light .zs-hud-stop:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #b91c1c;
+}
+
+.zs-hud-sep {
   background: rgba(0, 0, 0, 0.1);
 }
 

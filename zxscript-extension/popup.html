@@ -486,10 +486,13 @@
       <span class="title">ZXScript</span>
       <span id="ver" class="ver"></span>
     </div>
-    <a href="https://www.zirconx.xyz" target="_blank" rel="noopener" class="author" style="text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 4px; transition: color 0.15s;" title="เยี่ยมชมเว็บไซต์ www.zirconx.xyz">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-      zirconx.xyz
-    </a>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button id="btn-sound-toggle" style="background: none; border: none; cursor: pointer; color: #a1a1aa; font-size: 11px; padding: 2px 4px; transition: transform 0.15s ease;" title="เปิด/ปิดเสียงแจ้งเตือน (Chime)">🔔</button>
+      <a href="https://www.zirconx.xyz" target="_blank" rel="noopener" class="author" style="text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 4px; transition: color 0.15s;" title="เยี่ยมชมเว็บไซต์ www.zirconx.xyz">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        zirconx.xyz
+      </a>
+    </div>
   </div>
 
   <!-- STATUS MONITOR SCREEN -->
@@ -651,9 +654,12 @@
       <button id="btn-caveman">โหมด Caveman</button>
       <button id="btn-rest" style="color: #10b981; border-color: rgba(16, 185, 129, 0.25);">พักผ่อน/บันทึก</button>
     </div>
-    <div style="margin-top: 6px;">
-      <button id="btn-save-prompt" class="btn-primary" style="padding: 6px 10px;">
-        บันทึกการตั้งค่า
+    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+      <button id="btn-insert-chat" class="btn-primary" style="background: #10b981; border-color: rgba(16, 185, 129, 0.4); justify-content: center; font-size: 11.5px; padding: 7px 10px; cursor: pointer;">
+        ⚡ แทรกลงในแชททันที (1-Click)
+      </button>
+      <button id="btn-save-prompt" class="btn-secondary" style="justify-content: center; font-size: 10.5px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #a1a1aa; cursor: pointer;">
+        💾 บันทึกเป็น System Prompt ค่าเริ่มต้น
       </button>
     </div>
   </div>

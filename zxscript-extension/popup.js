@@ -348,3 +348,79 @@ setInterval(() => {
   refresh();
   highlightActiveTabs();
 }, 2500);
+
+
+// ── Sound Toggle & 1-Click Chat Insert ────────────────────────────────────────
+const btnSound = document.getElementById("btn-sound-toggle");
+if (btnSound) {
+  chrome.storage.local.get({ soundEnabled: true }, (res) => {
+    const on = res.soundEnabled !== false;
+    btnSound.textContent = on ? "🔔" : "🔕";
+    btnSound.title = on ? "เสียงแจ้งเตือน: เปิดอยู่ (คลิกเพื่อปิด)" : "เสียงแจ้งเตือน: ปิดอยู่ (คลิกเพื่อเปิด)";
+  });
+  btnSound.addEventListener("click", () => {
+    chrome.storage.local.get({ soundEnabled: true }, (res) => {
+      const next = !res.soundEnabled;
+      chrome.storage.local.set({ soundEnabled: next }, () => {
+        btnSound.textContent = next ? "🔔" : "🔕";
+        btnSound.title = next ? "เสียงแจ้งเตือน: เปิดอยู่ (คลิกเพื่อปิด)" : "เสียงแจ้งเตือน: ปิดอยู่ (คลิกเพื่อเปิด)";
+        showToast(next ? "เปิดเสียงแจ้งเตือนแล้ว" : "ปิดเสียงแจ้งเตือนแล้ว");
+        chrome.tabs.query({}, (tabs) => {
+          tabs.forEach((t) => {
+            chrome.tabs.sendMessage(t.id, { type: "zs-sound-toggle", enabled: next }, () => {
+              void chrome.runtime.lastError;
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+const btnInsertChat = document.getElementById("btn-insert-chat");
+if (btnInsertChat) {
+  btnInsertChat.addEventListener("click", () => {
+    const text = (promptInput && promptInput.value.trim()) || "";
+    if (!text) {
+      showToast("กรุณาเลือกหรือพิมพ์ข้อความก่อน");
+      return;
+    }
+    const supported = [
+      "chat.deepseek.com",
+      "chatgpt.com",
+      "gemini.google.com",
+      "qwen",
+      "kimi.moonshot",
+      "chatglm.cn",
+      "meta.ai",
+      "arena.ai"
+    ];
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const targetTab = tabs[0];
+      const isSupported = targetTab && targetTab.url && supported.some((h) => targetTab.url.includes(h));
+      if (isSupported) {
+        sendInsert(targetTab.id, text);
+      } else {
+        chrome.tabs.query({}, (allTabs) => {
+          const found = allTabs.find((t) => t.url && supported.some((h) => t.url.includes(h)));
+          if (found) {
+            chrome.tabs.update(found.id, { active: true }, () => {
+              sendInsert(found.id, text);
+            });
+            if (found.windowId) chrome.windows.update(found.windowId, { focused: true });
+          } else {
+            showToast("ไม่พบแท็บแชท AI ที่เปิดอยู่");
+          }
+        });
+      }
+    });
+  });
+}
+
+function sendInsert(tabId, text) {
+  chrome.tabs.sendMessage(tabId, { type: "zs-insert-text", text }, () => {
+    void chrome.runtime.lastError;
+    showToast("⚡ แทรกข้อความลงในแชทสำเร็จ");
+    setTimeout(() => window.close(), 500);
+  });
+}

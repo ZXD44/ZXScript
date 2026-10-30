@@ -4,6 +4,13 @@ Control Roblox Studio with AI, for free. ZXScript turns a normal AI chat (ChatGP
 
 It's a Chrome/Edge browser extension plus a small local bridge that connects the chat to Roblox Studio through the official MCP server. **DeepSeek is the recommended provider.** ChatGPT, Gemini, Kimi, GLM, Qwen, Arena and Meta AI also work. On ChatGPT, screenshots and image input are disabled on purpose (its free tier caps files/images on a separate quota from messages, so vision would only work part of the day); ChatGPT also summarises its own context in long sessions, so ZXScript re-states its operating instructions periodically (shown as a "Reminder" chip) to stop it forgetting it can run commands. Gemini and Kimi are fully supported with continuous tool prompt enforcement. On Arena, keep the mode dropdown on **Direct** (ZXScript only supports Direct mode).
 
+## ✨ Latest Features & Enhancements
+- 🏝️ **Top Dynamic Island HUD:** Anchored at the top center of the viewport with real-time tool state tracking and a 1-click emergency stop button (`■`).
+- 🔔 **Web Audio Chimes:** Zero-latency synthesized pleasant chime on turn completion and subtle error pings (toggleable in popup).
+- 🔄 **Zero-F5 Reconnection:** Automatic connection health recovery that dismisses warning banners as soon as Studio or the Bridge is back online.
+- ⚡ **1-Click Prompt Injector:** Send ready-made architecture, Caveman, or ProfileStore prompts into the active chat in 1 click.
+- 🇹🇭 **Thai Error Diagnostics:** Friendly localized error messages for `execute_luau` replacing internal `AssistantCommand:XX:` frames with line numbers.
+
 ## Setup
 
 **Load the extension manually (Edge or Chrome):**

@@ -288,6 +288,87 @@
     toolsAt: 0,
   };
 
+  // ── Web Audio API Synthesizer (Zero-latency Task Complete & Error Chimes) ───
+  const ZSSound = (() => {
+    let audioCtx = null;
+    let enabled = true;
+    try {
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get({ soundEnabled: true }, (res) => {
+          if (typeof res.soundEnabled === "boolean") enabled = res.soundEnabled;
+        });
+      }
+    } catch {}
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioCtx = new AudioCtx();
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function play(type = "done") {
+      if (!enabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        if (type === "done") {
+          // Linear / macOS warm pleasant two-tone chime (C5 -> G5)
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+
+          osc1.type = "sine";
+          osc1.frequency.setValueAtTime(523.25, now);
+          osc1.frequency.exponentialRampToValueAtTime(523.25, now + 0.12);
+
+          osc2.type = "sine";
+          osc2.frequency.setValueAtTime(783.99, now + 0.1);
+          osc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.35);
+
+          gainNode.gain.setValueAtTime(0.001, now);
+          gainNode.gain.linearRampToValueAtTime(0.14, now + 0.02);
+          gainNode.gain.exponentialRampToValueAtTime(0.08, now + 0.1);
+          gainNode.gain.linearRampToValueAtTime(0.16, now + 0.12);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+
+          osc1.connect(gainNode);
+          osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          osc1.start(now);
+          osc1.stop(now + 0.14);
+          osc2.start(now + 0.1);
+          osc2.stop(now + 0.55);
+        } else if (type === "error") {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(160, now + 0.25);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        }
+      } catch {}
+    }
+
+    return {
+      play,
+      setEnabled: (v) => { enabled = !!v; },
+      isEnabled: () => enabled
+    };
+  })();
+
+
   async function waitFor(pred, timeout) {
     const t0 = Date.now();
     while (Date.now() - t0 < timeout) {
@@ -1376,10 +1457,11 @@
     const REMIND_TOOLS_EVERY = 8;
     ui.showStop(true);
     P.setInputLock(true); // prevent user from typing while the agent is active
-    ui.inputCover(true);  // keep the "Agent is working" cover up for the WHOLE loop
+    ui.inputCover(true, "⚡ เริ่มต้นทำงานใน Studio…");  // keep the "Agent is working" cover up for the WHOLE loop
     diag("loop.start", { base });
     try {
       while (!A.stop) {
+        ui.setHudStatus("⚡ รอ AI ตอบกลับ…");
         // Gate the WHOLE cycle on tab visibility. We only advance - read the
         // reply, PARSE it, EXECUTE a tool, inject the result - while the AI tab
         // is the FOREGROUND tab of its Edge window. document.visibilityState
@@ -1517,6 +1599,7 @@
           A.toolName = call.tool;
           A.toolItem = res.item;
           A.toolArg = argSummary(call);
+          ui.setHudStatus(`⚡ รัน: ${call.tool}…`);
           // Record this turn as dispatched OFF the DOM so the auto-resume
           // watchdog never re-fires it after a scroll re-render wipes the node's
           // zloop/zResume markers (see the `executed` map).
@@ -1606,11 +1689,13 @@
           const images = A.pendingImages;
           A.pendingImages = null;
           diag("images.consumed", { count: images ? images.length : 0 });
+          ui.setHudStatus("⚡ กำลังส่งผลลัพธ์กลับ…");
           base = await submitAndGetBase(toSend, images);
         }
       }
     } catch (e) {
       diag("loop.error", { msg: String((e && e.message) || e) });
+      ZSSound.play("error");
       ui.banner("warn", "ข้อผิดพลาดภายในลูป", String((e && e.message) || e));
     } finally {
       A.running = false;
@@ -1632,7 +1717,10 @@
       ui.inputCover(false); // lift the "Agent is working" cover when the loop ends
       P.setInputLock(false); // always unlock, even on error or stop
       diag("loop.end");
-      if (!A.stop && !A.stopping) notifyTurnComplete("งานเสร็จสิ้นเรียบร้อยแล้ว!");
+      if (!A.stop && !A.stopping) {
+        notifyTurnComplete("งานเสร็จสิ้นเรียบร้อยแล้ว!");
+        ZSSound.play("done");
+      }
     }
   }
 
@@ -3337,7 +3425,15 @@
       // Bridge-drop alert: a clear, persistent red banner the moment a
       // previously-connected bridge goes offline. Clears on reconnect.
       if (wasConnected && !s.connected) bridgeAlert(true);
-      if (s.connected) bridgeAlert(false);
+      if (s.connected) {
+        bridgeAlert(false);
+        clearBanner("Studio ยังไม่พร้อม");
+        clearBanner("Bridge หรือ Studio ออฟไลน์");
+        clearBanner("Bridge ขาดการเชื่อมต่อ");
+      }
+      if (!wasConnected && s.connected) {
+        ensureTools(true).catch(() => {});
+      }
       wasConnected = s.connected;
       // Once the bridge has connected at least once, onboarding is done: never
       // resurface the "download the bridge" setup card again (otherwise, if the
@@ -3370,6 +3466,21 @@
       b.querySelector(".zs-banner-reload").addEventListener("click", () => location.reload());
       root.appendChild(b);
       bridgeBannerEl = b;
+    }
+
+
+    function clearBanner(keyword) {
+      if (!keyword) {
+        root.querySelectorAll(".zs-banner:not(.zs-stale)").forEach((b) => b.remove());
+        return;
+      }
+      root.querySelectorAll(".zs-banner").forEach((b) => {
+        const t = b.querySelector(".zs-banner-t");
+        if (t && t.textContent.includes(keyword)) {
+          b.remove();
+          if (bridgeBannerEl === b) bridgeBannerEl = null;
+        }
+      });
     }
 
     // Show (on=true) / clear (on=false) the bridge-disconnected red banner.
@@ -3721,7 +3832,7 @@
       };
     }
 
-    function inputCover(on) {
+    function inputCover(on, text) {
       const ed = P.getEditor();
       if (!on) {
         if (cover) { cover.style.display = "none"; cover.dataset.on = ""; }
@@ -3745,8 +3856,21 @@
         cover.innerHTML = `<span class="zs-cover-pulse-ring"><span class="zs-cover-pulse"></span></span>` +
           `<span class="zs-hud-brand">Studio AI</span>` +
           `<span class="zs-hud-sep"></span>` +
-          `<span class="zs-cover-label">⚡ AI กำลังทำงานใน Studio…</span>`;
+          `<span class="zs-cover-label">⚡ AI กำลังทำงานใน Studio…</span>` +
+          `<button class="zs-hud-stop" title="หยุดการทำงานฉุกเฉิน (Stop)">■</button>`;
+        const stopMini = cover.querySelector(".zs-hud-stop");
+        if (stopMini) {
+          stopMini.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            stopLoop();
+          });
+        }
         document.documentElement.appendChild(cover);
+      }
+      if (text) {
+        const lbl = cover.querySelector(".zs-cover-label");
+        if (lbl) lbl.textContent = text;
       }
       cover.dataset.on = "1";
       cover.style.display = "flex";
@@ -3775,6 +3899,13 @@
         coverRaf = requestAnimationFrame(place);
       };
       place();
+    }
+
+
+    function setHudStatus(text) {
+      if (!cover) return;
+      const lbl = cover.querySelector(".zs-cover-label");
+      if (lbl && text) lbl.textContent = text;
     }
 
     function toast(msg) {
@@ -3867,7 +3998,7 @@
     }
 
     build();
-    return { setStatus, staleExtensionAlert, setStarted, setStarting, showStop, markStopping, inputCover, toast, banner, showImages, nudgeStart, updateStartGate, refreshSetup, getCustomPrompt, getCustomMcpServers, openMenu: (toSupport) => openMenuFn && openMenuFn(toSupport) };
+    return { setStatus, staleExtensionAlert, setStarted, setStarting, showStop, markStopping, inputCover, setHudStatus, clearBanner, toast, banner, showImages, nudgeStart, updateStartGate, refreshSetup, getCustomPrompt, getCustomMcpServers, openMenu: (toSupport) => openMenuFn && openMenuFn(toSupport) };
   })();
 
   // ── Live token + timer, shown ONLY on a tool call's chip detail. The
@@ -4123,6 +4254,17 @@
     }
     if (msg && msg.type === "zs-open-menu") {
       ui.openMenu(false); // from the popup's Settings button — opens at the top (Switch AI / custom prompt)
+    }
+    if (msg && msg.type === "zs-insert-text") {
+      if (msg.text) {
+        P.setEditorText(msg.text);
+        const ed = P.getEditor();
+        if (ed) ed.focus();
+        ui.toast("⚡ แทรกข้อความลงในแชทแล้ว");
+      }
+    }
+    if (msg && msg.type === "zs-sound-toggle") {
+      ZSSound.setEnabled(msg.enabled);
     }
   });
 

@@ -59,6 +59,11 @@ ZXScript/
 - **Play Mode Auto-Routing:** Automatically retries `execute_luau` on Server datamodel when Studio is in Play mode.
 - **Provider Agnostic & All-Platform Verified:** Fortified start button (`▶︎ เริ่มทำงาน`) across all 8 major AI platforms: DeepSeek, ChatGPT, Gemini, Qwen, Kimi, GLM / Z.ai, Meta AI, and Arena.
 - **Impeccable Style UI & 5px Custom Scrollbars:** Conforms strictly to impeccable.style guidelines with deep Zinc-950 aesthetics, custom 5px slim pill scrollbars on all containers, and tactile micro-interactions.
+- **Top Dynamic Island HUD (Impeccable Design):** Center-anchored floating status pill (`top: 16px; left: 50%`) with live state feedback (`⚡ รัน: execute_luau…`, `⚡ รอ AI ตอบกลับ…`) and an integrated mini emergency stop button (`■`).
+- **Zero-Latency Web Audio Synthesizer:** Elegant Mac/Linear-style two-tone success chimes and alert pings synthesized natively via the Web Audio API without heavy MP3 dependencies (toggleable via bell icon `🔔` in popup).
+- **Zero-F5 Auto-Recovery:** Automatic real-time status sync between extension, Bridge, and Studio; reconnects seamlessly and dismisses error banners without page refreshes.
+- **1-Click Prompt Insertion:** Instant insertion of customized prompt presets into the active chat composer directly from the extension popup.
+- **Localized Luau Error Reporting:** Transforms internal Roblox stack chunks (`AssistantCommand:XX:`) into Thai (`สคริปต์บรรทัดที่ XX:`) with structured bulleted diagnostics and remediation hints.
 - **High-Performance 144Hz Engine:** Zero DOM layout thrashing in requestAnimationFrame positioning loops, ensuring buttery-smooth rendering with no dropped frames.
 - **Persistent Project Memory & Auto-Sync:** Automatically detects intent to rest or finish (e.g. 'พักผ่อน', 'เสร็จแล้ว'), syncs `game.ServerStorage.ZXScript.Memory` in Studio, and mirrors local documentation to `projects/<PlaceName>/`.
 - **Standalone Build:** Optional PyInstaller build (`scripts/build_exe.py`) produces a single `ZXScript-Bridge.exe` with no Python dependency.

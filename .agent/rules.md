@@ -79,3 +79,10 @@ This document specifies mandatory rules for any AI agent interacting with, devel
   - `• สถานะ / ปัญหา:` Brief description of what happened.
   - `• วิธีแก้:` Clear 1-step resolution action.
 - **1-Click Action:** Provide dedicated action buttons (e.g. 1-click Copy Error Log, 1-click Reload) for zero-friction user workflow.
+
+### Rule 9: Real-Time HUD, Sound Chime & 1-Click Chat Insertion Standards
+- **Top Dynamic Island HUD:** Status pill MUST be anchored at top-center (`top: 16px; left: 50%`) with real-time tool state updates (`⚡ รัน: execute_luau…`, `⚡ รอ AI ตอบกลับ…`) and a 1-click mini emergency stop button (`■`).
+- **Localized Luau Error Messages:** Luau execution errors MUST format internal chunk names (`AssistantCommand:XX:`) into Thai (`สคริปต์บรรทัดที่ XX:`) with structured bulleted causes and fix hints.
+- **Synthesized Web Audio Chimes:** Use zero-latency Web Audio API synthesizers for success chimes (warm 2-tone) and error alerts. Configurable via popup bell toggle.
+- **Zero-F5 Auto-Recovery:** Bridge and Studio state reconnects automatically without requiring page reloads (auto-dismissing stale banners).
+- **1-Click Prompt Insertion:** Popup must provide 1-click insertion into the active AI chat's composer.
