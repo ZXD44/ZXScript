@@ -434,8 +434,7 @@
       if (!messageSent && !landed() && !A.stop) {
         diag("send.failed", { tries });
         ui.banner("warn", "ส่งข้อความไม่สำเร็จ",
-          `${P.displayName} ไม่ยอมรับข้อความหลังพยายามส่ง ${tries} ครั้ง ` +
-          `กรุณาลองพิมพ์ข้อความสั้นๆ ด้วยตนเอง (เช่น "ทำต่อ") เพื่อให้ AI ทำงานต่อ`);
+          `• ส่งข้อความไม่ผ่านหลังพยายาม ${tries} ครั้ง\n• วิธีแก้: พิมพ์ข้อความสั้นๆ เช่น "ทำต่อ" ในกล่องแชต`);
       }
       return base;
     } finally {
@@ -1166,8 +1165,8 @@
     // text instead of a result. Surface it as a proper environment ERROR so the
     // model stops and tells the user, instead of treating it as tool output.
     if (r.ok && /Unable to find an active Studio instance|previously active Studio has disconnected/i.test(r.text || "")) {
-      ui.banner("warn", "Roblox Studio ยังไม่ได้เชื่อมต่อ",
-        "กรุณาเปิดแมพของคุณใน Roblox Studio และเปิดใช้งาน MCP Server (ไปที่ Assistant AI → … → Manage MCP Servers → Enable Studio as MCP Server) แล้วลองใหม่อีกครั้ง");
+      ui.banner("warn", "Roblox Studio ยังไม่พร้อม",
+        "• ยังไม่ได้เปิดแมพ หรือยังไม่ได้เปิด MCP Server\n• วิธีแก้: ใน Studio ไปที่ Assistant AI → … → Manage MCP Servers → ติ๊ก Enable Studio as MCP Server");
       return ZS.FEEDBACK.studioOffline;
     }
     // The Roblox MCP reports missing/invalid required parameters as a SUCCESS
@@ -1223,8 +1222,7 @@
     // that instead of blaming the bridge (see bg / isContextInvalidated).
     if (r.kind === "stale-extension") {
       ui.banner("warn", "กรุณารีเฟรชหน้านี้",
-        "ส่วนขยาย ZXScript มีการอัปเดตหรือโหลดใหม่ขณะเปิดแท็บนี้อยู่ ทำให้หน้านี้ยังรันโค้ดเวอร์ชันเก่าและส่งคำสั่งต่อไม่ได้ " +
-        "กรุณารีเฟรชหน้านี้ (F5) เพื่อเชื่อมต่อใหม่ — Bridge และ Roblox Studio ของคุณยังทำงานได้ตามปกติ");
+        "• Extension มีการอัปเดตใหม่ โค้ดเดิมจึงส่งคำสั่งไม่ได้\n• วิธีแก้: กดรีเฟรชหน้านี้ (F5) เพื่อเชื่อมต่อใหม่");
       diag("bridge.staleExtension", { name, error: r.error });
       return ZS.FEEDBACK.staleExtension;
     }
@@ -1391,18 +1389,18 @@
         if (A.stop || res.kind === "stopped") break;
 
         if (res.kind === "context_limit") {
-          ui.banner("limit", `${P.displayName} เกินขีดจำกัด Context`,
-            (res.detail || "") + " - กรุณาเปิดแชตใหม่เพื่อเริ่มเซสชันใหม่");
+          ui.banner("limit", "เกินขีดจำกัด Context",
+            "• ความจำของแชตนี้เต็มแล้ว\n• วิธีแก้: เปิดแชตใหม่เพื่อเริ่มเซสชันใหม่");
           break;
         }
         if (res.kind === "too_long") {
           ui.banner("limit", "การสนทนายาวเกินไป",
-            `${P.displayName} แจ้งว่าการสนทนายาวเกินไป กรุณาเริ่มเซสชันใหม่`);
+            "• เนื้อหาการสนทนายาวเกินขีดจำกัดของโมเดล\n• วิธีแก้: เปิดแชตใหม่เพื่อทำงานต่อ");
           break;
         }
         if (res.kind === "timeout") {
-          ui.banner("warn", `ไม่มีการตอบกลับจาก ${P.displayName}`,
-            `${P.displayName} ไม่ตอบสนองตามเวลาที่กำหนด หยุดการวนลูปแล้ว`);
+          ui.banner("warn", "ไม่มีการตอบกลับ",
+            `• ${P.displayName} ไม่ตอบสนองตามเวลาที่กำหนด\n• ระบบหยุดวนลูปแล้ว สั่งต่อหรือเริ่มใหม่ได้ทันที`);
           break;
         }
         // A genuinely empty turn is effectively never produced (the warm-up guard
@@ -1412,8 +1410,8 @@
         // explanation anywhere. Say what happened.
         if (res.kind === "empty") {
           diag("empty.end");
-          ui.banner("warn", `${P.displayName} ส่งข้อความว่างเปล่า`,
-            `ข้อความตอบกลับว่างเปล่า ลูปจึงหยุดทำงาน กรุณาสั่งให้ ${P.displayName} ทำต่อ หรือกดเริ่มทำงานใหม่`);
+          ui.banner("warn", "ข้อความตอบกลับว่างเปล่า",
+            `• ${P.displayName} ส่งข้อความเปล่า ลูปจึงหยุดทำงาน\n• วิธีแก้: สั่งให้ทำต่อ หรือเริ่มแชตใหม่`);
           break;
         }
 
@@ -1436,8 +1434,8 @@
             continue;
           }
           if (res.text) break; // give up resuming; keep what we have as the answer
-          ui.banner("warn", "ข้อความถูกตัดหลายครั้ง",
-            "โมเดลแตะขีดจำกัดความยาวซ้ำๆ กรุณาลองใช้คำสั่งที่สั้นลง หรือเปิดแชตใหม่");
+          ui.banner("warn", "ข้อความถูกตัดซ้ำๆ",
+            "• โมเดลแตะขีดจำกัดความยาวต่อเนื่อง\n• วิธีแก้: ใช้คำสั่งที่สั้นลง หรือเปิดแชตใหม่");
           break;
         }
         truncCount = 0;
@@ -1930,7 +1928,7 @@
     // "Start session" is allowed ONLY on a blank conversation. Opening an
     // EXISTING conversation must never trigger the bootstrap.
     if (!P.chatIsEmpty() && !A.started) {
-      ui.toast("กรุณาเปิดแชตใหม่ที่ว่างเปล่าเพื่อเริ่มต้นเซสชัน");
+      ui.toast("เปิดแชตใหม่ที่ว่างเปล่าเพื่อเริ่มใช้งาน");
       return;
     }
     A.userStopped = false;
@@ -1956,14 +1954,14 @@
       if (!alive()) return;
       if (!A.toolList.length) {
         ui.banner("warn", "Bridge หรือ Studio ออฟไลน์",
-          "ไม่สามารถดึงรายการคำสั่ง Roblox ได้ กรุณารัน start.bat และเปิด Roblox Studio ให้เรียบร้อย แล้วลองใหม่อีกครั้ง");
+          "• ไม่พบเครื่องมือควบคุม Roblox Studio\n• วิธีแก้: ดับเบิลคลิก start.bat และเปิดแมพใน Studio");
         return;
       }
       const modeState = await P.ensureComposerReady("startup");
       if (!alive()) return;
       if (!modeState.ready) {
-        ui.banner("warn", `โหมดของ ${P.displayName} ยังไม่พร้อม`,
-          `ไม่สามารถสลับโหมดของ ${P.displayName} ได้ กรุณาเปิดแชตใหม่หรือรีเฟรชหน้าเว็บ แล้วลองใหม่อีกครั้ง`);
+        ui.banner("warn", `โหมดของ ${P.displayName} ไม่พร้อม`,
+          `• สลับโหมดของ ${P.displayName} ไม่สำเร็จ\n• วิธีแก้: เปิดแชตใหม่ หรือรีเฟรชหน้าเว็บ`);
         return;
       }
       const prompt = systemPrompt();
@@ -3351,9 +3349,9 @@
       if (root.querySelector(".zs-banner.zs-stale")) return;
       const b = document.createElement("div");
       b.className = "zs-banner limit zs-stale";
-      b.innerHTML = `<div class="zs-banner-t">⚠ กรุณารีเฟรชหน้านี้เพื่อเชื่อมต่อ ZXScript ใหม่</div>
-        <div class="zs-banner-m">ส่วนขยาย ZXScript มีการอัปเดตหรือโหลดใหม่ขณะเปิดแท็บนี้อยู่ ทำให้หน้านี้ยังรันโค้ดเวอร์ชันเดิมและไม่สามารถส่งคำสั่งต่อได้ ตัว Bridge และ Roblox Studio ของคุณยังทำงานได้ตามปกติ — เพียงกดรีเฟรชหน้านี้ใหม่</div>
-        <div class="zs-banner-acts"><button class="zs-banner-reload">รีเฟรชหน้าเว็บ (Reload page)</button></div>`;
+      b.innerHTML = `<div class="zs-banner-t">⚠ ส่วนขยายอัปเดตใหม่</div>
+        <div class="zs-banner-m">• สถานะ: หน้านี้ยังใช้โค้ดเวอร์ชันเดิม<br>• Bridge & Studio: ทำงานปกติ<br>• วิธีแก้: รีเฟรชหน้านี้เพื่อเชื่อมต่อใหม่</div>
+        <div class="zs-banner-acts"><button class="zs-banner-reload">🔄 รีเฟรชหน้าเว็บ (F5)</button></div>`;
       b.querySelector(".zs-banner-reload").addEventListener("click", () => location.reload());
       root.appendChild(b);
       bridgeBannerEl = b;
@@ -3373,9 +3371,9 @@
       const videoLink = VIDEO_URL
         ? `<a class="zs-banner-video" href="${VIDEO_URL}" target="_blank" rel="noopener">▶︎ ดูคลิปสอนใช้งาน</a>`
         : "";
-      b.innerHTML = `<div class="zs-banner-t">⚠ ขาดการเชื่อมต่อกับ ZXScript Bridge</div>
-        <div class="zs-banner-m">โปรแกรม ZXScript Bridge บนคอมพิวเตอร์ของคุณหยุดทำงาน กรุณาเปิดใหม่ (ดับเบิลคลิก start.bat และเปิด Roblox Studio ค้างไว้) ระบบจะเชื่อมต่อกลับอัตโนมัติทันทีที่ตรวจพบ</div>
-        <div class="zs-banner-acts">${videoLink}<button class="zs-banner-x">ปิด</button></div>`;
+      b.innerHTML = `<div class="zs-banner-t">⚠ Bridge ขาดการเชื่อมต่อ</div>
+        <div class="zs-banner-m">• สถานะ: Bridge บนเครื่องหยุดทำงาน<br>• วิธีแก้: ดับเบิลคลิก <b>start.bat</b> ในโฟลเดอร์โปรเจกต์<br>• ระบบจะเชื่อมต่อกลับอัตโนมัติทันที</div>
+        <div class="zs-banner-acts">${videoLink}<button class="zs-banner-x">✕ ปิด</button></div>`;
       b.querySelector(".zs-banner-x").addEventListener("click", () => { b.remove(); if (bridgeBannerEl === b) bridgeBannerEl = null; });
       root.appendChild(b);
       bridgeBannerEl = b;
@@ -3798,7 +3796,7 @@
           <button class="zs-banner-x">ปิด</button>
         </div>`;
       b.querySelector(".zs-banner-t").textContent = title;
-      b.querySelector(".zs-banner-m").textContent = msg;
+      b.querySelector(".zs-banner-m").innerHTML = msg.includes("<") ? msg : msg.replace(/\n/g, "<br>");
 
       const reportPayload = [
         "=== รายงานข้อผิดพลาด ZXScript ===",

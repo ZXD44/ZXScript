@@ -71,3 +71,11 @@ This document specifies mandatory rules for any AI agent interacting with, devel
 - **Bridge Port:** `ws://127.0.0.1:17613`
 - **MCP Advertised Tools:** 31 active tools.
 - **Full Rules Document:** See [`docs/RULES.md`](../docs/RULES.md)
+
+
+### Rule 8: Concise & Structured UI Messages (ข้อความกระชับ จัดเรียงสวยงาม)
+- **Zero Fluff & High Density:** All user-facing alerts, banners, and modals in Thai must be concise, omitting conversational filler.
+- **Bullet & Paragraph Structure:** Messages must be separated cleanly with paragraphs and bullets:
+  - `• สถานะ / ปัญหา:` Brief description of what happened.
+  - `• วิธีแก้:` Clear 1-step resolution action.
+- **1-Click Action:** Provide dedicated action buttons (e.g. 1-click Copy Error Log, 1-click Reload) for zero-friction user workflow.

@@ -861,7 +861,7 @@ ol.flex-col-reverse > div.w-full:not(.mx-auto) > .zs-chip {
 .zs-banner.limit { border-left: 2px solid rgba(239, 68, 68, 0.55); }
 .zs-banner.warn { border-left: 2px solid rgba(251, 191, 36, 0.5); }
 .zs-banner-t { font-weight: 600; color: #f4f4f6; margin-bottom: 6px; }
-.zs-banner-m { color: #9a9aa2; line-height: 1.5; margin-bottom: 12px; }
+.zs-banner-m { color: #a1a1aa; line-height: 1.6; margin-bottom: 12px; font-size: 11.5px; white-space: pre-line; }
 .zs-banner-acts { display: flex; gap: 8px; }
 .zs-banner-acts button {
   flex: 1; padding: 7px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
