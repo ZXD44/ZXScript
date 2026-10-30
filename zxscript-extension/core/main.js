@@ -1523,6 +1523,8 @@
     A.loopKey = null; // pinned by syncSessionState once this chat has an id + content
     let truncCount = 0;
     const MAX_TRUNC = 6;
+    let emptyRetries = 0;
+    const MAX_EMPTY_RETRIES = 2;
     // Re-send the command list after this many successful tool calls. Kept high
     // so the reminder does not bloat the context too often.
     const REMIND_TOOLS_EVERY = 8;
@@ -1577,11 +1579,34 @@
         // failure: the pending command just settles to a grey "not run" with no
         // explanation anywhere. Say what happened.
         if (res.kind === "empty") {
+          diag("empty.detected", { emptyRetries });
+          // If the model sent an empty turn, try auto-recovering (up to MAX_EMPTY_RETRIES)
+          // by clicking native regenerate/retry button or sending a continuation prompt.
+          if (emptyRetries < MAX_EMPTY_RETRIES && !A.stop) {
+            emptyRetries++;
+            ui.toast(`⚡ ตรวจพบข้อความว่าง กำลังสั่งให้ ${P.displayName} ทำต่ออัตโนมัติ (${emptyRetries}/${MAX_EMPTY_RETRIES})…`);
+            log(`[EmptyReply] Received empty response from ${P.displayName}. Auto-recovery attempt ${emptyRetries}/${MAX_EMPTY_RETRIES}`);
+
+            // Try clicking provider's native regenerate/retry button first
+            if (P.clickRegenerateBtn && P.clickRegenerateBtn()) {
+              diag("empty.regenerated");
+              captureSendToken();
+              await sleep(1000);
+              continue;
+            }
+
+            // Otherwise, send a clear continuation command
+            await sleep(1200);
+            base = await submitAndGetBase("ทำงานต่อจากคำสั่งล่าสุด หรือรายงานสถานะงานปัจจุบัน");
+            continue;
+          }
+
           diag("empty.end");
           ui.banner("warn", "ข้อความตอบกลับว่างเปล่า",
             `• ${P.displayName} ส่งข้อความเปล่า ลูปจึงหยุดทำงาน\n• วิธีแก้: สั่งให้ทำต่อ หรือเริ่มแชตใหม่`);
           break;
         }
+        emptyRetries = 0;
 
         // The turn stopped with the site's "Continue" affordance.
         if (res.kind === "truncated") {

@@ -67,7 +67,7 @@ const ZSProvider = (() => {
     userRole: "user",
     assistantRole: "assistant",
     reply: ".markdown",
-    thinking: "[data-testid='thought-container'], [data-testid='thought'], [data-testid*='thought-container'], [data-testid*='reasoning-content']",
+    thinking: "[data-testid*='thought'], [data-testid*='reasoning'], [class*='thought-container'], [class*='reasoning-content'], [data-testid*='web-search'], [data-testid*='canvas']",
     editor: "#prompt-textarea",
     // The ONE submit control; its data-testid says whether it is currently a
     // send or a stop button (see isStopBtn). Id first - it survives testid churn.
@@ -97,7 +97,7 @@ const ZSProvider = (() => {
     // limit of messages", quota walls). Kept SHORT-message-gated by the core.
     busy: /something went wrong|une erreur s.est produite|try again later|réessayer plus tard|reached.{0,20}limit of messages|limite de messages|usage cap|temporarily unavailable/i,
     // The native "Continue generating" affordance after a length truncation.
-    continueBtn: /^(continue generating|continuer (?:à|a) générer|continue)$/i,
+    continueBtn: /^(continue generating|continuer (?:à|a) générer|continue|สร้างต่อ|ดำเนินการต่อ|ทำต่อ)$/i,
     // Quota wall / paused conversation. Seen live (fr): "Chat en pause jusqu'à la
     // réinitialisation du quota à 23:03 - Vous avez épuisé le quota de chats avec
     // fichiers ou images."
@@ -445,10 +445,11 @@ const ZSProvider = (() => {
   const isStopBtn = (b) => {
     if (!b) return false;
     if (b.closest && b.closest("#zs-root")) return false;
-    const tid = b.getAttribute("data-testid") || "";
+    const tid = (b.getAttribute("data-testid") || "").toLowerCase();
     if (tid === "stop-button" || tid.includes("stop")) return true;
-    const aria = b.getAttribute("aria-label") || "";
-    if (/stop|interrompre|หยุด/i.test(aria)) return true;
+    const aria = ((b.getAttribute("aria-label") || "") + " " + (b.getAttribute("title") || "")).toLowerCase();
+    if (/stop|interrompre|หยุด|ยกเลิก|pause|halt/i.test(aria)) return true;
+    if (b.querySelector && b.querySelector("rect, [data-icon='square'], svg.icon-square")) return true;
     return false;
   };
   const submitButton = () => {
@@ -466,7 +467,10 @@ const ZSProvider = (() => {
       "#composer-submit-button[data-testid='stop-button']",
       "button[aria-label*='Stop' i]",
       "button[aria-label*='Interrompre' i]",
-      "button[aria-label*='หยุด' i]"
+      "button[aria-label*='หยุด' i]",
+      "button[aria-label*='ยกเลิก' i]",
+      "#composer-submit-button:has(rect)",
+      "button[data-testid='send-button']:has(rect)"
     ]) {
       const b = document.querySelector(sel);
       if (b && b.closest && b.closest("#zs-root")) continue;
@@ -483,7 +487,15 @@ const ZSProvider = (() => {
   // submit control stayed in its "Interrompre la réponse" role, so every send was
   // refused and the tool result was stranded in the composer). See unwedgeStop.
   function streamText(item) {
-    return item ? textWithout(item, ".zs-chip") : "";
+    if (!item) return "";
+    let s = textWithout(item, ".zs-chip");
+    if (S.thinking && item.querySelector) {
+      try {
+        const th = item.querySelector(S.thinking);
+        if (th && !s.includes(th.textContent || "")) s += " " + (th.textContent || "");
+      } catch {}
+    }
+    return s;
   }
   const streamLen = (item) => streamText(item === undefined ? lastAssistant() : item).length;
 
@@ -499,7 +511,7 @@ const ZSProvider = (() => {
   }
   const grewWithin = (ms) => _streamMax > 1 && Date.now() - _streamAt < ms;
 
-  const WEDGE_MS = 10000;
+  const WEDGE_MS = 30000;
   let _stopSince = 0;
   function genActive() {
     sampleStream();
@@ -507,9 +519,14 @@ const ZSProvider = (() => {
     const now = Date.now();
     if (stop) {
       if (!_stopSince) _stopSince = now;
-      // Trust the stop button while the stream advances, or just after it
-      // appeared (generation spinning up). Frozen past WEDGE_MS ⇒ treat as done.
-      return (now - _streamAt < WEDGE_MS) || (now - _stopSince < 2000);
+      // If no text has arrived yet, ChatGPT is spinning up / thinking / searching.
+      // Trust the stop button for up to WARMUP_MS (45s).
+      if (_streamMax <= 0) {
+        return (now - _stopSince < (timings.WARMUP_MS || 45000));
+      }
+      // If text has already arrived, trust the stop button while text is advancing,
+      // or until text has been frozen for past WEDGE_MS (30s).
+      return (now - _streamAt < WEDGE_MS) || (now - _stopSince < 4000);
     }
     _stopSince = 0;
     return grewWithin(timings.GEN_IDLE_MS);
@@ -523,7 +540,7 @@ const ZSProvider = (() => {
   // NEVER aborted - during a real stream every attempt below is refused.
   function unwedgeStop() {
     const stop = stopButton();
-    if (stop && !genActive()) {
+    if (stop && !genActive() && _streamMax > 0) {
       diag("send.unwedge", {});
       try { stop.click(); } catch {}
       return true;
@@ -557,6 +574,23 @@ const ZSProvider = (() => {
     }
     return null;
   }
+  
+  const RE_REGENERATE = /^(regenerate|try again|réessayer|ลองอีกครั้ง|สร้างคำตอบใหม่|สร้างใหม่)$/i;
+  function findRegenerateBtn() {
+    for (const b of document.querySelectorAll("button")) {
+      if (b.offsetParent === null) continue;
+      if (b.closest && b.closest("#zs-root")) continue;
+      const txt = ((b.innerText || "") + " " + (b.getAttribute("aria-label") || "")).trim();
+      if (RE_REGENERATE.test(txt) || (b.matches && b.matches("[data-testid*='retry'], [data-testid*='regenerate']"))) return b;
+    }
+    return null;
+  }
+  function clickRegenerateBtn() {
+    const b = findRegenerateBtn();
+    if (!b) return false;
+    try { b.click(); return true; } catch { return false; }
+  }
+
   function clickContinueBtn() {
     const b = findContinueBtn();
     if (!b) return false;
@@ -569,7 +603,14 @@ const ZSProvider = (() => {
       if (!it) return { th: 0, rp: 0 };
       const mds = getReplyContainers(it);
       const len = mds.reduce((sum, m) => sum + (m.textContent || "").length, 0);
-      return { th: 0, rp: len || (it.textContent || "").length };
+      let thLen = 0;
+      if (S.thinking && it.querySelector) {
+        try {
+          const th = it.querySelector(S.thinking);
+          if (th) thLen = (th.textContent || "").length;
+        } catch {}
+      }
+      return { th: thLen, rp: len || (it.textContent || "").length };
     } catch { return {}; }
   }
 
@@ -584,10 +625,17 @@ const ZSProvider = (() => {
     if (!reply) {
       reply = (item.innerText || item.textContent || "").trim();
     }
+    let thinking = "";
+    if (S.thinking && item.querySelector) {
+      try {
+        const th = item.querySelector(S.thinking);
+        if (th) thinking = (th.textContent || "").trim();
+      } catch {}
+    }
     return {
       present: true,
       reply,
-      thinking: "", // reasoning is gated by the stop button, not parsed as text
+      thinking,
       item,
     };
   }
@@ -1122,7 +1170,7 @@ const ZSProvider = (() => {
     setInputLock, typeAndSend, setEditorText, stopGeneration,
     isGenerating, isBusyNow, isHardGenerating,
     enforceComposer, ensureComposerReady,
-    turnHalted, findContinueBtn, clickContinueBtn,
+    turnHalted, findContinueBtn, clickContinueBtn, findRegenerateBtn, clickRegenerateBtn,
     scanError, isTooLongMsg, isBusyMsg,
     // actions
     attachImages, clearAttachments, openNewChat, conversationKey,
