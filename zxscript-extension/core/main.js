@@ -863,7 +863,7 @@
       // Still REASONING / loading: thinking written but no answer yet. Don't
       // finalize - wait for the reply, bounded. A manually-stopped turn is
       // exempt so a real stop still ends.
-      if (d.thinking && d.thinking.length && !(d.reply && d.reply.length) && !P.turnHalted(d.item)) {
+      if (d.thinking && d.thinking.length && !(d.reply && d.reply.length) && !(P.turnHalted && P.turnHalted(d.item))) {
         if (!reasonSince) reasonSince = Date.now();
         if (Date.now() - reasonSince < REASON_NOREPLY_MS) { await sleep(200); continue; }
       } else {
@@ -1587,7 +1587,7 @@
         if (res.kind === "truncated") {
           // If the turn carries the halted marker (a stop - user OR self-halt),
           // respect it and do NOT auto-resume.
-          if (P.turnHalted(res.item)) { diag("truncated.halted"); break; }
+          if (P.turnHalted && P.turnHalted(res.item)) { diag("truncated.halted"); break; }
           // Otherwise it truncated by length → continue the SAME turn. Prefer
           // the native Continue button; fall back to a continuation message.
           if (truncCount < MAX_TRUNC) {
@@ -4731,7 +4731,7 @@
     // a reload-restored generation, not a reply to one of our sends (see
     // A.bootBaselineId). Guards the "execute_luau leaked into the new chat" bug.
     if (A.bootBaselineId && P.lastAssistantId && P.lastAssistantId() === A.bootBaselineId) return;
-    if (P.turnHalted(item)) return;                     // this turn was stopped → leave it
+    if (P.turnHalted && P.turnHalted(item)) return;                     // this turn was stopped → leave it
     // Scrolled-back OLD turn guard (virtualization). lastAssistant() is the last
     // RENDERED turn; scrolling up makes it an old command whose id is below the
     // session's high-water mark. Its result row may be off-screen (unrendered), so

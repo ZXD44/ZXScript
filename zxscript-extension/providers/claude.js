@@ -278,6 +278,10 @@ const ZSProvider = (() => {
     return item.querySelector(".standard-markdown, .font-claude-message") || item;
   }
 
+  const turnHalted = (item) => false;
+  const findContinueBtn = () => null;
+  const clickContinueBtn = () => false;
+
   async function typeAndSend(text, images) {
     const ed = getEditor();
     if (!ed) throw new Error("Claude input box not found");
@@ -329,5 +333,6 @@ const ZSProvider = (() => {
     scanError, isTooLongMsg, isBusyMsg,
     attachImages, clearAttachments, conversationKey,
     installSendHooks, findToolBlockSpot,
+    turnHalted, findContinueBtn, clickContinueBtn,
   };
 })();
