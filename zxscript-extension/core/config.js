@@ -267,8 +267,12 @@ ${BT}
 - ส่งได้ครั้งละ 1 คำสั่งต่อข้อความ และรอรับผลลัพธ์ก่อนส่งคำสั่งถัดไป
 - ใช้เฉพาะชื่อคำสั่งและพารามิเตอร์จริงจาก list_commands เท่านั้น ห้ามเดา
 - execute_luau: ครอบด้วย ###LUA### ... ###END_LUA### เสมอ ถ้าเกมกำลังรัน Play Mode ให้ใช้ ###LUA:Server### หรือ ###LUA:Client### ใช้ return สำหรับค่า output (print() จะไม่ถูกจับผลลัพธ์)
-- MODERN LUAU: บังคับใช้ task.wait(), task.spawn(), task.delay(), task.cancel() ห้ามใช้ wait(), spawn(), delay() เก่าเด็ดขาด ใช้ workspace:Raycast() แทน FindPartOnRay
+- MODERN LUAU (ROBLOX 0.744 / LUAU 0.743): บังคับใช้ task.wait(), task.spawn(), task.delay(), task.cancel() ห้ามใช้ wait(), spawn(), delay() เก่าเด็ดขาด ใช้ workspace:Raycast() แทน FindPartOnRay
 - ZERO GUESSING: ห้ามเดา Path ใน Explorer ก่อนแก้ไขหรือเขียนโค้ด ต้อง inspect_instance หรือ search_game_tree เสมอ
+- GOD-TIER SERVICE ARCHITECTURE: แยก Server / Client ชัดเจน Server คุม Data และ Logic 100%, Client เรนเดอร์ UI และส่ง Input Intent. ใช้ Init -> Start lifecycle
+- SERVER-AUTHORITATIVE COMBAT: ห้ามให้ Client ส่งดาเมจ ให้ส่งเฉพาะ Action Intent แล้ว Server ยิง Raycast ตรวจ Line-of-sight, Distance, และ Cooldown Rate-Limiting
+- PROFILESTORE DATA PERSISTENCE: ข้อมูลผู้เล่นต้องเซฟผ่าน ProfileStore / DataStoreService ปลอดภัย รองรับ Session Locking, Auto-save ทุก 5 นาที, และ BindToClose
+- PARALLEL LUAU (ACTORS): งานคำนวณหนัก (AI/Pathfinding/Raycasts 100+ ตัว) ให้รันใน Actor ด้วย task.desynchronize() และ task.synchronize() เขียนค่ากลับ
 - สร้าง UI/วัตถุก่อนเขียนสคริปต์: สร้าง Instance ก่อน แล้วจึงเขียน Script เชื่อมโยงผ่าน WaitForChild(name, 5)
 - ห้าม Destroy() สุ่มสี่สุ่มห้า: ห้ามสั่ง ClearAllChildren() หรือ Destroy() โฟลเดอร์หลักโดยไม่ระบุเป้าหมายชัดเจน
 - AUTO-DEBUG: หลังสร้างหรือแก้สคริปต์ ให้รัน get_console_output เพื่อตรวจจับ runtime error และแก้ปัญหาอัตโนมัติ
