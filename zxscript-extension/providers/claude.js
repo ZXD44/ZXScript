@@ -13,6 +13,7 @@ const ZSProvider = (() => {
     userItem: '[data-message-author-role="user"], div.font-user-message, div.group:has(div.bg-bg-300)',
     assistantItem: '[data-message-author-role="assistant"], div.font-claude-message, div.standard-markdown',
     anyItem: '[data-message-author-role], div.font-user-message, div.font-claude-message',
+    reply: '.standard-markdown, div.font-claude-message, [data-message-author-role="assistant"]',
     thinking: '[data-testid="thinking-content"], [class*="thinking"], div.ant-thinking',
     editor: 'div.ProseMirror[contenteditable="true"], div[contenteditable="true"][data-placeholder], fieldset div[contenteditable="true"], div[data-testid="chat-input"], div[contenteditable="true"]',
     composer: 'fieldset, div:has(> div.ProseMirror), div.relative:has(div[contenteditable="true"])',
@@ -313,9 +314,33 @@ const ZSProvider = (() => {
     );
   }
 
-  function findToolBlockSpot(item) {
+  const CMD_SHAPE = /"(?:command|tool)"\s*:\s*"|###\s*(?:lua|mcp_tool)###/i;
+
+  function findToolBlockSpot(item /*, chip */) {
     if (!item) return null;
-    return item.querySelector(".standard-markdown, .font-claude-message") || item;
+    const replies = [...item.querySelectorAll(S.reply || ".standard-markdown, .font-claude-message")].filter(
+      (m) => !m.closest(S.thinking)
+    );
+    let hidAny = null;
+    for (const mc of replies) {
+      mc.querySelectorAll(S.codeWrap).forEach((cb) => {
+        if (cb.closest(".zs-chip")) return;
+        if (CMD_SHAPE.test(cb.textContent || "")) {
+          cb.classList.add("zs-tool-hide");
+          mc.classList.add("zs-cmd-mask");
+          hidAny = hidAny || { parent: cb.parentElement, ref: cb };
+        }
+      });
+      [...mc.children].forEach((el) => {
+        if (el.classList.contains("zs-chip") || el.querySelector(S.codeWrap)) return;
+        const t = el.textContent || "";
+        if (t.length < 600 && CMD_SHAPE.test(t)) {
+          el.classList.add("zs-tool-hide");
+          hidAny = hidAny || { parent: el.parentElement, ref: el };
+        }
+      });
+    }
+    return hidAny;
   }
 
   const turnHalted = (item) => false;
@@ -361,6 +386,7 @@ const ZSProvider = (() => {
     id: "claude",
     displayName: "Claude",
     supportsVision: true,
+    chipAtItemLevel: true,
     timings,
     init({ diag: d } = {}) { if (d) diag = d; },
     allItems, isUserItem, isAssistantItem, itemText, classifyText,

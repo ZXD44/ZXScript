@@ -753,6 +753,13 @@ message-content.zs-cmd-mask code-block { display: none !important; }
    so the provider marks IT with .zs-cmd-mask and this rule re-hides recreated
    Monaco code blocks (pre.qwen-markdown-code) with no flash. Inert elsewhere. */
 .qwen-chat-message-assistant.zs-cmd-mask pre.qwen-markdown-code { display: none !important; }
+/* Claude (claude.ai, React): React recreates markdown on stream updates/settle.
+   .zs-cmd-mask keeps raw code blocks masked without flash. */
+.standard-markdown.zs-cmd-mask pre,
+.font-claude-message.zs-cmd-mask pre,
+.standard-markdown.zs-cmd-mask div.code-block,
+.font-claude-message.zs-cmd-mask div.code-block { display: none !important; }
+
 /* Arena (arena.ai, React): React recreates the reply's rendered code subtree on
    stream settle and on the next send, wiping any per-element .zs-tool-hide class.
    The assistant turn <div> keeps its identity (the chip is anchored at item

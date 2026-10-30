@@ -2292,7 +2292,9 @@
 
       if (whole) {
         // Fully injected turn (result / sys) → hide the whole item.
-        if (chip.parentElement !== item) item.insertBefore(chip, item.firstChild);
+        if (chip.parentElement !== item && item && typeof item.insertBefore === "function") {
+          item.insertBefore(chip, item.firstChild);
+        }
         item.classList.add("zs-hidden");
       } else {
         item.classList.remove("zs-hidden");
@@ -2310,25 +2312,21 @@
           // sibling and shove the layout sideways, so it anchors in the content
           // column instead). Default: the turn root.
           const anchor = (P.chipAnchor && P.chipAnchor(item)) || item;
-          // Default: pin the chip as the FIRST child - simple and immune to the
-          // site re-appending fresh content later. A provider may opt into
-          // `chipAppend` to place it LAST instead (reads in the model's actual
-          // order: narration, then the tool call it wrote at the end of the
-          // turn). `chipTrailRef(item)` lets it name a fixed trailing sibling
-          // (e.g. Qwen's action-buttons row) the chip must stay BEFORE even
-          // when "last" - see ensureOwnedChip's drift check for why this needs
-          // upkeep that firstChild pinning never did.
-          const wantLast = !!P.chipAppend;
-          const trailRef = wantLast && P.chipTrailRef ? P.chipTrailRef(item) : null;
-          const inPlace = chip.parentElement === anchor &&
-            (wantLast ? chip.nextElementSibling === trailRef : anchor.firstElementChild === chip);
-          if (!inPlace) {
-            if (wantLast) anchor.insertBefore(chip, trailRef); // trailRef=null -> append
-            else anchor.insertBefore(chip, anchor.firstChild);
+          if (anchor && typeof anchor.insertBefore === "function") {
+            const wantLast = !!P.chipAppend;
+            const trailRef = wantLast && P.chipTrailRef ? P.chipTrailRef(item) : null;
+            const inPlace = chip.parentElement === anchor &&
+              (wantLast ? chip.nextElementSibling === trailRef : anchor.firstElementChild === chip);
+            if (!inPlace) {
+              if (wantLast) anchor.insertBefore(chip, trailRef); // trailRef=null -> append
+              else anchor.insertBefore(chip, anchor.firstChild);
+            }
           }
-        } else if (spot) {
+        } else if (spot && spot.parent && typeof spot.parent.insertBefore === "function") {
           spot.parent.insertBefore(chip, spot.ref);
-        } else if (!chip.parentElement) {
+        } else if (spot && spot.nodeType === 1 && spot.parentElement && typeof spot.parentElement.insertBefore === "function") {
+          spot.parentElement.insertBefore(chip, spot);
+        } else if (!chip.parentElement && item && typeof item.insertBefore === "function") {
           item.insertBefore(chip, item.firstChild);
         }
       }
