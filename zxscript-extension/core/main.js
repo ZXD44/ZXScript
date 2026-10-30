@@ -3288,55 +3288,33 @@
       else if (A.starting) {
         toneClass = "starting";
         indicator = `<span class="zs-spin"></span>`;
-        msg = `กำลังเชื่อมต่อระบบ AI<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
+        msg = `<b>กำลังเริ่ม…</b>`;
         label = "กำลังเริ่ม…"; kind = "starting"; disabled = true;
       } else if (A.started) {
-        // Prefer the ADVERTISED list length (A.toolList - the AGGREGATE catalogue
-        // across every connected MCP server, already filtered by the vision/blocked
-        // gate so it matches what the model actually has: e.g. screen_capture is
-        // absent on non-vision providers like Kimi). After a page reload A.toolList
-        // is empty until the next list_tools, so fall back to the sum of every
-        // server's per-server health count (Roblox + addons like Blender) - NOT the
-        // Roblox-only count, which made the total drop to just 27 after a reload.
         const healthTotal = A.bridge &&
           (A.bridge.servers || []).reduce((n, x) => n + (x.tools || 0), 0);
         const tools = A.toolList.length || healthTotal || (A.bridge && A.bridge.tools) || 0;
-        // "N tools" only means StudioMCP itself is up - it advertises its full
-        // catalogue even with no Studio/place attached (see probe_studio() in
-        // bridge.py), so showing it while Studio/place isn't actually usable
-        // reads as "everything's fine" when tool calls will just fail. Surface
-        // the real blocker instead in that case.
         if (A.bridge && A.bridge.connected === false) {
-          // placeDown/appDown/studioDown are all false in this case (they're
-          // only computed when the bridge IS connected - see setStatus), so
-          // without this check the bridge dropping fell through to the
-          // stale "N tools" text below, reading as if nothing was wrong.
           toneClass = "warn"; warn = true;
-          msg = `<b>AI พร้อม</b> · Bridge ออฟไลน์ กรุณารัน start.bat`;
+          msg = `<b>AI พร้อม</b> · Bridge ออฟไลน์`;
         } else if ((placeDown || appDown || studioDown) && addonOk) {
-          // DEGRADED session by CHOICE: the user started the agent with Roblox
-          // down but other MCP server(s) alive (the "Start agent (Roblox
-          // offline)" path) - they may only want the addon tools (e.g. Blender).
-          // Keep the YELLOW dot as the honest health signal, but do NOT keep the
-          // red imperative "open Roblox Studio" nag on screen for the whole
-          // session (warn=false → no zs-state-warn red text). The full nag
-          // still shows when NO server is usable (the branches below).
           toneClass = "warn";
-          msg = `<b>AI กำลังทำงาน</b>${tools ? ` · ${tools} คำสั่ง` : ""} · Roblox ออฟไลน์`;
+          if (A.running) indicator = `<span class="zs-live-dot"></span>`;
+          msg = A.running
+            ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`)
+            : `<b>พร้อมรับคำสั่ง</b> · Roblox ออฟไลน์`;
         } else if (placeDown) {
           toneClass = "warn"; warn = true;
-          msg = `<b>AI พร้อม</b> · กรุณาเปิดแมพใน Roblox Studio`;
+          msg = `<b>AI พร้อม</b> · กรุณาเปิดแมพใน Studio`;
         } else if (appDown || studioDown) {
           toneClass = "warn"; warn = true;
-          msg = studioProcUp
-            ? `<b>AI พร้อม</b> · กำลังรอเชื่อมต่อ MCP<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span> (เปิด Assistant &gt; MCP)`
-            : `<b>AI พร้อม</b> · กำลังรอเปิด Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
+          msg = `<b>AI พร้อม</b> · กำลังรอเปิด Studio`;
         } else {
           toneClass = "active";
-          // No inline dot here: the leading status dot already shows green, two
-          // dots side by side looked cluttered. The green "Agent active" text
-          // carries it.
-          msg = `<b>AI กำลังทำงาน</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
+          if (A.running) indicator = `<span class="zs-live-dot"></span>`;
+          msg = A.running
+            ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`)
+            : `<b>พร้อมรับคำสั่ง</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
         }
       } else if (P.isFreshChat() || P.chatIsEmpty()) {
         // Treat ANY empty chat (no turns yet) as the standby/start case - not just
@@ -3830,86 +3808,46 @@
       };
     }
 
-    function inputCover(on, text) {
-      const ed = P.getEditor();
-      if (!on) {
-        if (cover) { cover.style.display = "none"; cover.dataset.on = ""; }
-        if (ed) ed.classList.remove("zs-typing");
-        cancelAnimationFrame(coverRaf);
-        return;
+    let _hudStatusText = "";
+
+    function cleanHudText(text) {
+      if (!text) return "";
+      let t = String(text).trim().replace(/^[⚡\s]+/, "");
+      if (t.includes("เริ่มต้นทำงาน") || t.includes("กำลังเริ่ม")) return "กำลังเริ่ม…";
+      if (t.includes("รอ AI ตอบกลับ")) return "รอ AI ตอบกลับ…";
+      if (t.includes("ส่งผลลัพธ์")) return "ส่งผลลัพธ์…";
+      if (t.startsWith("รัน: ")) {
+        const tool = t.replace("รัน: ", "").replace(/[…\s]+$/, "");
+        return `รัน: ${tool}`;
       }
-      if (!ed) return;
-
-      // Only mask text as transparent during active extension payload injection
-      // (user's typed text remains 100% visible while agent works)
-      if (A.injecting) {
-        ed.classList.add("zs-typing");
-      } else {
-        ed.classList.remove("zs-typing");
-      }
-
-      if (!cover) {
-        cover = document.createElement("div");
-        cover.id = "zs-input-cover";
-        cover.innerHTML = `<span class="zs-cover-pulse-ring"><span class="zs-cover-pulse"></span></span>` +
-          `<span class="zs-hud-brand">Studio AI</span>` +
-          `<span class="zs-hud-sep"></span>` +
-          `<span class="zs-cover-label">⚡ AI กำลังทำงานใน Studio…</span>` +
-          `<button class="zs-hud-stop" title="หยุดการทำงานฉุกเฉิน (Stop)">■</button>`;
-        const stopMini = cover.querySelector(".zs-hud-stop");
-        if (stopMini) {
-          stopMini.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            stopLoop();
-          });
-        }
-        document.documentElement.appendChild(cover);
-        // Also update state on top Action Bar directly
-        if (stateEl) {
-          stateEl.innerHTML = `<span class="zs-live-dot"></span><span class="zs-state-txt">${text || "⚡ AI กำลังทำงาน…"}</span>`;
-        }
-        if (stopBtn) stopBtn.hidden = false;
-        if (actionBtn) actionBtn.style.display = "none";
-      }
-      if (text) {
-        const lbl = cover.querySelector(".zs-cover-label");
-        if (lbl) lbl.textContent = text;
-      }
-      cover.dataset.on = "1";
-      cover.style.display = "flex";
-
-      const place = () => {
-        if (!cover || cover.dataset.on !== "1") return;
-        const e = P.getEditor();
-        if (!e) { coverRaf = requestAnimationFrame(place); return; }
-
-        // Keep zs-typing strictly tied to A.injecting so user writing is never blinded
-        if (A.injecting) {
-          if (!e.classList.contains("zs-typing")) e.classList.add("zs-typing");
-        } else {
-          if (e.classList.contains("zs-typing")) e.classList.remove("zs-typing");
-        }
-
-        if (
-          (P.overlayBlocking && P.overlayBlocking()) ||
-          (P.captchaPresent && P.captchaPresent())
-        ) {
-          cover.style.display = "none";
-        } else {
-          cover.style.display = "flex";
-        }
-
-        coverRaf = requestAnimationFrame(place);
-      };
-      place();
+      return t;
     }
 
+    function inputCover(on, text) {
+      const ed = P.getEditor();
+      const oldCover = document.getElementById("zs-input-cover");
+      if (oldCover) try { oldCover.remove(); } catch {}
+
+      if (!on) {
+        _hudStatusText = "";
+        if (ed) ed.classList.remove("zs-typing");
+        renderBar();
+        return;
+      }
+
+      if (text) _hudStatusText = cleanHudText(text);
+      if (ed) {
+        if (A.injecting) ed.classList.add("zs-typing");
+        else ed.classList.remove("zs-typing");
+      }
+      if (stopBtn && (A.running || A.starting)) stopBtn.hidden = false;
+      if (actionBtn && (A.running || A.starting)) actionBtn.style.display = "none";
+      renderBar();
+    }
 
     function setHudStatus(text) {
-      if (!cover) return;
-      const lbl = cover.querySelector(".zs-cover-label");
-      if (lbl && text) lbl.textContent = text;
+      _hudStatusText = cleanHudText(text);
+      renderBar();
     }
 
     function toast(msg) {
