@@ -460,8 +460,8 @@ const ZSProvider = (() => {
   // into a red warning state and disables Start until the user switches it off.
   function modeWarning() {
     if (nativeAgentModeOn())
-      return `Switch the model picker off <b>K3 Swarm</b> (pick <b>K3</b> or <b>Instantané</b>) - ` +
-        `Kimi's own agentic mode replaces the ZeroScript commands with its native tools and breaks the agent loop.`;
+      return `กรุณาสลับโมเดลออกจาก <b>K3 Swarm</b> (เลือก <b>K3</b> หรือ <b>Instantané</b>) - ` +
+        `โหมด Agent ในตัวของ Kimi จะทับคำสั่ง ZXScript และทำให้การวนลูปขัดข้อง`;
     return "";
   }
 
@@ -793,8 +793,7 @@ const ZSProvider = (() => {
     // runner, etc.) instead of emitting the ZeroScript command blocks that drive
     // Roblox Studio - model behavior, not something the prompt fully prevents.
     unstableWarning:
-      "Kimi sometimes uses its own native tools instead of the Roblox commands (model behavior, not the extension). " +
-      "If it stops acting in Roblox Studio and answers in plain text or runs its own tools, remind it to use the ZeroScript commands - or start a new session.",
+      "Kimi อาจเรียกใช้เครื่องมือของตัวเองแทนคำสั่งควบคุม Roblox Studio (เป็นพฤติกรรมของโมเดล) หาก Kimi หยุดรันคำสั่งใน Studio ให้สั่งเตือนให้ใช้คำสั่ง ZXScript หรือเปิดเซสชันใหม่",
     init({ diag: d } = {}) { if (d) diag = d; },
     // turns
     allItems, isUserItem, isAssistantItem, itemText, classifyText,

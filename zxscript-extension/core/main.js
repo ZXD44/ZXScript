@@ -433,9 +433,9 @@
       // themselves instead of watching a stuck bar.
       if (!messageSent && !landed() && !A.stop) {
         diag("send.failed", { tries });
-        ui.banner("warn", "Message could not be sent",
-          `${P.displayName} did not accept the injected message after ${tries} attempts. ` +
-          `Send a short message yourself (e.g. "continue") to resume the agent.`);
+        ui.banner("warn", "ส่งข้อความไม่สำเร็จ",
+          `${P.displayName} ไม่ยอมรับข้อความหลังพยายามส่ง ${tries} ครั้ง ` +
+          `กรุณาลองพิมพ์ข้อความสั้นๆ ด้วยตนเอง (เช่น "ทำต่อ") เพื่อให้ AI ทำงานต่อ`);
       }
       return base;
     } finally {
@@ -1166,8 +1166,8 @@
     // text instead of a result. Surface it as a proper environment ERROR so the
     // model stops and tells the user, instead of treating it as tool output.
     if (r.ok && /Unable to find an active Studio instance|previously active Studio has disconnected/i.test(r.text || "")) {
-      ui.banner("warn", "Roblox Studio is not connected",
-        "Open your place in Roblox Studio and enable the MCP server (Assistant AI → … → Manage MCP Servers → Enable Studio as MCP Server), then try again.");
+      ui.banner("warn", "Roblox Studio ยังไม่ได้เชื่อมต่อ",
+        "กรุณาเปิดแมพของคุณใน Roblox Studio และเปิดใช้งาน MCP Server (ไปที่ Assistant AI → … → Manage MCP Servers → Enable Studio as MCP Server) แล้วลองใหม่อีกครั้ง");
       return ZS.FEEDBACK.studioOffline;
     }
     // The Roblox MCP reports missing/invalid required parameters as a SUCCESS
@@ -1222,16 +1222,15 @@
     // Orphaned content script - a page reload is the only cure, so say exactly
     // that instead of blaming the bridge (see bg / isContextInvalidated).
     if (r.kind === "stale-extension") {
-      ui.banner("warn", "Reload this page",
-        "ZXScript was updated or reloaded while this tab was open, so this page is running an " +
-        "old copy of it and commands can no longer run. Reload the page (F5) to reconnect - your " +
-        "bridge and Roblox Studio are unaffected.");
+      ui.banner("warn", "กรุณารีเฟรชหน้านี้",
+        "ส่วนขยาย ZXScript มีการอัปเดตหรือโหลดใหม่ขณะเปิดแท็บนี้อยู่ ทำให้หน้านี้ยังรันโค้ดเวอร์ชันเก่าและส่งคำสั่งต่อไม่ได้ " +
+        "กรุณารีเฟรชหน้านี้ (F5) เพื่อเชื่อมต่อใหม่ — Bridge และ Roblox Studio ของคุณยังทำงานได้ตามปกติ");
       diag("bridge.staleExtension", { name, error: r.error });
       return ZS.FEEDBACK.staleExtension;
     }
     if (r.kind === "disconnected") return ZS.FEEDBACK.bridgeOffline;
     if (r.kind === "timeout") {
-      return `ERROR: tool '${name}' timed out after ${name === "execute_luau" ? 20 : 120}s.\n${r.error}\nTry a shorter/simpler call or check that Roblox Studio is open and responsive.`;
+      return `ERROR: คำสั่ง '${name}' หมดเวลาการทำงาน (${name === "execute_luau" ? 20 : 120}s)\n${r.error}\nกรุณาลองคำสั่งที่สั้นลง หรือตรวจสอบว่า Roblox Studio เปิดอยู่และไม่ค้าง`;
     }
     if (name === "execute_luau") {
       const err = r.error || "";
@@ -1931,7 +1930,7 @@
     // "Start session" is allowed ONLY on a blank conversation. Opening an
     // EXISTING conversation must never trigger the bootstrap.
     if (!P.chatIsEmpty() && !A.started) {
-      ui.toast("Open a new, empty conversation to start a session.");
+      ui.toast("กรุณาเปิดแชตใหม่ที่ว่างเปล่าเพื่อเริ่มต้นเซสชัน");
       return;
     }
     A.userStopped = false;
@@ -1956,15 +1955,15 @@
                                // the model makes seconds later)
       if (!alive()) return;
       if (!A.toolList.length) {
-        ui.banner("warn", "Bridge or Studio offline",
-          "Could not fetch Roblox tools. Run start.bat and make sure Roblox Studio is open, then try again.");
+        ui.banner("warn", "Bridge หรือ Studio ออฟไลน์",
+          "ไม่สามารถดึงรายการคำสั่ง Roblox ได้ กรุณารัน start.bat และเปิด Roblox Studio ให้เรียบร้อย แล้วลองใหม่อีกครั้ง");
         return;
       }
       const modeState = await P.ensureComposerReady("startup");
       if (!alive()) return;
       if (!modeState.ready) {
-        ui.banner("warn", `${P.displayName} mode not ready`,
-          `Could not switch ${P.displayName} to the required mode. Start a new chat or reload the page, then try again.`);
+        ui.banner("warn", `โหมดของ ${P.displayName} ยังไม่พร้อม`,
+          `ไม่สามารถสลับโหมดของ ${P.displayName} ได้ กรุณาเปิดแชตใหม่หรือรีเฟรชหน้าเว็บ แล้วลองใหม่อีกครั้ง`);
         return;
       }
       const prompt = systemPrompt();
@@ -3352,9 +3351,9 @@
       if (root.querySelector(".zs-banner.zs-stale")) return;
       const b = document.createElement("div");
       b.className = "zs-banner limit zs-stale";
-      b.innerHTML = `<div class="zs-banner-t">⚠ Reload this page to reconnect ZXScript</div>
-        <div class="zs-banner-m">ZXScript was updated or reloaded while this tab was open, so this page is still running the old copy and commands can no longer run. Your bridge and Roblox Studio are fine - only this page needs refreshing.</div>
-        <div class="zs-banner-acts"><button class="zs-banner-reload">Reload page</button></div>`;
+      b.innerHTML = `<div class="zs-banner-t">⚠ กรุณารีเฟรชหน้านี้เพื่อเชื่อมต่อ ZXScript ใหม่</div>
+        <div class="zs-banner-m">ส่วนขยาย ZXScript มีการอัปเดตหรือโหลดใหม่ขณะเปิดแท็บนี้อยู่ ทำให้หน้านี้ยังรันโค้ดเวอร์ชันเดิมและไม่สามารถส่งคำสั่งต่อได้ ตัว Bridge และ Roblox Studio ของคุณยังทำงานได้ตามปกติ — เพียงกดรีเฟรชหน้านี้ใหม่</div>
+        <div class="zs-banner-acts"><button class="zs-banner-reload">รีเฟรชหน้าเว็บ (Reload page)</button></div>`;
       b.querySelector(".zs-banner-reload").addEventListener("click", () => location.reload());
       root.appendChild(b);
       bridgeBannerEl = b;
@@ -3372,10 +3371,10 @@
       // The setup tutorial lives INSIDE this banner (not as a separate card) so it
       // can never overlap the alert - the previous standalone onboarding card did.
       const videoLink = VIDEO_URL
-        ? `<a class="zs-banner-video" href="${VIDEO_URL}" target="_blank" rel="noopener">▶︎ Watch setup tutorial</a>`
+        ? `<a class="zs-banner-video" href="${VIDEO_URL}" target="_blank" rel="noopener">▶︎ ดูคลิปสอนใช้งาน</a>`
         : "";
-      b.innerHTML = `<div class="zs-banner-t">⚠ Lost connection to ZXScript</div>
-        <div class="zs-banner-m">The ZXScript bridge stopped on your PC. Restart it (run start.bat and keep Roblox Studio open): the agent will reconnect automatically as soon as it is detected again.</div>
+      b.innerHTML = `<div class="zs-banner-t">⚠ ขาดการเชื่อมต่อกับ ZXScript Bridge</div>
+        <div class="zs-banner-m">โปรแกรม ZXScript Bridge บนคอมพิวเตอร์ของคุณหยุดทำงาน กรุณาเปิดใหม่ (ดับเบิลคลิก start.bat และเปิด Roblox Studio ค้างไว้) ระบบจะเชื่อมต่อกลับอัตโนมัติทันทีที่ตรวจพบ</div>
         <div class="zs-banner-acts">${videoLink}<button class="zs-banner-x">ปิด</button></div>`;
       b.querySelector(".zs-banner-x").addEventListener("click", () => { b.remove(); if (bridgeBannerEl === b) bridgeBannerEl = null; });
       root.appendChild(b);

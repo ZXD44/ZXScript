@@ -611,14 +611,12 @@ const ZSProvider = (() => {
   function modeWarning() {
     const um = activeUnsupportedMode();
     if (um)
-      return `Turn off <b>${um.label}</b> (${um.tip} in the composer) - ` +
-        `ZeroScript only works in plain chat. ${um.label} mode uses a different ` +
-        `output surface and breaks the agent loop.`;
+      return `กรุณาปิด <b>${um.label}</b> (${um.tip} ในกล่องพิมพ์) - ` +
+        `ZXScript รองรับเฉพาะโหมดแชตปกติ โหมด ${um.label} ไม่สามารถรันคำสั่งได้`;
     if (isSupportedMode()) return "";
     const m = currentMode();
-    const name = m ? m.charAt(0).toUpperCase() + m.slice(1) : "another mode";
-    return `Switch the mode dropdown to <b>Direct</b> - ZeroScript only works in ` +
-      `Direct mode (current: <b>${name}</b>).`;
+    const name = m ? m.charAt(0).toUpperCase() + m.slice(1) : "โหมดอื่น";
+    return `กรุณาสลับโหมดไปที่ <b>Direct</b> - ZXScript รองรับเฉพาะโหมด Direct (ปัจจุบัน: <b>${name}</b>)`;
   }
 
   // A bot-check challenge is on screen (Cloudflare Turnstile / hCaptcha /

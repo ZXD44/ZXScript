@@ -583,9 +583,7 @@ const ZSProvider = (() => {
     // again later" (a z.ai server issue, NOT the extension). Prefer the GLM-5.2
     // model and retry off-peak.
     unstableWarning:
-      "GLM (z.ai) can be unstable: when its servers are busy a turn fails with " +
-      "\"No response, please try again later\" - that's a z.ai issue, not the extension. " +
-      "Prefer the GLM-5.2 model and retry in a moment (or off-peak) if it happens.",
+      "GLM (z.ai) อาจไม่เสถียรเป็นบางครั้ง: เมื่อเซิร์ฟเวอร์หนาแน่นอาจขึ้นว่า 'No response, please try again later' ซึ่งเป็นปัญหาจากเซิร์ฟเวอร์ของ z.ai เอง ไม่ใช่จากส่วนขยาย แนะนำให้เลือกโมเดล GLM-5.2",
     // Svelte re-renders the reply's markdown subtree on every update, wiping any
     // chip placed inside it. Anchor chips at the turn-element level instead
     // (redirected into the reply column by chipAnchor).
