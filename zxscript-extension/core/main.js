@@ -2656,16 +2656,16 @@
       root.innerHTML = `
         <div id="zs-bar">
           <span id="zs-dot" class="off" title=""></span>
-          <span id="zs-brand">ZXScript <span class="zs-free">v${EXT_VERSION}</span></span>
+          <span id="zs-brand">⚡ ZXScript <span class="zs-free">v${EXT_VERSION}</span></span>
           <span id="zs-state"></span>
           <button id="zs-action"></button>
-          <button id="zs-stop" hidden>■ หยุด</button>
+          <button id="zs-stop" hidden>■ หยุดการทำงาน</button>
           <a id="zs-discord" href="https://www.zirconx.xyz" target="_blank" rel="noopener" title="เว็บไซต์ผู้พัฒนา: www.zirconx.xyz"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a>
-          <button id="zs-switch" aria-label="Switch AI and options" title="Switch AI, custom prompt, support"><span id="zs-switch-name"></span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-          <button id="zs-support" aria-label="Support ZXScript" title="Support ZXScript"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+          <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span id="zs-switch-name"></span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button id="zs-support" aria-label="ผู้พัฒนา" title="ผู้พัฒนา: zxd44 (ZirconX)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
         </div>
         <div id="zs-menu" hidden></div>
-        ${P.unstableWarning ? `<button id="zs-unstable" aria-label="Provider may be unstable" hidden>⚠ unstable</button>` : ""}
+        ${P.unstableWarning ? `<button id="zs-unstable" aria-label="Provider may be unstable" hidden>⚠ ไม่เสถียร</button>` : ""}
       `;
       document.documentElement.appendChild(root);
       bar = root.querySelector("#zs-bar");
@@ -3105,7 +3105,7 @@
       else if (A.starting) {
         toneClass = "starting";
         indicator = `<span class="zs-spin"></span>`;
-        msg = `กำลังเชื่อมต่อเซสชัน AI<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
+        msg = `กำลังเชื่อมต่อระบบ AI<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
         label = "กำลังเริ่ม…"; kind = "starting"; disabled = true;
       } else if (A.started) {
         // Prefer the ADVERTISED list length (A.toolList - the AGGREGATE catalogue
@@ -3129,7 +3129,7 @@
           // without this check the bridge dropping fell through to the
           // stale "N tools" text below, reading as if nothing was wrong.
           toneClass = "warn"; warn = true;
-          msg = `<b>Agent พร้อม</b> · Bridge ออฟไลน์ กรุณารัน start.bat`;
+          msg = `<b>AI พร้อม</b> · Bridge ออฟไลน์ กรุณารัน start.bat`;
         } else if ((placeDown || appDown || studioDown) && addonOk) {
           // DEGRADED session by CHOICE: the user started the agent with Roblox
           // down but other MCP server(s) alive (the "Start agent (Roblox
@@ -3142,12 +3142,12 @@
           msg = `<b>AI กำลังทำงาน</b>${tools ? ` · ${tools} คำสั่ง` : ""} · Roblox ออฟไลน์`;
         } else if (placeDown) {
           toneClass = "warn"; warn = true;
-          msg = `<b>Agent พร้อม</b> · กรุณาเปิดแมพใน Roblox Studio`;
+          msg = `<b>AI พร้อม</b> · กรุณาเปิดแมพใน Roblox Studio`;
         } else if (appDown || studioDown) {
           toneClass = "warn"; warn = true;
           msg = studioProcUp
-            ? `<b>Agent พร้อม</b> · กำลังรอเชื่อมต่อ MCP<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span> (เปิด Assistant &gt; MCP)`
-            : `<b>Agent พร้อม</b> · กำลังรอเปิด Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
+            ? `<b>AI พร้อม</b> · กำลังรอเชื่อมต่อ MCP<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span> (เปิด Assistant &gt; MCP)`
+            : `<b>AI พร้อม</b> · กำลังรอเปิด Roblox Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
         } else {
           toneClass = "active";
           // No inline dot here: the leading status dot already shows green, two
@@ -3166,7 +3166,7 @@
         if (bridgeOk) {
           toneClass = "standby";
           msg = `พร้อมทำงาน · กดปุ่มเพื่อเริ่มสั่งงาน Studio หรือพิมพ์คุยปกติ`;
-          label = "▶︎ เริ่มทำงาน"; kind = "start";
+          label = "▶︎ เริ่มให้ AI ทำงาน"; kind = "start";
         } else if (addonOk) {
           // Roblox is down but another MCP server is live: allow a DEGRADED start
           // (yellow). The agent runs on the other server(s); Roblox tools stay
@@ -3177,7 +3177,7 @@
             : studioProcUp
               ? `<b>เปิด Studio แล้วแต่ยังไม่เชื่อมต่อ</b> - เปิด <b>Assistant Settings &gt; MCP Servers</b> ใน Studio หรือเริ่มทำงานโดยไม่มี Studio`
               : `<b>Roblox Studio ออฟไลน์</b> - เริ่มทำงานกับเซิร์ฟเวอร์ MCP อื่นที่มี`;
-          label = "▶︎ เริ่มทำงาน (Roblox ออฟไลน์)"; kind = "start-degraded";
+          label = "▶︎ เริ่มให้ AI ทำงาน (Studio ออฟไลน์)"; kind = "start-degraded";
         } else {
           toneClass = "warn"; warn = true;
           msg = !A.bridge.connected
@@ -3196,7 +3196,7 @@
         disabled = !bridgeOk && !addonOk;
       } else {
         toneClass = "noagent";
-        msg = `แชตนี้ยังไม่ได้เริ่มเซสชัน · เปิดแชตใหม่เพื่อเริ่มใช้งาน`;
+        msg = `แชตนี้ยังไม่ได้เริ่มระบบ · เปิดแชตใหม่เพื่อเริ่มใช้งาน`;
       }
       // Parked on visibility: the loop is alive but deliberately frozen because
       // this tab is not the foreground tab of its window. Say so explicitly -
@@ -3421,7 +3421,7 @@
       if (A.started || !P.isFreshChat()) return;
       if (!nudged) {
         nudged = true;
-        toast("คำแนะนำ: กดปุ่ม “▶︎ เริ่มต้น AI Roblox” เพื่อให้ AI เริ่มควบคุม Roblox Studio");
+        toast("คำแนะนำ: กดปุ่ม “▶︎ เริ่มให้ AI ทำงาน” เพื่อให้ AI เริ่มควบคุม Roblox Studio");
       }
       if (!actionBtn) return;
       actionBtn.classList.add("zs-flash");
@@ -3727,7 +3727,7 @@
       if (!cover) {
         cover = document.createElement("div");
         cover.id = "zs-input-cover";
-        cover.innerHTML = `<span class="zs-cover-pulse"></span><span class="zs-cover-label">AI กำลังทำงานใน Studio…</span>`;
+        cover.innerHTML = `<span class="zs-cover-pulse"></span><span class="zs-cover-label">⚡ AI กำลังทำงานใน Studio…</span>`;
         document.documentElement.appendChild(cover);
       }
       cover.dataset.on = "1";

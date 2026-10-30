@@ -212,8 +212,8 @@ html.zs-light #zs-unstable {
   font-variant-emoji: text;
 }
 #zs-action[data-kind="start"] {
-  background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; border-color: transparent;
-  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.45);
+  background: linear-gradient(135deg, #10b981, #059669); color: #fff; border-color: transparent;
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4);
 }
 #zs-action[data-kind="start"]:hover { filter: brightness(1.08); }
 /* Degraded start: Roblox is down but another MCP server is live. Amber to signal
