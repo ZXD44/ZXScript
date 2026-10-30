@@ -700,7 +700,7 @@ const ZSProvider = (() => {
     streamLen, snapshot,
     // composer / state
     getEditor, editorText, chatIsEmpty, isFreshChat, composerFrame, barMount,
-    setInputLock, typeAndSend, stopGeneration,
+    setInputLock, typeAndSend, setEditorText, stopGeneration,
     isGenerating, isBusyNow, isHardGenerating,
     enforceComposer, ensureComposerReady,
     turnHalted, findContinueBtn, clickContinueBtn,

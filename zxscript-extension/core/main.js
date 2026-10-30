@@ -3085,7 +3085,11 @@
            <div class="zs-sec-label"><span>คำสั่งเฉพาะเพิ่มเติม (Custom Prompt)</span></div>
            <div class="zs-menu-note">แทรกต่อท้าย System Prompt ในทุกเซสชันใหม่ เหมาะสำหรับคำสั่งบังคับเฉพาะ</div>
            <textarea id="zs-set-text" rows="4" placeholder="เช่น: บังคับเขียนแบบ Caveman Mode, ใช้ task.wait() เสมอ"></textarea>
-           <div class="zs-set-row"><button id="zs-set-save">บันทึก</button><span id="zs-set-status"></span></div>
+           <div class="zs-set-row" style="gap: 6px;">
+            <button id="zs-set-insert" style="background: #10b981; color: #09090b; font-weight: 600; border: none; border-radius: 6px; padding: 5px 9px; cursor: pointer;">⚡ แทรกลงในแชททันที</button>
+            <button id="zs-set-save">บันทึก</button>
+            <span id="zs-set-status"></span>
+          </div>
          </section>
          <section class="zs-menu-sec">
            <div class="zs-sec-label"><span>เซิร์ฟเวอร์ MCP ทั้งหมด</span></div>
@@ -3103,6 +3107,13 @@
       const saveBtn = menuEl.querySelector("#zs-set-save");
       const status = menuEl.querySelector("#zs-set-status");
       ta.value = customPrompt;
+      const insertBtn = menuEl.querySelector("#zs-set-insert");
+      if (insertBtn) {
+        insertBtn.addEventListener("click", () => {
+          insertTextToEditor(ta.value);
+          menuEl.hidden = true;
+        });
+      }
       saveBtn.addEventListener("click", () => {
         customPrompt = ta.value;
         try { chrome.storage.local.set({ zsCustomPrompt: customPrompt }); } catch {}
@@ -4320,7 +4331,91 @@
   //  WIRING
   // ════════════════════════════════════════════════════════════════════════
 
-  chrome.runtime.onMessage.addListener((msg) => {
+  async function insertTextToEditor(text) {
+    if (!text) return false;
+    try {
+      const ed = (P.getEditor ? P.getEditor() : null) || document.querySelector("textarea, [contenteditable='true']");
+      if (!ed) {
+        ui.toast("❌ ไม่พบช่องพิมพ์ข้อความของแชท");
+        return false;
+      }
+
+      // Unlock if input is currently locked by ZXScript
+      if (P.setInputLock) {
+        try { P.setInputLock(false); } catch {}
+      }
+      if (ed.getAttribute("contenteditable") === "false" || ed.hasAttribute("data-zs-locked")) {
+        ed.setAttribute("contenteditable", "true");
+        ed.removeAttribute("data-zs-locked");
+        ed.removeAttribute("readonly");
+      }
+
+      ed.focus();
+
+      // If provider has its own specialized setEditorText implementation, use it
+      if (P.setEditorText) {
+        try {
+          await P.setEditorText(ed, text);
+        } catch {
+          await P.setEditorText(text);
+        }
+      } else {
+        // Universal fallback for Textarea vs Contenteditable
+        const tag = (ed.tagName || "").toUpperCase();
+        if (tag === "TEXTAREA" || tag === "INPUT") {
+          const proto = (tag === "TEXTAREA" ? window.HTMLTextAreaElement : window.HTMLInputElement)?.prototype;
+          const setter = proto && Object.getOwnPropertyDescriptor(proto, "value")?.set;
+          if (setter) {
+            setter.call(ed, text);
+          } else {
+            ed.value = text;
+          }
+          ed.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+          ed.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
+        } else {
+          const sel = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(ed);
+          sel.removeAllRanges();
+          sel.addRange(range);
+
+          let ok = false;
+          try {
+            const lines = String(text).split("\n");
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i]) document.execCommand("insertText", false, lines[i]);
+              if (i < lines.length - 1) document.execCommand("insertLineBreak");
+            }
+            ok = true;
+          } catch {
+            ok = false;
+          }
+
+          if (!ok || (P.editorText && P.editorText().trim() === "")) {
+            try { document.execCommand("insertText", false, text); } catch {}
+          }
+          if (P.editorText && P.editorText().trim() === "") {
+            ed.textContent = text;
+          }
+          ed.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        }
+      }
+
+      try {
+        ed.focus();
+        if (ed.scrollIntoView) ed.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch {}
+
+      ui.toast("⚡ แทรกข้อความลงในแชทแล้ว");
+      return true;
+    } catch (err) {
+      console.error("[zs-insert-text-err]", err);
+      ui.toast("แทรกข้อความไม่สำเร็จ: " + ((err && err.message) || err));
+      return false;
+    }
+  }
+
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.type === "zs-status") {
       ui.setStatus({ connected: msg.connected, mcpAlive: msg.mcpAlive, studio: msg.studio, studioApp: msg.studioApp, studioProc: msg.studioProc, tools: msg.tools, servers: msg.servers });
     }
@@ -4329,11 +4424,15 @@
     }
     if (msg && msg.type === "zs-insert-text") {
       if (msg.text) {
-        P.setEditorText(msg.text);
-        const ed = P.getEditor();
-        if (ed) ed.focus();
-        ui.toast("⚡ แทรกข้อความลงในแชทแล้ว");
+        insertTextToEditor(msg.text).then((ok) => {
+          try { sendResponse({ ok }); } catch {}
+        }).catch((err) => {
+          try { sendResponse({ ok: false, error: String(err) }); } catch {}
+        });
+        return true;
       }
+      try { sendResponse({ ok: false, error: "ไม่มีข้อความ" }); } catch {}
+      return false;
     }
     if (msg && msg.type === "zs-sound-toggle") {
       ZSSound.setEnabled(msg.enabled);

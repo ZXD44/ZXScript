@@ -644,6 +644,16 @@ const ZSProvider = (() => {
     return text.slice(0, headLen) + marker + text.slice(text.length - tailLen);
   }
 
+  function setEditorText(ed, text) {
+    if (!ed) ed = getEditor();
+    if (!ed) return;
+    ed.focus();
+    if (_nativeSetter) { _nativeSetter.call(ed, text); }
+    else { ed.value = text; }
+    ed.dispatchEvent(new Event("input", { bubbles: true }));
+    ed.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
   async function typeAndSend(text, images) {
     const ed = getEditor();
     if (!ed) throw new Error("Qwen input box not found");
@@ -1004,7 +1014,7 @@ const ZSProvider = (() => {
     streamLen, snapshot,
     // composer / state
     getEditor, editorText, chatIsEmpty, isFreshChat, composerFrame, gateTarget, barAnchor,
-    setInputLock, typeAndSend, stopGeneration,
+    setInputLock, typeAndSend, setEditorText, stopGeneration,
     isGenerating, isBusyNow, isHardGenerating,
     enforceComposer, ensureComposerReady,
     turnHalted, findContinueBtn, clickContinueBtn, replyUnsettled, isComparisonTurn, resolveComparison,

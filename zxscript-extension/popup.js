@@ -391,14 +391,19 @@ if (btnInsertChat) {
       return;
     }
     const supported = [
-      "chat.deepseek.com",
+      "deepseek.com",
       "chatgpt.com",
+      "chat.openai.com",
       "gemini.google.com",
-      "qwen",
-      "kimi.moonshot",
+      "kimi.ai",
+      "moonshot.cn",
+      "chat.z.ai",
       "chatglm.cn",
+      "qwen.ai",
+      "tongyi.aliyun.com",
       "meta.ai",
-      "arena.ai"
+      "arena.ai",
+      "lmarena.ai"
     ];
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const targetTab = tabs[0];
@@ -414,7 +419,7 @@ if (btnInsertChat) {
             });
             if (found.windowId) chrome.windows.update(found.windowId, { focused: true });
           } else {
-            showToast("ไม่พบแท็บแชท AI ที่เปิดอยู่");
+            showToast("ไม่พบแท็บแชท AI ที่เปิดอยู่ (เปิด DeepSeek, ChatGPT, Gemini, Kimi ฯลฯ)");
           }
         });
       }
@@ -423,9 +428,20 @@ if (btnInsertChat) {
 }
 
 function sendInsert(tabId, text) {
-  chrome.tabs.sendMessage(tabId, { type: "zs-insert-text", text }, () => {
-    void chrome.runtime.lastError;
-    showToast("⚡ แทรกข้อความลงในแชทสำเร็จ");
-    setTimeout(() => window.close(), 500);
+  showToast("กำลังแทรกข้อความ...");
+  chrome.tabs.sendMessage(tabId, { type: "zs-insert-text", text }, (res) => {
+    const err = chrome.runtime.lastError;
+    if (err) {
+      showToast("⚠️ กรุณารีเฟรช (F5) หน้าเว็บแชท AI ก่อนใช้งานปุ่มนี้");
+      return;
+    }
+    if (res && res.ok === false) {
+      showToast("แทรกไม่สำเร็จ: " + (res.error || "เกิดข้อผิดพลาด"));
+      return;
+    }
+    showToast("⚡ แทรกข้อความลงในแชทสำเร็จ!");
+    setTimeout(() => {
+      try { window.close(); } catch {}
+    }, 450);
   });
 }

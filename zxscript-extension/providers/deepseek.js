@@ -628,6 +628,13 @@ const ZSProvider = (() => {
   // DeepSeek's composer is a <textarea> driven by React. We must set .value via
   // the native prototype setter so React's onChange fires, then dispatch an input
   // event, then click the primary send button (Enter inserts a newline).
+  function setEditorText(el, v) {
+    if (!el) el = getEditor();
+    if (!el) return;
+    el.focus();
+    setTextareaValue(el, v);
+  }
+
   function setTextareaValue(el, v) {
     const proto = window.HTMLTextAreaElement && window.HTMLTextAreaElement.prototype;
     const setter = proto && Object.getOwnPropertyDescriptor(proto, "value");
@@ -980,7 +987,7 @@ const ZSProvider = (() => {
     streamLen, snapshot,
     // composer / state
     getEditor, editorText, chatIsEmpty, isFreshChat, composerFrame, barMount,
-    setInputLock, typeAndSend, stopGeneration,
+    setInputLock, typeAndSend, setEditorText, stopGeneration,
     isGenerating, isBusyNow, isHardGenerating, genDebug,
     enforceComposer, ensureComposerReady,
     turnHalted, findContinueBtn, clickContinueBtn,

@@ -1072,7 +1072,7 @@ const ZSProvider = (() => {
     // band's own ~245px ceiling so a full composer is covered edge to edge.
     coverTarget,
     coverMaxH: 280,
-    setInputLock, typeAndSend, stopGeneration,
+    setInputLock, typeAndSend, setEditorText, stopGeneration,
     isGenerating, isBusyNow, isHardGenerating,
     enforceComposer, ensureComposerReady,
     turnHalted, findContinueBtn, clickContinueBtn,
