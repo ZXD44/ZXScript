@@ -1,3 +1,106 @@
+// Global error catcher for ZXScript
+if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
+  window.__ZS_ERR_GUARD__ = true;
+
+  function showZSErrorModal(title, msg, stack) {
+    try {
+      let el = document.getElementById("zs-error-reporter");
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "zs-error-reporter";
+        el.style.cssText = [
+          "position: fixed", "top: 16px", "right: 16px", "max-width: 380px",
+          "width: calc(100vw - 32px)", "background: #18181b", "color: #f4f4f5",
+          "border: 1px solid rgba(239, 68, 68, 0.45)", "border-left: 4px solid #ef4444",
+          "border-radius: 10px", "padding: 12px 14px", "box-shadow: 0 20px 40px rgba(0,0,0,0.6)",
+          "z-index: 2147483647", "font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
+          "font-size: 12px", "line-height: 1.4", "user-select: text"
+        ].join(";");
+        (document.body || document.documentElement).appendChild(el);
+      }
+
+      const reportPayload = [
+        "=== ZXScript Error Report ===",
+        `Title: ${title}`,
+        `Message: ${msg}`,
+        `Stack: ${stack || "N/A"}`,
+        `URL: ${location.href}`,
+        `Time: ${new Date().toLocaleString("th-TH")}`,
+        `UserAgent: ${navigator.userAgent}`,
+        "============================="
+      ].join("\n");
+
+      const esc = (s) => String(s || "").replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      el.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <div style="font-weight: 600; color: #f87171; display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>ZXScript ตรวจพบ Error</span>
+          </div>
+          <button id="zs-err-close" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 14px; padding: 0 4px;">✕</button>
+        </div>
+        <div style="font-size: 11.5px; color: #e4e4e7; margin-bottom: 6px; font-weight: 500; word-break: break-word;">${esc(msg || title)}</div>
+        <div style="font-size: 10px; color: #71717a; max-height: 90px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 6px 8px; border-radius: 6px; font-family: monospace; margin-bottom: 10px; white-space: pre-wrap; word-break: break-all;">${esc(stack || "ไม่มี Stack Trace")}</div>
+        <div style="display: flex; gap: 6px;">
+          <button id="zs-err-copy" style="flex: 1; background: #10b981; color: #09090b; border: none; border-radius: 6px; padding: 7px 10px; font-size: 11px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;">📋 คัดลอก Log Error ไปส่ง</button>
+        </div>
+      `;
+
+      el.querySelector("#zs-err-close").addEventListener("click", () => el.remove());
+      const copyBtn = el.querySelector("#zs-err-copy");
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(reportPayload).then(() => {
+          copyBtn.textContent = "✓ คัดลอกเรียบร้อยแล้ว!";
+          copyBtn.style.background = "#059669";
+          copyBtn.style.color = "#ffffff";
+          setTimeout(() => {
+            if (copyBtn) {
+              copyBtn.textContent = "📋 คัดลอก Log Error ไปส่ง";
+              copyBtn.style.background = "#10b981";
+              copyBtn.style.color = "#09090b";
+            }
+          }, 2500);
+        }).catch(() => {
+          copyBtn.textContent = "คัดลอกไม่สำเร็จ";
+        });
+      });
+
+      try {
+        if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+          chrome.runtime.sendMessage({
+            type: "zs_error_notify",
+            title: "ZXScript ตรวจพบ Error",
+            message: msg || title,
+            stack: reportPayload
+          }, () => void (chrome.runtime && chrome.runtime.lastError));
+        }
+      } catch {}
+    } catch {}
+  }
+
+  window.addEventListener("error", (e) => {
+    const fn = e.filename || "";
+    const isExtension = fn.includes("chrome-extension://") || fn.includes("moz-extension://") ||
+                        fn.includes("core/") || fn.includes("providers/") ||
+                        (e.error && (e.error.stack || "").includes("chrome-extension://")) ||
+                        (e.message && (e.message.includes("ZXScript") || e.message.includes("execute_luau")));
+    if (isExtension) {
+      showZSErrorModal("Uncaught Error", e.message || "Unknown error", e.error ? e.error.stack : `${fn}:${e.lineno}:${e.colno}`);
+    }
+  });
+
+  window.addEventListener("unhandledrejection", (e) => {
+    const reason = e.reason;
+    const stack = (reason && reason.stack) || String(reason || "");
+    if (stack.includes("chrome-extension://") || stack.includes("core/") || stack.includes("providers/") || stack.includes("zxscript")) {
+      showZSErrorModal("Unhandled Promise Rejection", (reason && reason.message) || String(reason), stack);
+    }
+  });
+
+  window.__ZS_SHOW_ERROR__ = showZSErrorModal;
+}
+
 // SPDX-License-Identifier: GPL-3.0-or-later
 // core/config.js - provider-agnostic constants: app identity, system prompt,
 // feedback strings, tool categorisation. NOTHING in this file may reference a

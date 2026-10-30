@@ -1200,3 +1200,12 @@ html.zs-light .zs-dev-title {
 html.zs-light .zs-dev-sub {
   color: #71717a;
 }
+
+.zs-banner-copy {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+.zs-banner-copy:hover {
+  background: rgba(16, 185, 129, 0.24) !important;
+}

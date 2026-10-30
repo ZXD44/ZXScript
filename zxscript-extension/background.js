@@ -351,6 +351,22 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         }
         break;
       }
+      case "zs_error_notify": {
+        if (chrome.notifications) {
+          try {
+            chrome.notifications.create("zs-err-" + Date.now(), {
+              type: "basic",
+              iconUrl: "icon-128.png",
+              title: msg.title || "ZXScript ตรวจพบ Error",
+              message: (msg.message || "มีข้อผิดพลาดเกิดขึ้น คลิกเพื่อดู").slice(0, 100),
+              priority: 2,
+              requireInteraction: true
+            });
+          } catch {}
+        }
+        sendResponse({ ok: true });
+        break;
+      }
       case "show_notification": {
         if (chrome.notifications) {
           try {

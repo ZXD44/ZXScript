@@ -3790,17 +3790,52 @@
       setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 300); }, 3500);
     }
 
-    function banner(kind, title, msg) {
+    function banner(kind, title, msg, stack) {
       const b = document.createElement("div");
       b.className = `zs-banner ${kind}`;
       b.innerHTML = `<div class="zs-banner-t"></div><div class="zs-banner-m"></div>
         <div class="zs-banner-acts">
+          <button class="zs-banner-copy">📋 คัดลอก Error</button>
           <button class="zs-banner-x">ปิด</button>
         </div>`;
       b.querySelector(".zs-banner-t").textContent = title;
       b.querySelector(".zs-banner-m").textContent = msg;
+
+      const reportPayload = [
+        "=== รายงานข้อผิดพลาด ZXScript ===",
+        `หมวดหมู่: ${kind}`,
+        `หัวข้อ: ${title}`,
+        `ข้อความ: ${msg}`,
+        stack ? `Stack Trace:\n${stack}` : "",
+        `ลิงก์ (URL): ${location.href}`,
+        `เวลา: ${new Date().toLocaleString("th-TH")}`,
+        `เวอร์ชัน: ${EXT_VERSION || "0.0.1"}`,
+        "=================================="
+      ].filter(Boolean).join("\n");
+
+      const copyBtn = b.querySelector(".zs-banner-copy");
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(reportPayload).then(() => {
+          copyBtn.textContent = "✓ คัดลอกแล้ว";
+          setTimeout(() => { if (copyBtn) copyBtn.textContent = "📋 คัดลอก Error"; }, 2000);
+        }).catch(() => {
+          copyBtn.textContent = "คัดลอกไม่สำเร็จ";
+        });
+      });
+
       b.querySelector(".zs-banner-x").addEventListener("click", () => b.remove());
-      root.appendChild(b);
+      (root || document.documentElement).appendChild(b);
+
+      try {
+        if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+          chrome.runtime.sendMessage({
+            type: "zs_error_notify",
+            title: title || "ZXScript เกิดข้อผิดพลาด",
+            message: msg || title,
+            stack: reportPayload
+          }, () => void chrome.runtime.lastError);
+        }
+      } catch {}
     }
 
     // Left-hand ZXScript popup showing the latest screen_capture. Fed from the
