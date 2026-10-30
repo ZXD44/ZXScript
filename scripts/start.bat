@@ -2,7 +2,7 @@
 @echo off
 setlocal enabledelayedexpansion
 chcp 65001 >nul
-title ZXScript Bridge - by ZXD44
+title ZXScript Bridge - โดย ZXD44
 set "ROOT=%~dp0..\"
 cd /d "%ROOT%"
 
@@ -13,30 +13,30 @@ for /f "tokens=*" %%v in ('ver') do call :log "%%v"
 
 cls
 echo =====================================================================
-echo    ZXScript Autonomous All-in-One Launcher - by ZXD44
-echo    Roblox Studio AI Agent Bridge (Bloxstrap and Vanilla Supported)
+echo    ZXScript All-in-One Launcher - โดย ZXD44 (ZirconX)
+echo    Roblox Studio AI Agent Bridge (รองรับทั้ง Bloxstrap และ Studio ทั่วไป)
 echo =====================================================================
 echo.
 
 REM --- 1. Verify Project Files --------------------------------------------
-echo   [1/6] Verifying project integrity...
+echo   [1/6] กำลังตรวจสอบความสมบูรณ์ของไฟล์ระบบ...
 if not exist "%ROOT%bridge\bridge.py" (
-    echo   [ERROR] bridge\bridge.py not found!
-    echo   Make sure you extracted the complete folder before running.
+    echo   [ERROR] ไม่พบไฟล์ bridge\bridge.py!
+    echo   กรุณาแตกไฟล์ ZIP หรือดาวน์โหลดโปรเจกต์ให้ครบถ้วนก่อนเปิดใช้งาน
     call :log "FATAL: bridge\bridge.py missing."
     pause
     exit /b 1
 )
 if not exist "%ROOT%zxscript-extension\manifest.json" (
-    echo   [WARNING] zxscript-extension folder not found!
+    echo   [คำเตือน] ไม่พบโฟลเดอร์ zxscript-extension!
     call :log "WARN: zxscript-extension missing."
 ) else (
-    echo         [OK] Project core and extension verified.
+    echo         [OK] ตรวจสอบไฟล์ระบบและ Extension ถูกต้องสมบูรณ์
 )
 
 REM --- 2. Python Detection and Auto-Install ---------------------------------
 echo.
-echo   [2/6] Checking Python runtime...
+echo   [2/6] กำลังตรวจสอบ Python บนเครื่องของคุณ...
 set "PY="
 where py >nul 2>nul && set "PY=py -3"
 call :validate_py && goto :py_found
@@ -60,46 +60,46 @@ for %%R in (
 )
 
 call :log "Python missing. Attempting auto-installation via winget..."
-echo         Python not found. Auto-installing Python 3.12 via winget...
+echo         ไม่พบ Python บนเครื่อง กำลังดาวน์โหลดและติดตั้ง Python 3.12 ให้อัตโนมัติ (winget)...
 where winget >nul 2>nul
 if errorlevel 1 (
-    echo   [ERROR] winget is unavailable. Please download Python from:
-    echo   https://www.python.org/downloads/ (tick Add to PATH).
+    echo   [ERROR] ไม่พบ winget บนเครื่อง กรุณาดาวน์โหลดและติดตั้ง Python ด้วยตนเองจาก:
+    echo   https://www.python.org/downloads/ (อย่าลืมติ๊ก Add Python to PATH)
     pause
     exit /b 1
 )
 winget install --id Python.Python.3.12 --source winget --accept-package-agreements --accept-source-agreements
 set "PY=python"
 call :validate_py && goto :py_found
-echo   [ERROR] Python auto-install failed. Please install manually.
+echo   [ERROR] ติดตั้ง Python อัตโนมัติไม่สำเร็จ กรุณาติดตั้ง Python ด้วยตนเอง
 pause
 exit /b 1
 
 :py_found
 for /f "tokens=*" %%v in ('call %PY% --version 2^>^&1') do (
-    echo         [OK] Python found: %PY% (%%v)
+    echo         [OK] ตรวจพบ Python: %PY% (%%v)
     call :log "Python detected: %PY% (%%v)"
 )
 
 REM --- 3. Dependency Check and Auto-Install ---------------------------------
 echo.
-echo   [3/6] Checking Python dependencies (websockets)...
+echo   [3/6] กำลังตรวจสอบไลบรารี websockets...
 %PY% -c "import websockets" >nul 2>nul
 if errorlevel 1 (
-    echo         Installing required websockets library...
+    echo         กำลังติดตั้งไลบรารี websockets สำหรับการสื่อสารแบบเรียลไทม์...
     %PY% -m pip install --user websockets
     if errorlevel 1 (
-        echo   [ERROR] Failed to install websockets. Check internet connection.
+        echo   [ERROR] ติดตั้ง websockets ไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต
         pause
         exit /b 1
     )
 )
-echo         [OK] websockets library is ready.
+echo         [OK] ไลบรารี websockets พร้อมทำงาน
 call :log "websockets library ready."
 
 REM --- 4. Process and Port Cleanup ------------------------------------------
 echo.
-echo   [4/6] Cleaning lingering processes and ports (17613 and 13469)...
+echo   [4/6] กำลังเคลียร์พอร์ตและโปรเซสเก่าที่อาจค้างอยู่ (พอร์ต 17613)...
 tasklist /fi "imagename eq StudioMCP.exe" 2>nul | findstr /i "StudioMCP.exe" >nul
 if not errorlevel 1 (
     taskkill /F /IM StudioMCP.exe >nul 2>nul
@@ -115,11 +115,11 @@ if defined OLDPID (
     timeout /t 1 /nobreak >nul
     call :log "Replaced previous bridge on PID !OLDPID!"
 )
-echo         [OK] Ports and background processes cleaned.
+echo         [OK] เคลียร์พอร์ตและเบื้องหลังเรียบร้อย
 
 REM --- 5. Roblox Studio / Bloxstrap MCP Check and Auto-Launch ---------------
 echo.
-echo   [5/6] Inspecting Roblox Studio and Bloxstrap MCP engine...
+echo   [5/6] กำลังตรวจสอบ Roblox Studio และระบบ StudioMCP...
 set "STUDIO_MCP="
 set "STUDIO_EXE="
 
@@ -128,14 +128,14 @@ for /f "tokens=*" %%a in ('%PY% -c "import sys; sys.path.insert(0, r'%ROOT%bridg
 )
 
 if defined STUDIO_MCP (
-    echo         [OK] Detected StudioMCP binary:
+    echo         [OK] ตรวจพบโมดูล StudioMCP:
     echo              !STUDIO_MCP!
     call :log "Detected StudioMCP at !STUDIO_MCP!"
     for /f "tokens=*" %%a in ('%PY% -c "import sys, os; sys.path.insert(0, r'%ROOT%bridge'); import launch_studio_mcp as m; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else \"\"; s = os.path.join(d, \"RobloxStudioBeta.exe\"); print(s if os.path.isfile(s) else \"\")"') do (
         set "STUDIO_EXE=%%a"
     )
 ) else (
-    echo         [WARNING] StudioMCP.exe not found automatically.
+    echo         [คำเตือน] ไม่พบ StudioMCP.exe อัตโนมัติ (เปิด Studio เพื่อเชื่อมต่อ)
     call :log "WARN: StudioMCP binary not detected."
 )
 
@@ -144,37 +144,41 @@ tasklist /fi "imagename eq RobloxStudioBeta.exe" 2>nul | findstr /i "RobloxStudi
 tasklist /fi "imagename eq RobloxStudio.exe" 2>nul | findstr /i "RobloxStudio.exe" >nul && set "STUDIO_RUNNING=1"
 
 if "!STUDIO_RUNNING!"=="1" (
-    echo         [OK] Roblox Studio is currently running.
+    echo         [OK] Roblox Studio กำลังเปิดทำงานอยู่
 ) else (
     if defined STUDIO_EXE (
-        echo         Roblox Studio is not running. Auto-launching Roblox Studio...
+        echo         Roblox Studio ยังไม่เปิด กำลังเปิด Roblox Studio ให้อัตโนมัติ...
         start "" "!STUDIO_EXE!"
         call :log "Auto-launched Roblox Studio from !STUDIO_EXE!"
-        echo         [OK] Roblox Studio launched! Please open your Place.
+        echo         [OK] เปิด Studio แล้ว กรุณาเปิดแมพ (Place) ของคุณ
     ) else (
-        echo         [NOTICE] Please launch Roblox Studio and open your Place.
+        echo         [คำแนะนำ] กรุณาเปิด Roblox Studio และเปิดแมพ (Place) ของคุณ
     )
 )
 
 REM --- 6. Launch Bridge ----------------------------------------------------
 echo.
-echo   [6/6] Starting ZXScript Bridge...
+echo   [6/6] กำลังเริ่มการทำงาน ZXScript Bridge...
 echo.
 echo  =====================================================================
-echo    STATUS: Bridge is ONLINE and ready!
+echo    สถานะ: Bridge ออนไลน์ พร้อมเชื่อมต่อแล้ว!
 echo.
-echo    1. Load Extension in Chrome:
-echo       chrome://extensions -^> Developer Mode -^> Load unpacked:
-echo       %ROOT%zxscript-extension
+echo    1. ติดตั้ง Extension ลงในเบราว์เซอร์ (Chrome หรือ Edge):
+echo       - ไปที่: chrome://extensions หรือ edge://extensions
+echo       - เปิดสวิตช์มุมขวาบน: "โหมดนักพัฒนา" (Developer mode)
+echo       - กดปุ่ม: "โหลดส่วนขยายที่คลายแพ็กไว้" (Load unpacked)
+echo       - เลือกโฟลเดอร์: %ROOT%zxscript-extension
 echo.
-echo    2. Open your Place in Roblox Studio:
-echo       Assistant AI -^> ... -^> Manage MCP Servers -^> Enable Studio as MCP Server
+echo    2. เปิดแมพใน Roblox Studio:
+echo       - กดแท็บ Assistant AI ด้านบน -^> กดปุ่ม ... (มุมขวาบน)
+echo       - เลือก Manage MCP Servers -^> ติ๊กเปิด "Enable Studio as MCP Server"
 echo.
-echo    3. Open Web AI:
-echo       https://chat.deepseek.com (Recommended) or https://chat.qwen.ai
-echo       Wait for green dot and click Start session!
+echo    3. เปิดแชต AI บนเว็บ:
+echo       - เข้าเว็บ https://chat.deepseek.com (แนะนำ) หรือ ChatGPT / Qwen
+echo       - รอจนแถบ ZXScript ด้านล่างขึ้นจุดสีเขียว 🟢
+echo       - กดปุ่ม "▶︎ เริ่มทำงาน" แล้วเริ่มสั่งงานสร้างแมพได้ทันที!
 echo.
-echo    [NOTE] DO NOT CLOSE THIS TERMINAL. Minimize it while working.
+echo    [ข้อสำคัญ] ห้ามปิดหน้าต่างดำนี้ ให้พับย่อหน้าจอลงขณะใช้งาน
 echo  =====================================================================
 echo.
 
@@ -185,10 +189,10 @@ set "BRIDGE_EXIT=%errorlevel%"
 call :log "bridge.py exited with code %BRIDGE_EXIT%"
 echo.
 if not "%BRIDGE_EXIT%"=="0" (
-    echo   Bridge stopped with error code %BRIDGE_EXIT%.
-    echo   Log file: logs\start.log
+    echo   Bridge หยุดทำงานด้วยรหัสข้อผิดพลาด %BRIDGE_EXIT%
+    echo   ดูรายละเอียดข้อผิดพลาดที่: logs\start.log
 ) else (
-    echo   Bridge stopped normally.
+    echo   Bridge หยุดการทำงานเรียบร้อยแล้ว
 )
 pause
 exit /b 0

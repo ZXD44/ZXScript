@@ -604,18 +604,18 @@ def check_studio_port():
     if "roblox" in p or "bloxstrap" in p or "studiomcp" in n or "robloxstudio" in n:
         return False
     where = path or name
-    log(f"port {STUDIO_MCP_PORT} (Studio's MCP port) is held by a non-Roblox process:", "yl")
+    log(f"พอร์ต {STUDIO_MCP_PORT} (พอร์ต MCP ของ Studio) ถูกโปรเซสอื่นยึดครองอยู่ / port is held by:", "yl")
     log(f"    {name} (pid {pid})  {where}", "yl")
-    log("    This will block Studio's tools (the bridge will see 0 tools).", "yl")
+    log("    สิ่งนี้จะทำให้เชื่อมต่อคำสั่งของ Roblox Studio ไม่ได้ (จะเห็นเป็น 0 คำสั่ง)", "yl")
     try:
-        ans = input("    Kill this process so Studio can use the port? [y/N] ").strip().lower()
+        ans = input("    ปิดโปรเซสนี้เพื่อให้ Studio ใช้พอร์ตได้เลยหรือไม่? [y/N] (Kill process?): ").strip().lower()
     except (EOFError, KeyboardInterrupt):
         ans = ""
     if ans in ("y", "yes", "o", "oui"):
         try:
             subprocess.run(["taskkill", "/F", "/PID", str(pid)],
                            capture_output=True, text=True, timeout=8)
-            log(f"killed {name} (pid {pid}). Studio can use the port now.", "cy")
+            log(f"ปิด {name} (pid {pid}) เรียบร้อยแล้ว Studio สามารถใช้งานพอร์ตได้ทันที", "cy")
             # Tell the user the finishing step IMMEDIATELY, here, instead of only
             # after the ~48s server-launch grace loop that follows: killing the
             # squatter frees the port, but Studio's MCP plugin registers only
