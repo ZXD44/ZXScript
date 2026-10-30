@@ -351,6 +351,22 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         }
         break;
       }
+      case "show_notification": {
+        if (chrome.notifications) {
+          try {
+            chrome.notifications.create("zs-done-" + Date.now(), {
+              type: "basic",
+              iconUrl: "icon-128.png",
+              title: msg.title || "ZXScript × Roblox Studio",
+              message: msg.message || "ทำงานและรันคำสั่งเสร็จเรียบร้อยแล้ว!",
+              priority: 2,
+              requireInteraction: false
+            });
+          } catch {}
+        }
+        sendResponse({ ok: true });
+        break;
+      }
       case "reconnect":
         reconnectDelay = RECONNECT_MIN;
         connect();
@@ -405,6 +421,18 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   })();
   return true; // async sendResponse
 });
+
+// Click notification to focus active provider tab
+if (chrome.notifications && chrome.notifications.onClicked) {
+  chrome.notifications.onClicked.addListener(() => {
+    chrome.tabs.query({ url: PROVIDER_URLS }, (tabs) => {
+      if (tabs && tabs[0]) {
+        chrome.tabs.update(tabs[0].id, { active: true });
+        if (tabs[0].windowId) chrome.windows.update(tabs[0].windowId, { focused: true });
+      }
+    });
+  });
+}
 
 // Wake/keepalive hooks.
 chrome.runtime.onStartup.addListener(connect);

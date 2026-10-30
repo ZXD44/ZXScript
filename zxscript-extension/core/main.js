@@ -33,41 +33,121 @@
     return sleep(lo + Math.random() * (hi - lo));
   }
 
-  // ── Native Web Audio Chime ────────────────────────────────────────────────
-  // Generates subtle, non-intrusive audio cues on tool completion and turn finish.
-  // Pure Web Audio synthesis - zero external audio assets or network requests.
-  function playChime(kind = "tool") {
+  // ── Native Web Audio Chime & Background Notification ────────────────────────
+  // Generates rich, resonant audio cues on tool completion and turn finish.
+  // When window is minimized or inactive, volume is boosted and a native desktop
+  // notification + tab title flash are dispatched so the user never misses it.
+  function notifyTurnComplete(summaryText) {
+    try {
+      const isHidden = document.hidden || !document.hasFocus();
+      playChime("done", isHidden);
+
+      // Desktop Notification & Tab Title Alert when switched away / minimized
+      if (isHidden) {
+        try {
+          chrome.runtime.sendMessage({
+            type: "show_notification",
+            title: "ZXScript × Roblox Studio",
+            message: summaryText || "AI ทำงานและรันคำสั่งเสร็จสิ้นแล้ว!",
+          }, () => void chrome.runtime.lastError);
+        } catch {}
+
+        // Flash document title until user returns to tab
+        try {
+          if (!window.__zsTitleFlashing) {
+            window.__zsTitleFlashing = true;
+            const origTitle = document.title;
+            let isAlert = false;
+            const flashTimer = setInterval(() => {
+              if (!document.hidden && document.hasFocus()) {
+                clearInterval(flashTimer);
+                window.__zsTitleFlashing = false;
+                document.title = origTitle;
+                return;
+              }
+              isAlert = !isAlert;
+              document.title = isAlert ? "🔔 [งานเสร็จแล้ว!] ZXScript" : origTitle;
+            }, 900);
+
+            const stopFlash = () => {
+              clearInterval(flashTimer);
+              window.__zsTitleFlashing = false;
+              document.title = origTitle;
+              window.removeEventListener("focus", stopFlash);
+              document.removeEventListener("visibilitychange", stopFlash);
+            };
+            window.addEventListener("focus", stopFlash);
+            document.addEventListener("visibilitychange", stopFlash);
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  function playChime(kind = "tool", boost = false) {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       if (ctx.state === "suspended") ctx.resume();
       const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
 
-      osc.type = "sine";
       if (kind === "done") {
-        // Soft two-tone chime (D5 -> A5) on full turn finish
-        osc.frequency.setValueAtTime(587.33, now);
-        osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.08);
-        gain.gain.setValueAtTime(0.025, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.18);
+        // Rich, high-clarity 3-note ascending chime: E5 (659.25Hz) -> G#5 (830.61Hz) -> B5 (987.77Hz)
+        // Louder, resonant, and unmistakable across headphones/speakers.
+        const vol = boost ? 0.40 : 0.28;
+        const notes = [
+          { f: 659.25, t: 0.00, d: 0.22, g: vol * 0.8 },
+          { f: 830.61, t: 0.10, d: 0.24, g: vol * 0.9 },
+          { f: 987.77, t: 0.22, d: 0.55, g: vol * 1.0 },
+        ];
+
+        notes.forEach(({ f, t, d, g }) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(f, now + t);
+
+          gain.gain.setValueAtTime(0.0001, now + t);
+          gain.gain.exponentialRampToValueAtTime(g, now + t + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
+
+          // Subtle bell overtone for crystalline chime presence
+          const harm = ctx.createOscillator();
+          const harmGain = ctx.createGain();
+          harm.type = "triangle";
+          harm.frequency.setValueAtTime(f * 2, now + t);
+          harmGain.gain.setValueAtTime(0.0001, now + t);
+          harmGain.gain.exponentialRampToValueAtTime(g * 0.22, now + t + 0.015);
+          harmGain.gain.exponentialRampToValueAtTime(0.0001, now + t + (d * 0.7));
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          harm.connect(harmGain);
+          harmGain.connect(ctx.destination);
+
+          osc.start(now + t);
+          osc.stop(now + t + d);
+          harm.start(now + t);
+          harm.stop(now + t + d);
+        });
+
+        setTimeout(() => { try { ctx.close(); } catch {} }, 1000);
       } else {
-        // Ultra-soft tick on tool finish
-        osc.frequency.setValueAtTime(523.25, now);
-        gain.gain.setValueAtTime(0.012, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+        // Crisp, distinct tick on tool execution finish (louder than before)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.05);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.06);
+        osc.stop(now + 0.09);
+        setTimeout(() => { try { ctx.close(); } catch {} }, 250);
       }
-      setTimeout(() => { try { ctx.close(); } catch {} }, 350);
     } catch {}
   }
 
@@ -1544,7 +1624,7 @@
       ui.inputCover(false); // lift the "Agent is working" cover when the loop ends
       P.setInputLock(false); // always unlock, even on error or stop
       diag("loop.end");
-      if (!A.stop && !A.stopping) playChime("done");
+      if (!A.stop && !A.stopping) notifyTurnComplete("งานเสร็จสิ้นเรียบร้อยแล้ว!");
     }
   }
 
