@@ -52,6 +52,17 @@ jobs:
           node --check zxscript-extension/core/config.js
           node --check zxscript-extension/core/main.js
           node --check zxscript-extension/core/parser.js
+          node --check zxscript-extension/providers/arena.js
+          node --check zxscript-extension/providers/chatgpt.js
+          node --check zxscript-extension/providers/chatgpt-cm.js
+          node --check zxscript-extension/providers/claude.js
+          node --check zxscript-extension/providers/deepseek.js
+          node --check zxscript-extension/providers/gemini.js
+          node --check zxscript-extension/providers/glm.js
+          node --check zxscript-extension/providers/kimi.js
+          node --check zxscript-extension/providers/meta.js
+          node --check zxscript-extension/providers/qwen.js
+          node --check zxscript-extension/providers/qwen-net.js
 
       # ── Unit tests ──
       - name: Parser test suite
@@ -59,6 +70,9 @@ jobs:
 
       - name: ChatGPT provider tests
         run: node zxscript-extension/test-chatgpt.js
+
+      - name: Claude provider tests
+        run: node zxscript-extension/test-claude.js
 
       # ── Bridge unit tests ──
       - name: Bridge helper function tests
@@ -88,7 +102,7 @@ jobs:
           with open('zxscript-extension/manifest.json') as f:
               m = json.load(f)
           assert m['manifest_version'] == 3
-          assert m['version'] == '0.0.1'
+          assert 'version' in m and m['version'] >= '0.0.1'
           assert 'background' in m
           assert 'content_scripts' in m
           print(f'manifest.json OK: {m[\"name\"]} v{m[\"version\"]}')

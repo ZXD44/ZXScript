@@ -13,40 +13,49 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
         el.id = "zs-error-reporter";
         el.style.cssText = [
           "position: fixed", "top: 16px", "right: 16px", "max-width: 380px",
-          "width: calc(100vw - 32px)", "background: #18181b", "color: #f4f4f5",
-          "border: 1px solid rgba(239, 68, 68, 0.45)", "border-left: 4px solid #ef4444",
-          "border-radius: 10px", "padding: 12px 14px", "box-shadow: 0 20px 40px rgba(0,0,0,0.6)",
-          "z-index: 2147483647", "font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-          "font-size: 12px", "line-height: 1.4", "user-select: text"
+          "width: calc(100vw - 32px)", "background: rgba(18, 20, 24, 0.96)",
+          "backdrop-filter: blur(28px) saturate(190%)", "-webkit-backdrop-filter: blur(28px) saturate(190%)",
+          "color: #f4f4f5", "border: 1px solid rgba(226, 35, 26, 0.45)",
+          "border-radius: 12px", "padding: 12px 14px",
+          "box-shadow: 0 20px 48px -4px rgba(0, 0, 0, 0.8), 0 0 16px rgba(226, 35, 26, 0.2)",
+          "z-index: 2147483647", "font-family: 'Builder Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          "font-size: 11.5px", "line-height: 1.45", "user-select: text",
+          "animation: zs-banner-in 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
         ].join(";");
         (document.body || document.documentElement).appendChild(el);
       }
 
       const reportPayload = [
-        "=== ZXScript Error Report ===",
-        `Title: ${title}`,
-        `Message: ${msg}`,
-        `Stack: ${stack || "N/A"}`,
-        `URL: ${location.href}`,
-        `Time: ${new Date().toLocaleString("th-TH")}`,
-        `UserAgent: ${navigator.userAgent}`,
-        "============================="
-      ].join("\n");
+        "=== รายงานข้อผิดพลาด ZXScript ===",
+        `หมวดหมู่: ระบบ (error)`,
+        `หัวข้อ: ${title}`,
+        `ข้อความ: ${msg}`,
+        stack ? `Stack Trace:\n${stack}` : "",
+        `ลิงก์ (URL): ${location.href}`,
+        `เวลา: ${new Date().toLocaleString("th-TH")}`,
+        `เวอร์ชัน: 0.0.2`,
+        "=================================="
+      ].filter(Boolean).join("\n");
 
       const esc = (s) => String(s || "").replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
       el.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-          <div style="font-weight: 600; color: #f87171; display: flex; align-items: center; gap: 6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>ZXScript ตรวจพบ Error</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; background: rgba(226, 35, 26, 0.15); border: 1px solid rgba(226, 35, 26, 0.35); color: #f87171;">
+            <span>⚠️ ระบบ</span>
           </div>
-          <button id="zs-err-close" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 14px; padding: 0 4px;">✕</button>
+          <button id="zs-err-close" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 13px; padding: 0 4px; line-height: 1; transition: color 0.15s;">✕</button>
         </div>
-        <div style="font-size: 11.5px; color: #e4e4e7; margin-bottom: 6px; font-weight: 500; word-break: break-word;">${esc(msg || title)}</div>
-        <div style="font-size: 10px; color: #71717a; max-height: 90px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 6px 8px; border-radius: 6px; font-family: monospace; margin-bottom: 10px; white-space: pre-wrap; word-break: break-all;">${esc(stack || "ไม่มี Stack Trace")}</div>
+        <div style="font-size: 12.5px; font-weight: 700; color: #ffffff; margin-bottom: 4px; letter-spacing: -0.01em;">${esc(title)}</div>
+        <div style="font-size: 11px; color: #cbd5e1; margin-bottom: 8px; word-break: break-word;">${esc(msg || title)}</div>
+        ${stack ? `
+          <details style="margin-bottom: 10px; font-size: 10.5px; color: #64748b;">
+            <summary style="cursor: pointer; color: #00a2ff; font-weight: 600; padding: 2px 0; user-select: none;">🔍 ดู Stack Trace / รายละเอียดเทคนิค</summary>
+            <pre style="margin: 6px 0 0; padding: 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 9.5px; font-family: Consolas, monospace; overflow-x: auto; max-height: 110px; color: #e2e8f0; white-space: pre-wrap; word-break: break-all;">${esc(stack)}</pre>
+          </details>
+        ` : ""}
         <div style="display: flex; gap: 6px;">
-          <button id="zs-err-copy" style="flex: 1; background: #10b981; color: #09090b; border: none; border-radius: 6px; padding: 7px 10px; font-size: 11px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;">📋 คัดลอก Log Error ไปส่ง</button>
+          <button id="zs-err-copy" style="flex: 1; height: 28px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(0, 176, 111, 0.15); border: 1px solid rgba(0, 176, 111, 0.4); color: #00b06f; transition: all 0.15s ease;">📋 คัดลอกรายงาน</button>
         </div>
       `;
 
@@ -54,16 +63,16 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
       const copyBtn = el.querySelector("#zs-err-copy");
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(reportPayload).then(() => {
-          copyBtn.textContent = "✓ คัดลอกเรียบร้อยแล้ว!";
-          copyBtn.style.background = "#059669";
+          copyBtn.textContent = "✓ คัดลอกแล้ว";
+          copyBtn.style.background = "rgba(0, 176, 111, 0.3)";
           copyBtn.style.color = "#ffffff";
           setTimeout(() => {
             if (copyBtn) {
-              copyBtn.textContent = "📋 คัดลอก Log Error ไปส่ง";
-              copyBtn.style.background = "#10b981";
-              copyBtn.style.color = "#09090b";
+              copyBtn.textContent = "📋 คัดลอกรายงาน";
+              copyBtn.style.background = "rgba(0, 176, 111, 0.15)";
+              copyBtn.style.color = "#00b06f";
             }
-          }, 2500);
+          }, 2000);
         }).catch(() => {
           copyBtn.textContent = "คัดลอกไม่สำเร็จ";
         });
