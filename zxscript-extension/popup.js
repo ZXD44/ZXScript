@@ -195,6 +195,7 @@ document.getElementById("btn-open-overlay").addEventListener("click", () => {
   const supported = [
     "chat.deepseek.com", "deepseek.com",
     "chatgpt.com", "chat.openai.com",
+    "claude.ai",
     "gemini.google.com",
     "chat.qwen.ai",
     "kimi.ai", "www.kimi.ai",

@@ -276,6 +276,7 @@
   const AI_SITES = [
     { name: "DeepSeek", url: "https://chat.deepseek.com/" },
     { name: "ChatGPT", url: "https://chatgpt.com/" },
+    { name: "Claude", url: "https://claude.ai/new" },
     { name: "Gemini", url: "https://gemini.google.com/app" },
     { name: "Kimi", url: "https://www.kimi.ai/" },
     { name: "GLM", url: "https://chat.z.ai/" },
@@ -1084,8 +1085,8 @@
   // any tool result carrying images is caught generically at the point results
   // are handled (see the `r.images.length` branch) and turned into a plain
   // error on non-vision providers, so nothing needs to be predicted here.
-  const ALWAYS_BLOCKED_TOOLS = new Set(["subagent"]);
-  const VISION_TOOLS = new Set(["screen_capture"]);
+  const ALWAYS_BLOCKED_TOOLS = new Set();
+  const VISION_TOOLS = new Set();
   const bareToolName = (name) => (name && name.includes("/") ? name.split("/").pop() : name) || "";
   // Is `name` a tool we actually have? The bridge ADVERTISES names that may carry
   // a per-server prefix when two MCP servers expose the same tool (see

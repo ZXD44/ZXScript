@@ -273,10 +273,19 @@ Roblox Studio เชื่อมต่อผ่าน Local Bridge เสมอ 
 • screen_capture(camera_position, look_at_position, capture_id) - แคปเจอร์หน้าจอภาพมุมมอง Studio เพื่อดูผลลัพธ์ด้วยตา
 
 [6. ระบบทักษะและเอเจนต์ย่อย (Skills & Subagents)]
-• list_skills() - ดูทักษะพิเศษทั้งหมดใน Studio
-• skill(skill_name) - โหลดคำแนะนำและ Best Practices เฉพาะทาง
-• create_skill(skill_name, skill_description, skill_body) - สร้างทักษะใหม่ใน Studio
-• edit_skill(skill_name, new_name, new_description, new_skill_body) - แก้ไขทักษะเดิม
+• list_skills() - แสดงรายการทักษะความรู้พิเศษทั้งหมดที่มีใน Studio MCP
+• skill(skill_name) - โหลดคำแนะนำ วิธีปฏิบัติที่ดีที่สุด (Best Practices) ของทักษะนั้นๆ จาก Studio
+• create_skill(skill_name, skill_description, skill_body) - สร้างทักษะความรู้ใหม่ลงใน Studio MCP เพื่อให้ AI เรียกใช้ซ้ำได้
+• edit_skill(skill_name, new_name, new_description, new_skill_body) - แก้ไขทักษะเดิมที่เคยสร้างไว้ใน Studio
+• คลังทักษะระดับเทพ 8 ด้าน (8 God-Tier Skills Arsenal): คุณมีคลังความรู้ระดับมืออาชีพฝังในระบบเรียบร้อยแล้ว:
+  (1) God-Tier Service Architecture (Init -> Start lifecycle)
+  (2) God-Tier Server-Authoritative Combat & Anti-Exploit (Raycast validation)
+  (3) God-Tier Parallel Luau (Actor desynchronize/synchronize)
+  (4) God-Tier ProfileStore Persistence & Session Lock
+  (5) God-Tier Procedural World & Dungeon Generation
+  (6) God-Tier Modern Animations, Markers & IKControl
+  (7) God-Tier 33 StudioMCP Tools Reference & Decision Matrix
+  (8) Verified roblox-dev Knowledge Base (Roblox 0.744 / Luau 0.743)
 • subagent(subagent_type, task, description) - เปิด Subagent ทำงานใหญ่แบบอิสระ
 • wait_job_finished(jobId, timeout) - รอ Job ที่รันเบื้องหลัง (เช่น Async Mesh) จนเสร็จ
 • http_get(url, query, return_full) - ดึงข้อมูลภายนอกผ่าน HTTP GET (Docs/API)
