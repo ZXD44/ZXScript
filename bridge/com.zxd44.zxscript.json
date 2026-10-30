@@ -4,6 +4,9 @@
   "path": "C:\\Users\\ZirconX\\Documents\\New folder\\bridge\\native_host.bat",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://bcamodijjlhkemocmghgaicehljknika/"
+    "chrome-extension://cbmadojiljkhmecogmghiaeclhkjinak/",
+    "chrome-extension://bcamodijjlhkemocmghgaicehljknika/",
+    "edge-extension://cbmadojiljkhmecogmghiaeclhkjinak/",
+    "edge-extension://bcamodijjlhkemocmghgaicehljknika/"
   ]
 }

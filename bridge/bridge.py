@@ -281,15 +281,18 @@ def _roblox_studio_app_running():
     if this can't be determined (non-Windows, or the check itself failed)."""
     if sys.platform != "win32":
         return None
-    try:
-        out = subprocess.run(
-            ["tasklist", "/FI", "IMAGENAME eq RobloxStudioBeta.exe"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace",
-            timeout=8,
-        ).stdout
-    except Exception:
-        return None
-    return "RobloxStudioBeta.exe" in out
+    for exe in ("RobloxStudioBeta.exe", "RobloxStudio.exe"):
+        try:
+            out = subprocess.run(
+                ["tasklist", "/FI", f"IMAGENAME eq {exe}"],
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                timeout=8,
+            ).stdout
+            if exe in out:
+                return True
+        except Exception:
+            return None
+    return False
 
 
 def _kill_orphan_studio_mcp():
@@ -505,7 +508,9 @@ def _kill_port_squatter():
     owner = _port_owner(STUDIO_MCP_PORT)
     if owner:
         pid, name, path = owner
-        if "roblox" in (path or "").lower() or "studiomcp" in (name or "").lower():
+        p = (path or "").lower()
+        n = (name or "").lower()
+        if "roblox" in p or "bloxstrap" in p or "studiomcp" in n or "robloxstudio" in n:
             return False, None  # legitimate Studio-side owner; not a squatter
         log(f"port {STUDIO_MCP_PORT} is hijacked by '{name}' (pid {pid}, {path}).", "yl")
         log("    StudioMCP connected to it instead of Roblox Studio - that is why "
@@ -593,8 +598,10 @@ def check_studio_port():
         return False
     pid, name, path = owner
     # The legitimate holder is Studio itself / a Roblox helper: its path lives
-    # under a "...\Roblox\..." folder. Anything else is an intruder.
-    if "roblox" in (path or "").lower():
+    # under a "...\Roblox\..." or "...\Bloxstrap\..." folder. Anything else is an intruder.
+    p = (path or "").lower()
+    n = (name or "").lower()
+    if "roblox" in p or "bloxstrap" in p or "studiomcp" in n or "robloxstudio" in n:
         return False
     where = path or name
     log(f"port {STUDIO_MCP_PORT} (Studio's MCP port) is held by a non-Roblox process:", "yl")
