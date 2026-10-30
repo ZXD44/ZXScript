@@ -58,7 +58,8 @@
 
 | เวอร์ชัน | สถานะ | ฟีเจอร์หลัก |
 |---|---|---|
-| **v0.0.1** | **ปล่อยแล้ว (ปัจจุบัน)** | Core Bridge, Bloxstrap 31 Tools, Ctrl+Z Undo, Game Tree Pruning, Modern Luau, Audio Chime, Mega-Script Chunking, Play Auto-Routing, CI/CD |
+| **v0.0.1** | ปล่อยแล้ว | Core Bridge, Bloxstrap 31 Tools, Ctrl+Z Undo, Game Tree Pruning, Modern Luau, Audio Chime, Mega-Script Chunking, Play Auto-Routing, CI/CD |
+| **v0.0.2** | **ปล่อยแล้ว (ปัจจุบัน)** | รองรับ 9 แพลตฟอร์ม AI (เพิ่ม Claude + Z.ai), 33 เครื่องมือ Studio, Dynamic Island Morph Bar, ระบบแจ้งเตือน Error อัจฉริยะ 1 คลิก, Auto-Recovery แก้ปัญหา ChatGPT ข้อความว่าง, Popup 3x3 App Launcher |
 | **v0.0.2** | กำลังพัฒนา | Auto-Update Checker ผูกกับ `zxd44/ZXScript`, ป้ายแจ้งเตือนใน Popup |
 | **v0.0.3** | ตามแผน | 1-Click Game Project Scaffolding (Obby, Simulator, RPG), Visual Gallery |
 | **v0.1.0** | ตามแผน | Standalone `ZXScript-Bridge.exe` Release พร้อมใช้งานแบบไม่ต้องติดตั้ง Python |

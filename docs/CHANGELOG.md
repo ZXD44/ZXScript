@@ -2,6 +2,35 @@
 
 All notable changes to ZXScript are documented here.
 
+## [0.0.2] - 2026-10-30
+
+### Added & Enhanced
+- **9 AI Platforms Supported**: Added full native support for **Claude AI** (`claude.ai`) and **Z.ai** (`z.ai`, `www.z.ai`, `chat.z.ai`) alongside DeepSeek, ChatGPT, Gemini, Qwen, Kimi, Meta AI, and Arena.
+- **33 Roblox Studio Tools**: Expanded toolset to 33 ready-to-run tools with enhanced parameters and script-chunking support.
+- **Dynamic Island Morph Action Bar**:
+  - Compact mini-capsule in idle/standby mode (`max-width: 440px`) to keep the chat viewport completely unobstructed.
+  - Smooth morphing expansion into active HUD (`max-width: 560px`) with cubic-bezier transition when AI is executing tools.
+  - Cyan neon breathing glow border (`@keyframes zs-island-breathe`) for real-time visual feedback.
+  - Dual-ring radar ping animation on `.zs-live-dot` for live streaming indication.
+  - Vibrant Stop Red square emergency halt button (`#zs-stop`).
+  - Removed deprecated developer button (`#zs-support`) for a cleaner, perfectly balanced bar.
+- **Smart Error Notification System**:
+  - Intelligent automatic categorization (Roblox Studio, Bridge Server, AI Model, AI Context Limit, System).
+  - 1-click smart action buttons (e.g. `🔄 ตรวจสอบการเชื่อมต่อ` for Studio/Bridge, `▶︎ สั่งให้ทำต่อทันที` for empty replies, `➕ เปิดแชตใหม่` for context limits).
+  - Clear solution container with `[วิธีแก้]` badge.
+  - Collapsible diagnostic details drawer (`<details><summary>🔍 ดู Stack Trace</summary>`) preventing visual clutter.
+  - Anti-spam deduplication with dynamic shake animation (`.zs-shake`) on recurring errors.
+  - 1-click clipboard bug report generator.
+- **ChatGPT Auto-Recovery Engine**:
+  - Fixed premature `genActive` termination by extending `WEDGE_MS` to 30s with dedicated spin-up guard (up to 45s) for reasoning/thinking models (o1/o3/4o search).
+  - Added thought/reasoning extraction from ChatGPT thought containers.
+  - Implemented auto-recovery loop for empty responses (`res.kind === "empty"`), automatically clicking native regenerate or dispatching continuation prompts up to 2 times before halting.
+- **3x3 AI App Launcher Grid in Extension Popup**:
+  - Redesigned the "โมเดล AI" tab into a symmetrical 3x3 launcher grid (all 9 AI websites).
+  - Unique brand colorways and vector icons for each platform.
+  - Live active browser tab detection with emerald glow and status dot.
+  - Updated tools tab counter to **เครื่องมือ (33)**.
+
 ## [0.0.1] - 2026-10-29
 
 ### Added & Rebranded

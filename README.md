@@ -8,7 +8,7 @@
 ![Roblox Studio](https://img.shields.io/badge/Roblox%20Studio-MCP%20Enabled-green)
 ![Bloxstrap Support](https://img.shields.io/badge/Bloxstrap-Supported-orange)
 
-**ZXScript** is an AI agent bridge and browser extension developed by **zxd44 (ZirconX)** that turns web-based AI models (DeepSeek, ChatGPT, Gemini, Qwen, Kimi, GLM) into autonomous Roblox Studio assistants.
+**ZXScript** is an AI agent bridge and browser extension developed by **zxd44 (ZirconX)** that turns web-based AI models (DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, Arena) into autonomous Roblox Studio assistants.
 
 Directly control Roblox Studio from your browser: inspect explorer trees, read/write Luau scripts, insert assets, run play-mode diagnostics, and build games step-by-step.
 
@@ -55,11 +55,14 @@ ZXScript/
 - **Native Bloxstrap & Vanilla Studio Support:** Automatically discovers `StudioMCP.exe` across standard Roblox installations and Bloxstrap directories without manual path configuration.
 - **Built-in Anti-Ban Shield:** Smart humanized delay (`1000 - 2200ms`) prevents rate-limiting and account blocks from Cloudflare and AI providers.
 - **Context Resend & Tool Persistence:** Auto-refreshes tools every 8 calls and resends system prompts to prevent AI from dropping MCP tool calling.
-- **28+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more. Script chunking for large files (start_line/end_line).
+- **33+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more. Script chunking for large files (start_line/end_line).
 - **Play Mode Auto-Routing:** Automatically retries `execute_luau` on Server datamodel when Studio is in Play mode.
-- **Provider Agnostic & All-Platform Verified:** Fortified start button (`▶︎ เริ่มทำงาน`) across all 8 major AI platforms: DeepSeek, ChatGPT, Gemini, Qwen, Kimi, GLM / Z.ai, Meta AI, and Arena.
+- **Provider Agnostic & All-Platform Verified:** Fortified start button (`▶︎ เริ่มทำงาน`) across all 9 major AI platforms: DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, and Arena.
 - **Impeccable Style UI & 5px Custom Scrollbars:** Conforms strictly to impeccable.style guidelines with deep Zinc-950 aesthetics, custom 5px slim pill scrollbars on all containers, and tactile micro-interactions.
-- **Top Dynamic Island HUD (Impeccable Design):** Center-anchored floating status pill (`top: 16px; left: 50%`) with live state feedback (`⚡ รัน: execute_luau…`, `⚡ รอ AI ตอบกลับ…`) and an integrated mini emergency stop button (`■`).
+- **Dynamic Island Morph Action Bar:** Center-anchored floating capsule (`top: 14px; left: 50%`) with intelligent morphing: stays ultra-compact while idle, and smoothly expands into an active HUD with a breathing cyan neon glow border, dual-ring radar live dot, and 1-click emergency stop button (`■ หยุด`).
+- **Smart Error Notification System:** Categorizes issues automatically into Roblox Studio, Bridge Server, AI Model, and Context Limit; features 1-click quick-action buttons (reconnect, continue, new chat), clear solution badges (`[วิธีแก้]`), collapsible technical diagnostics drawer, and anti-spam duplicate shaking.
+- **ChatGPT Auto-Recovery Engine:** Eliminates 'empty reply' deadlocks by automatically detecting stalled streams and issuing autonomous continuation prompts or native retries before failing.
+- **3x3 AI App Launcher Grid:** Redesigned extension popup pane with symmetrical 3x3 micro-cards, unique brand colorways, and real-time active browser tab detection.
 - **Zero-Latency Web Audio Synthesizer:** Elegant Mac/Linear-style two-tone success chimes and alert pings synthesized natively via the Web Audio API without heavy MP3 dependencies (toggleable via bell icon `🔔` in popup).
 - **Zero-F5 Auto-Recovery:** Automatic real-time status sync between extension, Bridge, and Studio; reconnects seamlessly and dismisses error banners without page refreshes.
 - **1-Click Prompt Insertion:** Instant insertion of customized prompt presets into the active chat composer directly from the extension popup.

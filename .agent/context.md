@@ -10,7 +10,7 @@
 ## 🏛️ System Topology
 
 ```text
-[ Web AI: DeepSeek / ChatGPT / Qwen / Gemini / Kimi / GLM / Arena ]
+[ Web AI: DeepSeek / ChatGPT / Claude / Gemini / Qwen / Kimi / Z.ai / Meta AI / Arena ]
                          │
                          ▼ DOM Content Scripts & Parser (###LUA### detection)
              [ zxscript-extension (Manifest v3) ]
@@ -41,7 +41,7 @@
 | `bridge/launch_studio_mcp.py` | Roblox MCP Discovery | Auto-discovers `StudioMCP.exe` across vanilla `%LOCALAPPDATA%\Roblox\Versions` and `%LOCALAPPDATA%\Bloxstrap\Versions`. Launches server on port 13469. |
 | `bridge/native_host.py` | Native Messaging Host | Chrome/Edge Native Messaging protocol bridge allowing in-browser direct process control. |
 | `bridge/register.py` | System Registry Setup | Registers Native Messaging host manifest and `zxscript://` custom URI scheme in Windows Registry. |
-| `bridge/config.json` | Server Registry | Configures MCP child servers (primary: `roblox`, 31 active tools). |
+| `bridge/config.json` | Server Registry | Configures MCP child servers (primary: `roblox`, 33 active tools). |
 | `scripts/start.bat` | Windows Launcher | 1-Click launcher verifying Python 3.9+, auto-installing dependencies, clearing port conflicts, and launching the bridge. |
 | `scripts/setup_service.bat` | Windows Host Setup | 1-Click registration of Native Messaging and system startup tasks. |
 | `scripts/MacOS_Start.command` | macOS Launcher | Shell launcher equivalent for macOS environments. |
@@ -62,7 +62,7 @@
 
 - **WebSocket Bridge:** `ws://127.0.0.1:17613` (Extension communicates with `bridge.py`)
 - **Studio MCP Server:** `http://127.0.0.1:13469` / stdio (Roblox Studio internal MCP listener)
-- **Primary MCP Server ID:** `roblox` (31 active tools)
+- **Primary MCP Server ID:** `roblox` (33 active tools)
 - **Native Protocol:** `zxscript://`
 
 ---
