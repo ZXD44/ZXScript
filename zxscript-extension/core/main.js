@@ -2811,7 +2811,7 @@
   //  UI  (control panel, onboarding, stop button, banners, toast, input cover)
   // ════════════════════════════════════════════════════════════════════════
   const ui = (() => {
-    let root, bar, dot, brandEl, stateEl, actionBtn, stopBtn, switchBtn, supportBtn, discordEl, menuEl, unstableEl;
+    let root, bar, dot, brandEl, stateEl, actionBtn, stopBtn, switchBtn, discordEl, menuEl, unstableEl;
     let cover, coverRaf, barRaf;
     let openMenuFn = null; // set by build(); lets the popup force the panel open via runtime message
     let bridgeOk = false, studioDown = false, placeDown = false, appDown = false, addonOk = false, studioProcUp = false;
@@ -2829,12 +2829,13 @@
         <div id="zs-bar">
           <span id="zs-dot" class="off" title=""></span>
           <span id="zs-brand"><svg class="zs-rbx-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><path d="M5.26 2L2 18.74 18.74 22 22 5.26 5.26 2zm8.28 11.23l-3.27-.63.63-3.27 3.27.63-.63 3.27z"/></svg>Studio <span class="zs-free">v${EXT_VERSION}</span></span>
+          <span class="zs-sep"></span>
           <span id="zs-state"></span>
           <button id="zs-action"></button>
           <button id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">■ หยุด</button>
-          <a id="zs-discord" href="https://www.zirconx.xyz" target="_blank" rel="noopener" title="เว็บไซต์ผู้พัฒนา: www.zirconx.xyz"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a>
-          <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span id="zs-switch-name"></span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-          <button id="zs-support" aria-label="ผู้พัฒนา" title="ผู้พัฒนา: zxd44 (ZirconX)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+          <span class="zs-sep"></span>
+          <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span id="zs-switch-name"></span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <a id="zs-discord" href="https://www.zirconx.xyz" target="_blank" rel="noopener" title="เว็บไซต์ผู้พัฒนา: www.zirconx.xyz"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a>
         </div>
         <div id="zs-menu" hidden></div>
         ${P.unstableWarning ? `<button id="zs-unstable" aria-label="Provider may be unstable" hidden>⚠ ไม่เสถียร</button>` : ""}
@@ -2847,7 +2848,6 @@
       actionBtn = root.querySelector("#zs-action");
       stopBtn = root.querySelector("#zs-stop");
       switchBtn = root.querySelector("#zs-switch");
-      supportBtn = root.querySelector("#zs-support");
       discordEl = root.querySelector("#zs-discord");
       const swName = root.querySelector("#zs-switch-name");
       if (swName) swName.textContent = P.displayName || P.id;
@@ -2894,11 +2894,10 @@
         }
       };
       switchBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(false); });
-      supportBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(true); });
       openMenuFn = (toSupport) => { if (menuEl.hidden) toggleMenu(toSupport); };
       document.addEventListener("click", (e) => {
         if (menuEl.hidden) return;
-        if (!menuEl.contains(e.target) && !switchBtn.contains(e.target) && !supportBtn.contains(e.target))
+        if (!menuEl.contains(e.target) && !switchBtn.contains(e.target))
           menuEl.hidden = true;
       }, true);
 
@@ -3412,7 +3411,6 @@
       // AI selector + tips/support: only once a session is live. Discord stays
       // visible in every state (it's the help link).
       if (switchBtn) switchBtn.style.display = showExtras ? "" : "none";
-      if (supportBtn) supportBtn.style.display = showExtras ? "" : "none";
     }
     let lastBarSig = "";
 
@@ -3860,47 +3858,166 @@
     }
 
     function banner(kind, title, msg, stack) {
-      if (kind === "warn" || kind === "limit") playChime("offline");
-      const b = document.createElement("div");
-      b.className = `zs-banner ${kind}`;
-      b.innerHTML = `<div class="zs-banner-t"></div><div class="zs-banner-m"></div>
-        <div class="zs-banner-acts">
-          <button class="zs-banner-copy">📋 คัดลอก Error</button>
-          <button class="zs-banner-x">ปิด</button>
-        </div>`;
-      b.querySelector(".zs-banner-t").textContent = title;
-      b.querySelector(".zs-banner-m").innerHTML = msg.includes("<") ? msg : msg.replace(/\n/g, "<br>");
+      if (kind === "warn" || kind === "limit" || kind === "error") {
+        playChime(kind === "limit" ? "offline" : "tool_error");
+      }
 
+      // Check if duplicate banner with same title already exists
+      const existing = (root || document.documentElement).querySelector(`.zs-banner[data-title="${title}"]`);
+      if (existing) {
+        existing.classList.remove("zs-shake");
+        void existing.offsetWidth; // force reflow
+        existing.classList.add("zs-shake");
+        const msgEl = existing.querySelector(".zs-banner-m");
+        if (msgEl) msgEl.innerHTML = formatMsg(msg);
+        return;
+      }
+
+      // Smart error classification
+      let cat = "ระบบ";
+      let catIcon = "⚠️";
+      let actionBtnHtml = "";
+      const textContext = (title + " " + msg).toLowerCase();
+      const isStudio = /studio|roblox/i.test(textContext);
+      const isBridge = /bridge|start\.bat/i.test(textContext);
+      const isLimit = /context|ยาวเกิน|ขีดจำกัด|quota/i.test(textContext) || kind === "limit";
+      const isEmpty = /ว่างเปล่า|ไม่มีการตอบกลับ|ไม่ตอบสนอง/i.test(textContext);
+
+      if (isStudio) {
+        cat = "Roblox Studio";
+        catIcon = `<svg class="zs-rbx-icon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5.26 2L2 18.74 18.74 22 22 5.26 5.26 2zm8.28 11.23l-3.27-.63.63-3.27 3.27.63-.63 3.27z"/></svg>`;
+        actionBtnHtml = `<button class="zs-banner-action zs-action-retry">🔄 ตรวจสอบการเชื่อมต่อ</button>`;
+      } else if (isBridge) {
+        cat = "Bridge Server";
+        catIcon = "🔌";
+        actionBtnHtml = `<button class="zs-banner-action zs-action-retry">🔄 ตรวจสอบ Bridge</button>`;
+      } else if (isEmpty) {
+        cat = P.displayName || "AI Model";
+        catIcon = "💬";
+        actionBtnHtml = `<button class="zs-banner-action zs-action-continue">▶︎ สั่งให้ทำต่อทันที</button>`;
+      } else if (isLimit) {
+        cat = "ขีดจำกัด AI";
+        catIcon = "⚠️";
+        actionBtnHtml = `<button class="zs-banner-action zs-action-newchat">➕ เปิดแชตใหม่</button>`;
+      }
+
+      function formatMsg(m) {
+        if (!m) return "";
+        const str = String(m);
+        if (str.includes("•")) {
+          return str.split("\n").map((line) => {
+            line = line.trim();
+            if (!line) return "";
+            if (line.startsWith("• วิธีแก้:")) {
+              return `<div class="zs-banner-sol"><span class="zs-sol-badge">วิธีแก้</span> ${line.replace(/^• วิธีแก้:\s*/, "")}</div>`;
+            }
+            if (line.startsWith("•")) {
+              return `<div class="zs-banner-bullet"><span class="zs-bullet-dot"></span>${line.replace(/^•\s*/, "")}</div>`;
+            }
+            return `<div>${line}</div>`;
+          }).join("");
+        }
+        return str.includes("<") ? str : str.replace(/\n/g, "<br>");
+      }
+
+      const b = document.createElement("div");
+      b.className = `zs-banner ${kind || "warn"}`;
+      b.dataset.title = title || "";
+      b.innerHTML = `
+        <div class="zs-banner-hdr">
+          <div class="zs-banner-tag">${catIcon} <span>${cat}</span></div>
+          <button class="zs-banner-close" title="ปิดการแจ้งเตือน">✕</button>
+        </div>
+        <div class="zs-banner-t">${title}</div>
+        <div class="zs-banner-m">${formatMsg(msg)}</div>
+        ${stack ? `<details class="zs-banner-diag"><summary>🔍 ดู Stack Trace / รายละเอียดเทคนิค</summary><pre>${stack}</pre></details>` : ""}
+        <div class="zs-banner-acts">
+          ${actionBtnHtml}
+          <button class="zs-banner-copy">📋 คัดลอกรายงาน</button>
+        </div>
+      `;
+
+      // Handlers for Smart Action Buttons
+      const retryBtn = b.querySelector(".zs-action-retry");
+      if (retryBtn) {
+        retryBtn.addEventListener("click", () => {
+          retryBtn.disabled = true;
+          retryBtn.textContent = "กำลังตรวจสอบ…";
+          ensureTools(true).then((tools) => {
+            if (tools && tools.length) {
+              retryBtn.textContent = "✓ เชื่อมต่อแล้ว!";
+              toast(`เชื่อมต่อสำเร็จ พบ ${tools.length} คำสั่ง`);
+              setTimeout(() => b.remove(), 1000);
+            } else {
+              retryBtn.textContent = "ยังไม่พบ Studio";
+              setTimeout(() => { if (retryBtn) { retryBtn.textContent = "🔄 ตรวจสอบอีกครั้ง"; retryBtn.disabled = false; } }, 2000);
+            }
+          }).catch(() => {
+            retryBtn.textContent = "ยังไม่พบ Studio";
+            setTimeout(() => { if (retryBtn) { retryBtn.textContent = "🔄 ตรวจสอบอีกครั้ง"; retryBtn.disabled = false; } }, 2000);
+          });
+        });
+      }
+
+      const contBtn = b.querySelector(".zs-action-continue");
+      if (contBtn) {
+        contBtn.addEventListener("click", () => {
+          contBtn.disabled = true;
+          contBtn.textContent = "กำลังส่งคำสั่ง…";
+          P.typeAndSend("ทำต่อ").then(() => {
+            toast("สั่งให้ AI ทำต่อแล้ว");
+            b.remove();
+          }).catch(() => {
+            contBtn.textContent = "ส่งไม่สำเร็จ";
+            setTimeout(() => { if (contBtn) { contBtn.textContent = "▶︎ ลองอีกครั้ง"; contBtn.disabled = false; } }, 2000);
+          });
+        });
+      }
+
+      const newChatBtn = b.querySelector(".zs-action-newchat");
+      if (newChatBtn) {
+        newChatBtn.addEventListener("click", () => {
+          if (P.openNewChat) P.openNewChat();
+          b.remove();
+        });
+      }
+
+      // Copy Report Payload
       const reportPayload = [
         "=== รายงานข้อผิดพลาด ZXScript ===",
-        `หมวดหมู่: ${kind}`,
+        `หมวดหมู่: ${cat} (${kind})`,
         `หัวข้อ: ${title}`,
         `ข้อความ: ${msg}`,
         stack ? `Stack Trace:\n${stack}` : "",
         `ลิงก์ (URL): ${location.href}`,
+        `AI / เบราว์เซอร์: ${P.displayName || P.id}`,
         `เวลา: ${new Date().toLocaleString("th-TH")}`,
         `เวอร์ชัน: ${EXT_VERSION || "0.0.1"}`,
         "=================================="
       ].filter(Boolean).join("\n");
 
       const copyBtn = b.querySelector(".zs-banner-copy");
-      copyBtn.addEventListener("click", () => {
-        navigator.clipboard.writeText(reportPayload).then(() => {
-          copyBtn.textContent = "✓ คัดลอกแล้ว";
-          setTimeout(() => { if (copyBtn) copyBtn.textContent = "📋 คัดลอก Error"; }, 2000);
-        }).catch(() => {
-          copyBtn.textContent = "คัดลอกไม่สำเร็จ";
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(reportPayload).then(() => {
+            copyBtn.textContent = "✓ คัดลอกแล้ว";
+            setTimeout(() => { if (copyBtn) copyBtn.textContent = "📋 คัดลอกรายงาน"; }, 2000);
+          }).catch(() => {
+            copyBtn.textContent = "คัดลอกไม่สำเร็จ";
+          });
         });
-      });
+      }
 
-      b.querySelector(".zs-banner-x").addEventListener("click", () => b.remove());
+      const closeBtn = b.querySelector(".zs-banner-close");
+      if (closeBtn) closeBtn.addEventListener("click", () => b.remove());
+
       (root || document.documentElement).appendChild(b);
 
       try {
         if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
           chrome.runtime.sendMessage({
             type: "zs_error_notify",
-            title: title || "ZXScript เกิดข้อผิดพลาด",
+            title: title || "ZXScript แจ้งเตือน",
             message: msg || title,
             stack: reportPayload
           }, () => void chrome.runtime.lastError);

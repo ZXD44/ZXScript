@@ -110,6 +110,17 @@ html.zs-light #zs-brand {
   background: rgba(0, 122, 204, 0.1);
   border-color: rgba(0, 122, 204, 0.25);
 }
+
+.zs-sep {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  flex: none;
+  margin: 0 2px;
+}
+html.zs-light .zs-sep {
+  background: rgba(0, 0, 0, 0.12);
+}
 html.zs-light #zs-brand .zs-free {
   color: rgba(0, 0, 0, 0.5);
 }
@@ -154,8 +165,8 @@ html.zs-light #zs-state b { color: #18181b; }
 
 #zs-action {
   flex: none;
-  height: 26px;
-  padding: 3px 12px;
+  height: 25px;
+  padding: 2px 12px;
   border-radius: 9999px;
   font-size: 11px;
   font-weight: 600;
@@ -171,11 +182,11 @@ html.zs-light #zs-state b { color: #18181b; }
   background: linear-gradient(135deg, #00b06f, #008a56);
   color: #ffffff;
   border: 1px solid rgba(0, 176, 111, 0.5);
-  box-shadow: 0 2px 10px rgba(0, 176, 111, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 176, 111, 0.35);
 }
 #zs-action[data-kind="start"]:hover {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 4px 14px rgba(0, 176, 111, 0.6);
+  box-shadow: 0 3px 12px rgba(0, 176, 111, 0.55);
   filter: brightness(1.1);
 }
 #zs-action[data-kind="start"]:active {
@@ -184,7 +195,7 @@ html.zs-light #zs-state b { color: #18181b; }
 #zs-action[data-kind="start-degraded"] {
   background: linear-gradient(135deg, #d97706, #f59e0b);
   color: #ffffff;
-  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.45);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
 }
 #zs-action:disabled {
   background: rgba(255, 255, 255, 0.08);
@@ -195,43 +206,68 @@ html.zs-light #zs-state b { color: #18181b; }
 #zs-action.zs-flash { animation: zs-flash 0.4s ease-in-out 3; }
 @keyframes zs-flash {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.6); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(0, 162, 255, 0.5); }
 }
 
 #zs-stop {
   flex: none;
-  height: 24px;
-  padding: 2px 10px;
+  height: 25px;
+  padding: 2px 11px;
   border-radius: 9999px;
   background: linear-gradient(135deg, #e2231a, #b8181f);
   border: 1px solid rgba(226, 35, 26, 0.6);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 10px rgba(226, 35, 26, 0.4);
+  box-shadow: 0 2px 8px rgba(226, 35, 26, 0.4);
   transition: all 0.15s ease;
 }
 #zs-stop:hover {
   filter: brightness(1.15);
-  box-shadow: 0 4px 14px rgba(226, 35, 26, 0.6);
-  transform: scale(1.04);
+  box-shadow: 0 3px 12px rgba(226, 35, 26, 0.6);
+  transform: translateY(-1px) scale(1.03);
 }
 #zs-stop[data-state="stopping"] {
   background: #b45309; cursor: progress; opacity: 0.85;
 }
 
-#zs-discord, #zs-support {
+#zs-switch {
   flex: none;
-  width: 24px;
-  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 25px;
+  padding: 0 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 9999px;
-  background: rgba(43, 47, 54, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #bac0cb;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+#zs-switch:hover {
+  background: rgba(0, 162, 255, 0.15);
+  border-color: rgba(0, 162, 255, 0.4);
+  color: #ffffff;
+  transform: scale(1.03);
+}
+#zs-switch svg { opacity: 0.7; }
+
+#zs-discord {
+  flex: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -240,47 +276,23 @@ html.zs-light #zs-state b { color: #18181b; }
   text-decoration: none;
   transition: all 0.15s ease;
 }
-#zs-discord:hover, #zs-support:hover {
-  background: rgba(0, 162, 255, 0.18);
+#zs-discord:hover {
+  background: rgba(0, 162, 255, 0.15);
   border-color: rgba(0, 162, 255, 0.4);
   color: #ffffff;
   transform: scale(1.06);
 }
-
-#zs-switch {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 24px;
-  padding: 0 8px;
-  background: rgba(43, 47, 54, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 9999px;
-  color: #bac0cb;
-  font-size: 10.5px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-#zs-switch:hover {
-  background: rgba(0, 162, 255, 0.18);
-  border-color: rgba(0, 162, 255, 0.4);
-  color: #ffffff;
-  transform: scale(1.04);
-}
 #zs-switch svg { opacity: 0.6; }
 
 html.zs-light #zs-switch,
-html.zs-light #zs-support,
+
 html.zs-light #zs-discord {
   background: rgba(0, 0, 0, 0.05);
   border-color: rgba(0, 0, 0, 0.08);
   color: #52525b;
 }
 html.zs-light #zs-switch:hover,
-html.zs-light #zs-support:hover,
+
 html.zs-light #zs-discord:hover {
   background: rgba(0, 0, 0, 0.09);
   color: #18181b;
@@ -827,37 +839,225 @@ ol.flex-col-reverse > div.w-full:not(.mx-auto) > .zs-chip {
 }
 .zs-toast.show { opacity: 1; transform: translateY(0); }
 
-/* ── banner (errors / limits) ──────────────────────────────── */
+/* ── Smart Error & Notification Banner (Roblox Studio Dark Glass) ── */
 .zs-banner {
-  position: fixed; right: 18px; top: 18px; width: 320px;
-  padding: 14px 16px; border-radius: 12px;
-  background: #161618; color: #ececee;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
-  font-size: 13px; z-index: 2147483601;
+  position: fixed !important;
+  top: 18px !important;
+  right: 18px !important;
+  width: 340px !important;
+  max-width: calc(100vw - 36px) !important;
+  box-sizing: border-box !important;
+  padding: 13px 15px !important;
+  border-radius: 14px !important;
+  background: rgba(20, 22, 27, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-left: 3.5px solid #00a2ff !important;
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 162, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  font-family: "Builder Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
+  font-size: 12px !important;
+  z-index: 2147483645 !important;
+  animation: zs-banner-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: all 0.2s ease !important;
 }
-/* semantic state kept, but as a thin muted stripe rather than a bright bar */
-.zs-banner.limit { border-left: 2px solid rgba(239, 68, 68, 0.55); }
-.zs-banner.warn { border-left: 2px solid rgba(251, 191, 36, 0.5); }
-.zs-banner-t { font-weight: 600; color: #f4f4f6; margin-bottom: 6px; }
-.zs-banner-m { color: #a1a1aa; line-height: 1.6; margin-bottom: 12px; font-size: 11.5px; white-space: pre-line; }
-.zs-banner-acts { display: flex; gap: 8px; }
-.zs-banner-acts button {
-  flex: 1; padding: 7px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
-  cursor: pointer; font-size: 11.5px; font-weight: 600;
-  background: transparent; color: #a0a0a8; transition: background 0.13s ease;
+
+@keyframes zs-banner-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.zs-banner-x { background: transparent; color: #a0a0a8; }
-.zs-banner-x:hover { background: rgba(255, 255, 255, 0.06); }
-/* Setup-tutorial link embedded in the bridge-lost banner (styled like a button,
-   sits in the actions row so it never overlaps the alert). */
-.zs-banner-video {
-  flex: 1; padding: 7px; border-radius: 8px; font-size: 11.5px; font-weight: 600;
-  text-align: center; text-decoration: none; box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06); color: #e4e4e8;
-  border: 1px solid rgba(255, 255, 255, 0.1); transition: background 0.13s ease;
+
+.zs-banner.zs-shake {
+  animation: zs-shake 0.35s ease-in-out !important;
 }
-.zs-banner-video:hover { background: rgba(255, 255, 255, 0.11); }
+@keyframes zs-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.zs-banner.warn {
+  border-left-color: #f59e0b !important;
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 14px rgba(245, 158, 11, 0.2) !important;
+}
+.zs-banner.limit {
+  border-left-color: #e2231a !important;
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 14px rgba(226, 35, 26, 0.25) !important;
+}
+
+.zs-banner-hdr {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 7px !important;
+}
+.zs-banner-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 2px 7px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.02em !important;
+}
+.zs-banner-close {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+  line-height: 1 !important;
+}
+.zs-banner-close:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.zs-banner-t {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin-bottom: 6px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.zs-banner-m {
+  font-size: 11.5px !important;
+  line-height: 1.55 !important;
+  color: #94a3b8 !important;
+  margin-bottom: 10px !important;
+}
+.zs-banner-bullet {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  margin-bottom: 4px !important;
+}
+.zs-bullet-dot {
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: #64748b !important;
+  margin-top: 6px !important;
+  flex: none !important;
+}
+.zs-banner-sol {
+  margin-top: 6px !important;
+  padding: 6px 9px !important;
+  border-radius: 8px !important;
+  background: rgba(0, 162, 255, 0.1) !important;
+  border: 1px solid rgba(0, 162, 255, 0.25) !important;
+  color: #e2e8f0 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+.zs-sol-badge {
+  display: inline-block !important;
+  padding: 1px 5px !important;
+  border-radius: 4px !important;
+  background: #00a2ff !important;
+  color: #ffffff !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  margin-right: 4px !important;
+}
+
+.zs-banner-diag {
+  margin-bottom: 10px !important;
+  font-size: 10.5px !important;
+  color: #64748b !important;
+}
+.zs-banner-diag summary {
+  cursor: pointer !important;
+  user-select: none !important;
+  color: #00a2ff !important;
+  font-weight: 600 !important;
+  padding: 3px 0 !important;
+}
+.zs-banner-diag pre {
+  margin: 6px 0 0 !important;
+  padding: 8px !important;
+  border-radius: 6px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  font-size: 10px !important;
+  font-family: Consolas, monospace !important;
+  overflow-x: auto !important;
+  max-height: 120px !important;
+  color: #e2e8f0 !important;
+}
+
+.zs-banner-acts {
+  display: flex !important;
+  gap: 7px !important;
+}
+.zs-banner-acts button,
+.zs-banner-acts a {
+  flex: 1 !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  transition: all 0.15s ease !important;
+}
+.zs-banner-acts button:hover,
+.zs-banner-acts a:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+.zs-banner-action {
+  background: rgba(0, 162, 255, 0.15) !important;
+  border-color: rgba(0, 162, 255, 0.4) !important;
+  color: #00a2ff !important;
+}
+.zs-banner-action:hover {
+  background: rgba(0, 162, 255, 0.28) !important;
+  border-color: rgba(0, 162, 255, 0.6) !important;
+  color: #ffffff !important;
+}
+.zs-banner-copy {
+  background: rgba(0, 176, 111, 0.12) !important;
+  border-color: rgba(0, 176, 111, 0.35) !important;
+  color: #00b06f !important;
+}
+.zs-banner-copy:hover {
+  background: rgba(0, 176, 111, 0.22) !important;
+  border-color: rgba(0, 176, 111, 0.5) !important;
+  color: #ffffff !important;
+}
+
+html.zs-light .zs-banner {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 12px rgba(0, 162, 255, 0.1) !important;
+  color: #1e293b !important;
+}
+html.zs-light .zs-banner-t { color: #0f172a !important; }
+html.zs-light .zs-banner-m { color: #475569 !important; }
+html.zs-light .zs-banner-tag { background: rgba(0, 0, 0, 0.05) !important; border-color: rgba(0, 0, 0, 0.08) !important; color: #64748b !important; }
+html.zs-light .zs-banner-close { color: #94a3b8 !important; }
+html.zs-light .zs-banner-close:hover { background: rgba(0, 0, 0, 0.06) !important; color: #0f172a !important; }
+html.zs-light .zs-banner-sol { background: rgba(0, 162, 255, 0.08) !important; border-color: rgba(0, 162, 255, 0.2) !important; color: #1e293b !important; }
+html.zs-light .zs-banner-acts button,
+html.zs-light .zs-banner-acts a { background: rgba(0, 0, 0, 0.05) !important; border-color: rgba(0, 0, 0, 0.08) !important; color: #334155 !important; }
+html.zs-light .zs-banner-acts button:hover,
+html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !important; color: #0f172a !important; }
 
 /* ── first-time onboarding card (bridge missing; pinned top-right) ───────── */
 #zs-setup {
@@ -1008,13 +1208,11 @@ html.zs-light #zs-state b { color: #4f46e5; }
 html.zs-light #zs-state.zs-state-warn { color: #b91c1c; }
 html.zs-light #zs-bar.tone-active #zs-state b { color: #059669; }
 html.zs-light #zs-discord,
-html.zs-light #zs-support,
 html.zs-light #zs-switch {
   background: rgba(0, 0, 0, 0.05); color: #4b5563;
   border-color: rgba(0, 0, 0, 0.12);
 }
 html.zs-light #zs-discord:hover,
-html.zs-light #zs-support:hover,
 html.zs-light #zs-switch:hover { background: rgba(0, 0, 0, 0.09); color: #1f2430; }
 html.zs-light #zs-action:disabled {
   background: rgba(0, 0, 0, 0.05); color: rgba(0, 0, 0, 0.35); border-color: rgba(0, 0, 0, 0.08);
