@@ -26,8 +26,11 @@
 ### เวอร์ชัน 0.0.3 (เวอร์ชันปัจจุบัน)
 - **ปรับโครงสร้างโค้ดแบบ Clean Architecture:** แยกไฟล์ทุกไฟล์ให้อยู่ภายใต้ขีดจำกัด 500-600 บรรทัด ตามหลัก Single Responsibility Principle
 - **ระบบทำงานเบื้องหลัง (Headless Native Host):** ซ่อนหน้าต่าง CMD ด้วย `CREATE_NO_WINDOW` พร้อมระบบส่ง Log สดผ่าน IPC
-- **ยกเครื่องหน้าต่างผู้ใช้ตาม Impeccable Style:** ลดการใช้อีโมจิ ปรับสีโทน Dark Neutral ลื่นไหล 60fps และสไตล์เรียบง่าย
-- **หน้าต่างรักษาความปลอดภัยในหน้าเว็บ:** ทดแทนหน้าต่างเดิมของเบราว์เซอร์ด้วย Modal ภายในหน้าเว็บ พร้อมหน้าต่าง Terminal แสดงผล Log
+- **ยกเครื่องหน้าต่างผู้ใช้ตาม Impeccable Style:** Dynamic Island Action Capsule ปีกมังกรกระพือ 60fps ลื่นไหล
+- **ตัวกรองไวยากรณ์ Luau ก่อนรัน (Pre-flight Sanitizer):** กรองและแปลงโอเปอเรเตอร์อัตโนมัติ (`!=` -> `~=`, `&&` -> `and`, `||` -> `or`) พร้อมซ่อมบล็อก `end` อัตโนมัติ
+- **ระบบสำรองสคริปต์อัตโนมัติลงดิสก์ (Local Script Snapshot):** บันทึกสำเนาไฟล์ `.luau` พร้อมประวัติย้อนหลังใน `projects/<PlaceName>/backups/` ป้องกันโค้ดหายเมื่อ Studio ปิดตัว
+- **ระบบตรวจสุขภาพและวินิจฉัยปัญหาอัตโนมัติ (Health Check Doctor):** คำสั่ง `.\doctor.bat` ตรวจสอบ 13 จุดสำคัญ พร้อมโหมด `--fix` ซ่อมแซมระบบ 1 คลิก
+- **ระบบควบคุมเวอร์ชันแบบจุดเดียว (Single Source of Truth):** จัดการเวอร์ชันจาก `version.json` และซิงค์ 16 ไฟล์ด้วย `.\bump-version.bat`
 
 ---
 
@@ -56,6 +59,6 @@
 |---|---|---|
 | **v0.0.1** | ปล่อยแล้ว | Core Bridge, Bloxstrap Auto-Discovery, Ctrl+Z Undo, Game Tree Pruning, Modern Luau, Audio Chime |
 | **v0.0.2** | ปล่อยแล้ว | รองรับ 9 แพลตฟอร์ม AI, Dynamic Island Morph Bar, ระบบแจ้งเตือน Error อัจฉริยะ, ChatGPT Auto-Recovery |
-| **v0.0.3** | **ปล่อยแล้ว (ปัจจุบัน)** | Clean Architecture (ไฟล์ < 500 บรรทัด), Headless Bridge (ไร้ CMD เด้ง), Impeccable UI, In-Page Modal พร้อม Log Terminal สด |
-| **v0.0.4** | ตามแผน | ระบบตรวจสอบอัปเดตอัตโนมัติผ่าน GitHub `ZXD44/ZXScript`, ป้ายแจ้งเตือนใน Popup |
+| **v0.0.3** | **ปล่อยแล้ว (ปัจจุบัน)** | Clean Architecture (< 500 บรรทัด), Headless Bridge, Luau Sanitizer, Auto-Backup, Health Doctor, SSOT Versioning |
+| **v0.0.4** | ตามแผน | Place Name Badge & Switch Warning, Atomic Turn Undo (1 Prompt = 1 Ctrl+Z), Smart Output Compactor, Auto-Updater |
 | **v0.1.0** | ตามแผน | ระบบสร้างโครงสร้างเกมสำเร็จรูป (Simulator, Obby, RPG) ในคลิกเดียว, คลังภาพถ่ายหน้าจอ |
