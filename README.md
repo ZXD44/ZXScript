@@ -1,5 +1,5 @@
 # ZXScript - AI Agent for Roblox Studio
-> **Created & Maintained by [zxd44](https://github.com/zxd44) (ZirconX)**  
+> **Created & Maintained by [ZXD44](https://github.com/ZXD44) (ZirconX)**  
 > 🌐 Website: [www.zirconx.xyz](https://www.zirconx.xyz)  
 > 📧 Contact: [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)
 
@@ -9,7 +9,7 @@
 ![Bloxstrap Support](https://img.shields.io/badge/Bloxstrap-Supported-orange)
 ![Version](https://img.shields.io/badge/version-0.0.3-brightgreen)
 
-**ZXScript** is an AI agent bridge and browser extension developed by **zxd44 (ZirconX)** that turns web-based AI models (DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, Arena) into autonomous Roblox Studio assistants.
+**ZXScript** is an AI agent bridge and browser extension developed by **ZXD44 (ZirconX)** that turns web-based AI models (DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, Arena) into autonomous Roblox Studio assistants.
 
 Directly control Roblox Studio from your browser: inspect explorer trees, read/write Luau scripts, insert assets, run play-mode diagnostics, and build games step-by-step.
 
@@ -127,4 +127,4 @@ python bridge/register.py
 ## 📄 License
 
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.  
-Created & Maintained by **zxd44 (ZirconX)**.
+Created & Maintained by **ZXD44 (ZirconX)**.

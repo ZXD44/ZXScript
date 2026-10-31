@@ -1,7 +1,7 @@
 # ZXScript Place Project Archive: ZXScript_Main
 
 > **Synchronized on:** 2026-10-29 23:22:00 (Local Time)  
-> **Author:** [zxd44](https://github.com/zxd44) (ZirconX)  
+> **Author:** [ZXD44](https://github.com/ZXD44) (ZirconX)  
 > **Official Website:** [www.zirconx.xyz](https://www.zirconx.xyz)  
 > **Contact:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)
 

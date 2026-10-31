@@ -1,5 +1,5 @@
 # ZXScript Agent Rules & Operational Constraints
-> **Owner & Maintainer:** zxd44 (ZirconX) <gonhackergamer0@gmail.com>  
+> **Owner & Maintainer:** ZXD44 (ZirconX) <gonhackergamer0@gmail.com>  
 > **Project:** ZXScript - Autonomous Roblox Studio AI Agent Bridge  
 > **Version:** `0.0.3` | **License:** GPL-3.0
 

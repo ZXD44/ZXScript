@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// providers/claude.js - Claude (claude.ai) provider by zxd44.
+// providers/claude.js - Claude (claude.ai) provider by ZXD44.
 // Exports the ZSProvider interface; the core (core/main.js) is provider-agnostic.
 
 // eslint-disable-next-line no-unused-vars

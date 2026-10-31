@@ -24,7 +24,7 @@
   const TOKEN_CHARS = 4;
 
   const WEBSITE_URL = "https://www.zirconx.xyz";
-  const GITHUB_URL = "https://github.com/zxd44/ZXScript";
+  const GITHUB_URL = "https://github.com/ZXD44/ZXScript";
   let extVersion = "0.0.3";
   try {
     extVersion = (chrome.runtime && chrome.runtime.getManifest && chrome.runtime.getManifest().version) || "0.0.3";

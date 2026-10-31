@@ -1,11 +1,11 @@
 # แผนผังทิศทางการพัฒนา ZXScript (Development Roadmap)
-> **เจ้าของโครงการและผู้พัฒนา:** [zxd44](https://github.com/zxd44) (ZirconX)  
+> **เจ้าของโครงการและผู้พัฒนา:** [ZXD44](https://github.com/ZXD44) (ZirconX)  
 > **เว็บไซต์:** [www.zirconx.xyz](https://www.zirconx.xyz)  
-> **คลังโค้ดทางการ:** [https://github.com/zxd44/ZXScript](https://github.com/zxd44/ZXScript)  
+> **คลังโค้ดทางการ:** [https://github.com/ZXD44/ZXScript](https://github.com/ZXD44/ZXScript)  
 > **อีเมล:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)  
 > **เวอร์ชันปัจจุบัน:** `0.0.3` | **สิทธิ์การใช้งาน:** GPL-3.0
 
-เอกสารนี้ระบุแผนผังทิศทางการพัฒนา (Roadmap) และฟีเจอร์สำหรับเวอร์ชันถัดไปของโปรเจกต์ **ZXScript** โดยกำหนดให้ทุกการเชื่อมต่อ บริการ และการอัปเดตทั้งหมดขึ้นตรงกับคลังโค้ดของ **zxd44** แต่เพียงผู้เดียว
+เอกสารนี้ระบุแผนผังทิศทางการพัฒนา (Roadmap) และฟีเจอร์สำหรับเวอร์ชันถัดไปของโปรเจกต์ **ZXScript** โดยกำหนดให้ทุกการเชื่อมต่อ บริการ และการอัปเดตทั้งหมดขึ้นตรงกับคลังโค้ดของ **ZXD44** แต่เพียงผู้เดียว
 
 ---
 
@@ -34,7 +34,7 @@
 ## 2. แผนการพัฒนาระยะถัดไป (Upcoming Phases)
 
 ### ระยะที่ 4: การตรวจสอบการอัปเดตอัตโนมัติ (Phase 4: Auto-Update Checker)
-- ตรวจสอบเวอร์ชันล่าสุดผ่าน GitHub Releases ของ `zxd44/ZXScript` โดยตรง
+- ตรวจสอบเวอร์ชันล่าสุดผ่าน GitHub Releases ของ `ZXD44/ZXScript` โดยตรง
 - แจ้งเตือนในหน้าต่าง Popup เมื่อมีเวอร์ชันใหม่ พร้อมปุ่มดาวน์โหลดตรงจากคลังทางการ
 - ระบบ CI/CD สร้างไฟล์ติดตั้งอัตโนมัติเมื่อมีการปล่อย Release
 
@@ -57,5 +57,5 @@
 | **v0.0.1** | ปล่อยแล้ว | Core Bridge, Bloxstrap Auto-Discovery, Ctrl+Z Undo, Game Tree Pruning, Modern Luau, Audio Chime |
 | **v0.0.2** | ปล่อยแล้ว | รองรับ 9 แพลตฟอร์ม AI, Dynamic Island Morph Bar, ระบบแจ้งเตือน Error อัจฉริยะ, ChatGPT Auto-Recovery |
 | **v0.0.3** | **ปล่อยแล้ว (ปัจจุบัน)** | Clean Architecture (ไฟล์ < 500 บรรทัด), Headless Bridge (ไร้ CMD เด้ง), Impeccable UI, In-Page Modal พร้อม Log Terminal สด |
-| **v0.0.4** | ตามแผน | ระบบตรวจสอบอัปเดตอัตโนมัติผ่าน GitHub `zxd44/ZXScript`, ป้ายแจ้งเตือนใน Popup |
+| **v0.0.4** | ตามแผน | ระบบตรวจสอบอัปเดตอัตโนมัติผ่าน GitHub `ZXD44/ZXScript`, ป้ายแจ้งเตือนใน Popup |
 | **v0.1.0** | ตามแผน | ระบบสร้างโครงสร้างเกมสำเร็จรูป (Simulator, Obby, RPG) ในคลิกเดียว, คลังภาพถ่ายหน้าจอ |

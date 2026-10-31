@@ -3,14 +3,14 @@
     ZXScript Project Memory & State Snapshot
     Place: ZXScript_Main
     Timestamp: 2026-10-29T23:22:00+07:00
-    Author: zxd44 <gonhackergamer0@gmail.com>
+    Author: ZXD44 <gonhackergamer0@gmail.com>
     Website: https://www.zirconx.xyz
 --]]
 
 local Memory = {
     Version = "0.0.1",
     LastUpdated = "2026-10-29",
-    Author = "zxd44 (ZirconX)",
+    Author = "ZXD44 (ZirconX)",
     Website = "https://www.zirconx.xyz",
     Status = "Resting / Completed Session",
     
@@ -25,7 +25,7 @@ local Memory = {
         "Verified and hardened bar mounting across all 8 supported AI web providers (Gemini, ChatGPT, DeepSeek, Qwen, Kimi, GLM, Meta AI, Arena)",
         "Eliminated DOM layout thrashing in 60-144 FPS rAF positioning loops, resulting in buttery-smooth performance",
         "Integrated Autonomous Rest / Stop Intent detection ('พัก', 'เสร็จแล้ว', 'ไปนอน') with automatic local project archiving",
-        "Updated official author identity strictly to zxd44 and website to www.zirconx.xyz across all modules, manifests, and documentation",
+        "Updated official author identity strictly to ZXD44 and website to www.zirconx.xyz across all modules, manifests, and documentation",
         "Maintained 100% test pass rate across all 45 parser and ChatGPT test suites"
     },
     

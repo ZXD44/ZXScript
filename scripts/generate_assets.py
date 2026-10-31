@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
-ZXScript Asset Generator - by zxd44
+ZXScript Asset Generator - by ZXD44
 Generates Concept 4 ("Terminal Chevron") icons and GitHub branding banner
 following Impeccable minimal software craftsmanship guidelines.
 """
@@ -175,7 +175,7 @@ def generate_banner(master_icon):
     draw.text((tx, ty + 124), tags, fill=(113, 113, 122, 255), font=font_mono)
 
     # Signature
-    draw.text((tx, ty + 154), "Crafted by zxd44 (ZirconX)  ·  v0.0.1", fill=(99, 102, 241, 230), font=font_mono)
+    draw.text((tx, ty + 154), "Crafted by ZXD44 (ZirconX)  ·  v0.0.1", fill=(99, 102, 241, 230), font=font_mono)
 
     banner.save(os.path.join(ASSETS_DIR, "banner.png"))
     print("Created assets/banner.png")
@@ -215,7 +215,7 @@ def generate_banner(master_icon):
   <text x="370" y="295" class="title">ZXScript</text>
   <text x="370" y="345" class="sub">Roblox Studio AI Agent Bridge</text>
   <text x="370" y="390" class="mono">Autonomous Studio MCP  ·  Bloxstrap &amp; Vanilla  ·  Anti-Ban Shield  ·  GPL-3.0</text>
-  <text x="370" y="420" class="mono accent">Crafted by zxd44 (ZirconX)  ·  v0.0.1</text>
+  <text x="370" y="420" class="mono accent">Crafted by ZXD44 (ZirconX)  ·  v0.0.1</text>
 </svg>"""
     with open(os.path.join(ASSETS_DIR, "banner.svg"), "w", encoding="utf-8") as f:
         f.write(banner_svg)

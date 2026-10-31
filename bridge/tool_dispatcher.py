@@ -155,7 +155,7 @@ def force_sync_memory_from_studio(mgr) -> tuple:
         readme_path = os.path.join(proj_dir, "README.md")
         with open(readme_path, "w", encoding="utf-8") as f:
             f.write(f"# Project Memory: {place_name}\n")
-            f.write(f"> **Owner:** zxd44 | **Last Synced:** {now_str}\n\n")
+            f.write(f"> **Owner:** ZXD44 | **Last Synced:** {now_str}\n\n")
             f.write(md_body + "\n")
 
         log_path = os.path.join(proj_dir, "sessions.log")
@@ -221,7 +221,7 @@ def sync_project_memory_to_disk(mgr, name: str, arguments: dict) -> None:
         readme_path = os.path.join(proj_dir, "README.md")
         with open(readme_path, "w", encoding="utf-8") as f:
             f.write(f"# Project Memory: {place_name}\n")
-            f.write(f"> **Owner:** zxd44 | **Last Synced:** {now_str}\n\n")
+            f.write(f"> **Owner:** ZXD44 | **Last Synced:** {now_str}\n\n")
             f.write(md_body + "\n")
 
         log_path = os.path.join(proj_dir, "sessions.log")

@@ -1,6 +1,6 @@
 # ZXScript System Context & Architecture
 > **Project:** ZXScript - Autonomous Roblox Studio AI Agent Bridge  
-> **Author & Maintainer:** [zxd44](https://github.com/zxd44) (ZirconX)  
+> **Author & Maintainer:** [ZXD44](https://github.com/ZXD44) (ZirconX)  
 > **Website:** [www.zirconx.xyz](https://www.zirconx.xyz)  
 > **Contact:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)  
 > **Version:** `0.0.3` | **License:** GPL-3.0
