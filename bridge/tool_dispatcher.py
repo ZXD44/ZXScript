@@ -12,6 +12,7 @@ import websockets
 from bridge.constants import HERE, log
 from bridge.studio_watcher import probe_studio, probe_tool_text, STUDIO_PROBE_TOOL
 from bridge.luau_sanitizer import sanitize_and_validate_luau
+from bridge.script_backup import process_tool_backup
 
 
 def modernize_and_wrap_luau(args: dict) -> dict:
@@ -265,6 +266,17 @@ def safe_call(mgr, name: str, arguments: dict, timeout: float) -> dict:
             text = slice_script_output(text, arguments)
 
         sync_project_memory_to_disk(mgr, name, arguments)
+
+        # Auto-backup modified or created scripts to disk
+        try:
+            place_name = get_active_place_name(mgr)
+            saved = process_tool_backup(place_name, name, arguments, text)
+            if saved:
+                for b_path in saved:
+                    b_file = os.path.basename(b_path)
+                    log(f"[backup] Snapshotted -> projects/{place_name}/backups/{b_file}", "gr")
+        except Exception as e:
+            log(f"[backup] Snapshot warning: {e}", "yl")
 
         return {"ok": True, "text": text, "images": result["images"]}
     except ValueError as e:
