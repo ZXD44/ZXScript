@@ -11,20 +11,24 @@ import websockets
 
 from bridge.constants import HERE, log
 from bridge.studio_watcher import probe_studio, probe_tool_text, STUDIO_PROBE_TOOL
+from bridge.luau_sanitizer import sanitize_and_validate_luau
 
 
 def modernize_and_wrap_luau(args: dict) -> dict:
-    """Modernizes deprecated Luau calls and wraps code in ChangeHistoryService for Ctrl+Z undo support."""
+    """Sanitizes Luau syntax, modernizes deprecated calls, and wraps in ChangeHistoryService for Ctrl+Z undo."""
     if not isinstance(args, dict):
         return args
     code = args.get("code")
     if not isinstance(code, str) or not code.strip():
         return args
 
-    # Modernize deprecated globals
-    code = re.sub(r'(?<![.\w])wait\s*\(', 'task.wait(', code)
-    code = re.sub(r'(?<![.\w])spawn\s*\(', 'task.spawn(', code)
-    code = re.sub(r'(?<![.\w])delay\s*\(', 'task.delay(', code)
+    # Pre-flight Luau syntax sanitization & validation
+    code, changes, fatal_err = sanitize_and_validate_luau(code)
+    if fatal_err:
+        log(f"[luau pre-check] Block syntax error detected: {fatal_err}", "yl")
+        raise ValueError(f"[ZXScript Luau Syntax Pre-Check] {fatal_err}")
+    if changes:
+        log(f"[luau pre-check] Auto-fixed: {', '.join(changes)}", "cy")
 
     # ChangeHistoryService transaction wrapping
     dm = str(args.get("datamodel_type", "Edit")).lower()
@@ -263,6 +267,8 @@ def safe_call(mgr, name: str, arguments: dict, timeout: float) -> dict:
         sync_project_memory_to_disk(mgr, name, arguments)
 
         return {"ok": True, "text": text, "images": result["images"]}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "kind": "syntax_error"}
     except TimeoutError as e:
         return {"ok": False, "error": str(e), "kind": "timeout"}
     except Exception as e:
