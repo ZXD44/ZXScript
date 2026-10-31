@@ -1,78 +1,67 @@
 # ZXScript Agent Workflows & Maintenance Procedures
 > **Project:** ZXScript - Autonomous Roblox Studio AI Agent Bridge  
 > **Author & Maintainer:** [zxd44](https://github.com/zxd44) (ZirconX) <gonhackergamer0@gmail.com>  
-> **Version:** `0.0.1` | **License:** GPL-3.0
+> **Version:** `0.0.3` | **License:** GPL-3.0
 
-This document defines standard, executable workflows for AI coding agents maintaining or enhancing ZXScript.
+This document defines standard development workflows, test commands, and maintenance procedures for ZXScript.
 
 ---
 
-## 🛠️ Workflow 1: Verifying Python & JavaScript Syntax
+## 1. Testing & Verification Workflow
 
-Always run syntax and compilation checks after modifying bridge or extension files:
+Run these commands before any commit or release:
 
 ```powershell
-# 1. Compile all Python files
-python -m py_compile bridge/bridge.py bridge/launch_studio_mcp.py bridge/register.py
+# 1. Verify Python backend compilation across all modules
+python -c "import glob, py_compile; [py_compile.compile(f, doraise=True) for f in glob.glob('bridge/*.py')]; print('All Python files compile cleanly!')"
 
-# 2. Check JavaScript syntax across all extension files
-node --check zxscript-extension/background.js
-node --check zxscript-extension/popup.js
-node --check zxscript-extension/core/config.js
-node --check zxscript-extension/core/main.js
-node --check zxscript-extension/core/parser.js
-
-# 3. Run extension test suites
+# 2. Test command parser
 node zxscript-extension/test-parser.js
+
+# 3. Test ChatGPT provider adapter
 node zxscript-extension/test-chatgpt.js
+
+# 4. Test Claude provider adapter
+node zxscript-extension/test-claude.js
 ```
 
 ---
 
-## 🔌 Workflow 2: Testing Live Bridge WebSocket
+## 2. File Length Audit Workflow
 
-Verify that the local Bridge is active, accepting WebSocket connections, and advertising the Roblox MCP tools:
-
-```python
-import asyncio, websockets, json
-
-async def check():
-    async with websockets.connect("ws://127.0.0.1:17613") as ws:
-        await ws.send(json.dumps({"type": "status"}))
-        res = json.loads(await ws.recv())
-        tools = [t["name"] for t in res.get("tools", [])]
-        print(f"Status: {res.get('servers')}, Total Tools: {len(tools)}")
-        assert "execute_luau" in tools
-        assert "search_game_tree" in tools
-        print("[OK] Live bridge verified successfully.")
-
-asyncio.run(check())
-```
-
----
-
-## 🔄 Workflow 3: Clean Bridge Process Restart
-
-When updating `bridge/bridge.py` or port configuration, restart the listening process cleanly without leaving port conflicts:
+Ensure that all files comply with the 500-600 line limit:
 
 ```powershell
-# Find and terminate existing listener on port 17613
-$portLine = netstat -ano | findstr :17613 | Select-Object -First 1
-if ($portLine -match '\s+(\d+)$') {
-    Stop-Process -Id $matches[1] -Force -ErrorAction SilentlyContinue
+node -e "const fs = require('fs'); const path = require('path');
+function walk(dir) {
+  let res = [];
+  for (const f of fs.readdirSync(dir)) {
+    if (f === 'node_modules' || f === '.git' || f === 'skills') continue;
+    const p = path.join(dir, f);
+    if (fs.statSync(p).isDirectory()) res = res.concat(walk(p));
+    else if (p.endsWith('.js') || p.endsWith('.py') || p.endsWith('.css') || p.endsWith('.html')) {
+      const lines = fs.readFileSync(p, 'utf8').split('\n').length;
+      if (lines > 600) res.push({ file: p, lines });
+    }
+  }
+  return res;
 }
-
-# Launch bridge cleanly
-cmd.exe /c "scripts\start.bat"
+const over = walk('.');
+if (over.length) { console.error('Files exceeding 600 lines:', over); process.exit(1); }
+else { console.log('All modular code files are strictly within line limits!'); }"
 ```
 
 ---
 
-## 📝 Workflow 4: Standard Git Commit
+## 3. Release & Packaging Workflow
 
-Ensure all modifications are committed with the verified author identity:
-
-```powershell
-git add -A
-git commit -m "<type>(<scope>): <concise description>" --author="zxd44 <gonhackergamer0@gmail.com>"
-```
+1. Update version tags across:
+   - `bridge/constants.py`
+   - `zxscript-extension/manifest.json`
+   - `zxscript-extension/core/constants.js`
+   - `README.md` and `docs/CHANGELOG.md`
+2. Build standalone Windows binary:
+   ```powershell
+   python scripts/build_exe.py
+   ```
+3. Tag commit and create GitHub Release under `zxd44/ZXScript`.

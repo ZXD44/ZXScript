@@ -7,6 +7,7 @@
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 ![Roblox Studio](https://img.shields.io/badge/Roblox%20Studio-MCP%20Enabled-green)
 ![Bloxstrap Support](https://img.shields.io/badge/Bloxstrap-Supported-orange)
+![Version](https://img.shields.io/badge/version-0.0.3-brightgreen)
 
 **ZXScript** is an AI agent bridge and browser extension developed by **zxd44 (ZirconX)** that turns web-based AI models (DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, Arena) into autonomous Roblox Studio assistants.
 
@@ -14,95 +15,116 @@ Directly control Roblox Studio from your browser: inspect explorer trees, read/w
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Structure (Clean Architecture & Modular Design)
+
+Every file in the codebase strictly conforms to the **Single Responsibility Principle (SRP)** with a hard limit of **under 500-600 lines per file**:
 
 ```text
 ZXScript/
-├── assets/                 # Icons, banners, and media branding
-│   ├── banner.png
-│   ├── banner.svg
-│   └── icon.png
-├── bridge/                 # Python Bridge Server & MCP Discovery
-│   ├── bridge.py           # Core Bridge Server (WebSocket <-> MCP)
-│   ├── launch_studio_mcp.py# Roblox Studio & Bloxstrap MCP discovery
-│   └── config.json         # Bridge server configuration
-├── dist/                   # Packed extension artifacts (.crx, .pem)
-├── docs/                   # Documentation & guides
-│   ├── CHANGELOG.md        # Version history
-│   ├── ROADMAP.md          # Future development roadmap (zxd44)
-│   ├── RULES.md            # Operational rules & Luau coding standards (TH/EN)
-│   └── ZXScript_Guide.md   # Complete installation & prompt guide (TH)
-├── logs/                   # Bridge and runtime logs
-├── projects/               # Auto-synced local project memories & logs per place
-├── scripts/                # Automated launchers
-│   ├── start.bat           # 1-Click launcher for Windows
-│   └── MacOS_Start.command # 1-Click launcher for macOS
-├── zxscript-extension/     # Chrome / Edge Browser Extension
-│   ├── manifest.json
-│   ├── popup.html
-│   ├── core/               # Agent loop, parser, and anti-ban engine
-│   └── providers/          # DeepSeek, ChatGPT, Qwen, Gemini, etc.
-├── .gitattributes          # Git attributes
-├── .gitignore              # Git ignore rules
-├── LICENSE                 # GPL-3.0 License with zxd44 ownership notice
-└── README.md               # Project overview
+├── assets/                       # Icons, branding assets, and vector SVGs
+├── bridge/                       # Python Bridge Server & Native Messaging
+│   ├── __init__.py               # Package descriptor
+│   ├── constants.py              # System paths, constants, ANSI colors, logger
+│   ├── config_manager.py         # Atomic config.json manager & in-place restarter
+│   ├── mcp_server.py             # JSON-RPC 2.0 MCP Client & process manager
+│   ├── studio_watcher.py         # Port squatter cleaner, Studio monitor & zombie killer
+│   ├── tool_dispatcher.py        # Luau modernization, ChangeHistoryService & dispatch
+│   ├── bridge_server.py          # WebSocket server & client status broadcaster
+│   ├── bridge.py                 # Clean supervisor entry point
+│   ├── native_host.py            # Headless Native Host (CREATE_NO_WINDOW)
+│   ├── native_host.exe           # Standalone headless binary for Chrome/Edge
+│   ├── launch_studio_mcp.py      # Roblox Studio & Bloxstrap MCP discovery
+│   └── register.py               # Registry installer for Native Messaging
+├── docs/                         # Documentation & guides
+│   ├── CHANGELOG.md              # Version release history
+│   ├── ROADMAP.md                # Development roadmap
+│   ├── RULES.md                  # Operational rules & coding standards
+│   └── ZXScript_Guide.md         # Comprehensive installation & prompt guide
+├── logs/                         # Bridge runtime and debug logs
+├── scripts/                      # Launchers & automation scripts
+│   ├── start.bat                 # 1-Click launcher for Windows
+│   └── MacOS_Start.command       # 1-Click launcher for macOS
+├── zxscript-extension/           # Chrome / Edge Browser Extension (MV3)
+│   ├── manifest.json             # Manifest V3 script injection map
+│   ├── background.js             # Service worker & native host bridge RPC
+│   ├── README.md                 # Extension documentation
+│   ├── icons/                    # Extension icon assets (16, 48, 128px)
+│   ├── popup/                    # Minimalist extension popup UI (HTML, CSS, JS)
+│   │   ├── popup.html
+│   │   ├── popup.js
+│   │   ├── popup.css
+│   │   └── popup-modal.css
+│   ├── styles/                   # In-page overlay stylesheets (< 500 lines each)
+│   │   ├── overlay.css           # Dynamic Island action capsule & theme
+│   │   ├── menu.css              # Dropdown settings menu & MCP server list
+│   │   ├── modals.css            # Alerts, setup wizard & security modal
+│   │   └── chips.css             # Tool execution cards & syntax previews
+│   ├── core/                     # Modular extension core (< 500-600 lines each)
+│   │   ├── constants.js          # Global state A, diagnostics, brand constants
+│   │   ├── icons.js              # Vector SVG icon definitions
+│   │   ├── audio.js              # Web Audio API chime synthesizer
+│   │   ├── camouflage.js         # DOM codeblock camouflage & tool chip decorator
+│   │   ├── ui-modals.js          # In-page headless bridge modal, toasts & banners
+│   │   ├── ui-menu.js            # Settings popover, MCP cards, prompt wizard
+│   │   ├── ui-bar.js             # Floating dynamic island action bar & theme engine
+│   │   ├── tools.js              # Tool caller, bridge RPC & editor text injector
+│   │   ├── response-watcher.js   # AI stream detector & response watcher
+│   │   ├── agent.js              # Autonomous agent loop & turn-memory manager
+│   │   ├── parser.js             # Robust Luau and JSON tool call parser
+│   │   └── main.js               # Extension lifecycle coordinator & hooks
+│   ├── providers/                # Site-specific adapters (ChatGPT, Claude, DeepSeek, etc.)
+│   └── tests/                    # Plain node unit test suite (Zero dependencies)
+├── start.bat                     # Root launcher redirect
+└── README.md                     # Project overview
 ```
 
 ---
 
 ## 🚀 Key Features
 
+- **Headless Native Bridge:** Runs completely in the background via `CREATE_NO_WINDOW`. Eliminates intrusive separate CMD popups; streams real-time logs directly inside the extension popup and in-page modal dialog.
+- **Impeccable Style Design System:** Inspired by [impeccable.style](https://impeccable.style/) principles. Features deep Zinc-950 surfaces, 60fps hardware-accelerated animations, zero emoji clutter on action buttons, and slim 5px custom scrollbars.
+- **Modular Clean Architecture:** All files adhere to strict separation of concerns and remain under 500-600 lines. Configs, constants, parsers, watchers, and UI engines are completely decoupled.
 - **Native Bloxstrap & Vanilla Studio Support:** Automatically discovers `StudioMCP.exe` across standard Roblox installations and Bloxstrap directories without manual path configuration.
 - **Built-in Anti-Ban Shield:** Smart humanized delay (`1000 - 2200ms`) prevents rate-limiting and account blocks from Cloudflare and AI providers.
-- **Context Resend & Tool Persistence:** Auto-refreshes tools every 8 calls and resends system prompts to prevent AI from dropping MCP tool calling.
-- **33+ Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, and more. Script chunking for large files (start_line/end_line).
-- **Play Mode Auto-Routing:** Automatically retries `execute_luau` on Server datamodel when Studio is in Play mode.
-- **Provider Agnostic & All-Platform Verified:** Fortified start button (`▶︎ เริ่มทำงาน`) across all 9 major AI platforms: DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, and Arena.
-- **Impeccable Style UI & 5px Custom Scrollbars:** Conforms strictly to impeccable.style guidelines with deep Zinc-950 aesthetics, custom 5px slim pill scrollbars on all containers, and tactile micro-interactions.
-- **Dynamic Island Morph Action Bar:** Center-anchored floating capsule (`top: 14px; left: 50%`) with intelligent morphing: stays ultra-compact while idle, and smoothly expands into an active HUD with a breathing cyan neon glow border, dual-ring radar live dot, and 1-click emergency stop button (`■ หยุด`).
-- **Smart Error Notification System:** Categorizes issues automatically into Roblox Studio, Bridge Server, AI Model, and Context Limit; features 1-click quick-action buttons (reconnect, continue, new chat), clear solution badges (`[วิธีแก้]`), collapsible technical diagnostics drawer, and anti-spam duplicate shaking.
-- **ChatGPT Auto-Recovery Engine:** Eliminates 'empty reply' deadlocks by automatically detecting stalled streams and issuing autonomous continuation prompts or native retries before failing.
-- **3x3 AI App Launcher Grid:** Redesigned extension popup pane with symmetrical 3x3 micro-cards, unique brand colorways, and real-time active browser tab detection.
-- **Zero-Latency Web Audio Synthesizer:** Elegant Mac/Linear-style two-tone success chimes and alert pings synthesized natively via the Web Audio API without heavy MP3 dependencies (toggleable via bell icon `🔔` in popup).
-- **Zero-F5 Auto-Recovery:** Automatic real-time status sync between extension, Bridge, and Studio; reconnects seamlessly and dismisses error banners without page refreshes.
-- **1-Click Prompt Insertion:** Instant insertion of customized prompt presets into the active chat composer directly from the extension popup.
-- **Localized Luau Error Reporting:** Transforms internal Roblox stack chunks (`AssistantCommand:XX:`) into Thai (`สคริปต์บรรทัดที่ XX:`) with structured bulleted diagnostics and remediation hints.
-- **High-Performance 144Hz Engine:** Zero DOM layout thrashing in requestAnimationFrame positioning loops, ensuring buttery-smooth rendering with no dropped frames.
-- **Persistent Project Memory & Auto-Sync:** Automatically detects intent to rest or finish (e.g. 'พักผ่อน', 'เสร็จแล้ว'), syncs `game.ServerStorage.ZXScript.Memory` in Studio, and mirrors local documentation to `projects/<PlaceName>/`.
-- **Standalone Build:** Optional PyInstaller build (`scripts/build_exe.py`) produces a single `ZXScript-Bridge.exe` with no Python dependency.
-- **GitHub Actions CI:** Automated syntax checks and test suite on every push.
+- **34 Built-in Studio Tools:** Full support for `execute_luau`, `multi_edit`, `script_search`, `search_game_tree`, `screen_capture`, `insert_asset`, `generate_mesh`, `character_navigation`, and more.
+- **ChangeHistoryService Protection:** Every Luau code change executed by AI in Roblox Studio is automatically wrapped in ChangeHistoryService, allowing instant `Ctrl + Z` undo in Studio.
+- **Provider Agnostic (9 AI Platforms):** Fully compatible with DeepSeek, ChatGPT, Claude, Gemini, Qwen, Kimi, Z.ai / GLM, Meta AI, and Arena.
+- **Zero-Latency Web Audio Synthesizer:** Two-tone success chimes and alert pings synthesized natively via the Web Audio API without heavy external audio files.
 
 ---
 
 ## 📦 Quick Setup
 
-### 1. Load the Browser Extension
+### 1. Register Native Messaging Host (One-Time)
+Run the registration script to allow the browser extension to communicate with the headless bridge:
+```powershell
+python bridge/register.py
+```
+
+### 2. Load the Browser Extension
 1. Open Chrome or Edge and navigate to `chrome://extensions` or `edge://extensions`.
-2. Enable **Developer mode** toggle.
+2. Enable the **Developer mode** toggle in the top-right corner.
 3. Click **Load unpacked** and select the `zxscript-extension` folder.
 
-### 2. Enable Roblox Studio MCP Server
+### 3. Enable Roblox Studio MCP Server
 1. Launch **Roblox Studio** and open your game Place.
 2. In the top ribbon, click **Assistant AI**.
 3. Click the `...` (three dots) icon at the top right of the Assistant panel -> **Manage MCP Servers**.
 4. Check **Enable Studio as MCP Server**.
 
-### 3. Run the Bridge Server
-- On Windows: Double-click `scripts/start.bat` (or run `.\scripts\start.bat`).
-- On macOS: Run `./scripts/MacOS_Start.command`.
-- Keep the terminal window minimized while using ZXScript.
+### 4. Start the Bridge
+- **Option A (Extension UI - Recommended):** Click the ZXScript extension icon in your browser and click **เปิดใช้งานทันที** (Start Bridge). The bridge will run headlessly with live logs streamed in the popup.
+- **Option B (Launcher Script):** Double-click `start.bat` in the project root.
 
-### 4. Connect Web AI
-1. Go to `chat.deepseek.com` (recommended) or `chat.qwen.ai`.
-2. Wait for the green status indicator 🟢 on the ZXScript bar.
-3. Click **Start session** and use the prompts from [docs/ZXScript_Guide.md](./docs/ZXScript_Guide.md).
-
----
-
-## 📄 Documentation & Prompts
-For full Thai documentation and step-by-step prompt templates, see [docs/ZXScript_Guide.md](./docs/ZXScript_Guide.md).
+### 5. Connect Web AI
+1. Go to `chat.deepseek.com` (recommended), `claude.ai`, or `chatgpt.com`.
+2. Look at the top center: the status indicator will turn green when connected.
+3. Click **เริ่มทำงาน** (Start session) and prompt your assistant to build!
 
 ---
 
-## ⚖️ License
-GNU General Public License v3.0 (GPL-3.0). Customized, modified, and maintained by [zxd44](https://github.com/zxd44) (ZirconX). See [LICENSE](./LICENSE) for details.
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.  
+Created & Maintained by **zxd44 (ZirconX)**.

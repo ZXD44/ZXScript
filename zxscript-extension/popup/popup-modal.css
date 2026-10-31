@@ -1,0 +1,177 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* popup-modal.css - Red Dragon Pixel Art Modal Dialog & Terminal Styles */
+
+.zs-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 3, 8, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+  animation: zs-m-in 0.12s ease;
+  backdrop-filter: blur(4px);
+}
+@keyframes zs-m-in { from { opacity: 0; } to { opacity: 1; } }
+
+.zs-modal-card {
+  width: 100%;
+  background: #150611;
+  border: 2px solid #731738;
+  padding: 14px;
+  box-sizing: border-box;
+  color: #fff1f2;
+  box-shadow: 3px 3px 0 #000, inset 0 0 16px rgba(225, 29, 72, 0.2);
+  transform: translateY(4px);
+  animation: zs-m-pop 0.12s ease forwards;
+  image-rendering: pixelated;
+}
+@keyframes zs-m-pop { to { transform: translateY(0); } }
+
+.zs-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #4a1024;
+  padding-bottom: 6px;
+}
+.zs-modal-tag {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #f43f5e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #27091d;
+  padding: 2px 6px;
+  border: 1px solid #731738;
+}
+.zs-modal-close {
+  background: #27091d;
+  border: 1px solid #731738;
+  color: #fda4af;
+  cursor: pointer;
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.zs-modal-close:hover {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #ff708f;
+}
+
+.zs-modal-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #fff1f2;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  text-shadow: 1px 1px 0 #4c0519;
+}
+.zs-modal-body {
+  font-size: 11px;
+  color: #fecdd3;
+  margin-bottom: 10px;
+  line-height: 1.4;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.zs-modal-info {
+  background: #0d040a;
+  border: 1px solid #4a1024;
+  padding: 7px 9px;
+  margin-bottom: 10px;
+  font-size: 10px;
+  box-shadow: 1px 1px 0 #000;
+}
+.zs-modal-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+.zs-modal-info-label {
+  color: #9f7584;
+  font-family: 'Silkscreen', monospace;
+  font-size: 8.5px;
+}
+.zs-modal-info-val {
+  color: #fecdd3;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+.zs-modal-log {
+  background: #080206;
+  border: 1px solid #5a142c;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 9px;
+  color: #fda4af;
+  max-height: 95px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.4;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+}
+.zs-modal-log .log-ok { color: #34d399; font-weight: 600; }
+.zs-modal-log .log-err { color: #f87171; font-weight: 600; }
+.zs-modal-log .log-info { color: #f43f5e; }
+
+.zs-modal-actions {
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+.zs-modal-btn {
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Silkscreen', 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.1s;
+  image-rendering: pixelated;
+}
+.zs-modal-btn.primary {
+  background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%);
+  color: #ffffff;
+  border: 1px solid #ff708f;
+  box-shadow: 0 2px 0 #4c0519, inset 1px 1px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 1px 1px 0 #000;
+}
+.zs-modal-btn.primary:hover {
+  background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%);
+}
+.zs-modal-btn.primary:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.zs-modal-btn.primary:disabled {
+  background: #331221;
+  border-color: #551c35;
+  color: #7d425c;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.zs-modal-btn.secondary {
+  background: #240a1b;
+  border: 1px solid #5a142c;
+  color: #fecdd3;
+  box-shadow: 1px 1px 0 #000;
+}
+.zs-modal-btn.secondary:hover {
+  background: #38102a;
+  border-color: #f43f5e;
+  color: #ffffff;
+}
+.zs-modal-btn.secondary:active {
+  transform: translateY(1px);
+}

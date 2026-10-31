@@ -1,0 +1,460 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* overlay.css - ZXScript (by ZXD44) in-page UI. Scoped under #zs-root / .zs-* */
+
+#zs-root {
+  position: fixed;
+  z-index: 2147483600;
+  font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ── Style 1: Dynamic Island Morph (เกาะลอยปรับขนาดอัตโนมัติ) ── */
+#zs-bar,
+#zs-bar.zs-bar-inline,
+#zs-bar.zs-bar-inline.zs-prov-chatgpt,
+#zs-bar.zs-bar-inline.zs-prov-claude,
+#zs-bar.zs-bar-anchored {
+  position: fixed !important;
+  top: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2147483640 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  padding: 3px 8px 3px 10px !important;
+  height: 35px !important;
+  min-height: 35px !important;
+  max-height: 35px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(92vw, 440px) !important;
+  background: rgba(16, 18, 22, 0.94) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(0, 162, 255, 0.3) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 162, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: #f4f4f5 !important;
+  font-size: 11px !important;
+  font-family: "Builder Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  transition: max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.35s ease !important;
+  animation: zs-bar-drop 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ── Dynamic Island Morph: Working State with Neon Breathing Glow ── */
+#zs-bar.zs-island-active,
+#zs-bar.is-busy {
+  max-width: min(95vw, 560px) !important;
+  padding: 3px 9px 3px 12px !important;
+  background: rgba(14, 16, 20, 0.96) !important;
+  border-color: rgba(0, 162, 255, 0.65) !important;
+  box-shadow: 0 18px 44px -4px rgba(0, 0, 0, 0.8), 0 0 22px rgba(0, 162, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  animation: zs-island-breathe 2.4s ease-in-out infinite alternate !important;
+}
+
+@keyframes zs-island-breathe {
+  0% {
+    border-color: rgba(0, 162, 255, 0.45);
+    box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.75), 0 0 14px rgba(0, 162, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  100% {
+    border-color: rgba(0, 162, 255, 0.85);
+    box-shadow: 0 20px 48px -4px rgba(0, 0, 0, 0.85), 0 0 28px rgba(0, 162, 255, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+}
+
+#zs-bar.zs-island-active #zs-brand,
+#zs-bar.is-busy #zs-brand {
+  background: rgba(0, 162, 255, 0.18);
+  border-color: rgba(0, 162, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 162, 255, 0.25);
+}
+
+#zs-bar.zs-island-active #zs-state,
+#zs-bar.is-busy #zs-state {
+  max-width: 250px;
+}
+#zs-bar.zs-island-active .zs-state-txt,
+#zs-bar.is-busy .zs-state-txt {
+  max-width: 230px;
+}
+
+@keyframes zs-bar-drop {
+  from { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+html.zs-light #zs-bar,
+html.zs-light #zs-bar.zs-bar-inline,
+html.zs-light #zs-bar.zs-bar-inline.zs-prov-chatgpt,
+html.zs-light #zs-bar.zs-bar-inline.zs-prov-claude,
+html.zs-light #zs-bar.zs-bar-anchored {
+  background: rgba(245, 247, 250, 0.95) !important;
+  border-color: rgba(0, 162, 255, 0.3) !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 162, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  color: #191b1d !important;
+}
+
+#zs-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+#zs-dot.on {
+  background: #00b06f;
+  box-shadow: 0 0 8px #00b06f, 0 0 14px rgba(0, 176, 111, 0.5);
+}
+#zs-dot.warn {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+#zs-dot.off {
+  background: #e2231a;
+  box-shadow: 0 0 6px rgba(226, 35, 26, 0.6);
+}
+
+#zs-brand {
+  font-size: 10px;
+  font-weight: 700;
+  color: #00a2ff;
+  background: rgba(0, 162, 255, 0.12);
+  border: 1px solid rgba(0, 162, 255, 0.35);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+}
+#zs-brand .zs-free {
+  font-size: 8.5px;
+  opacity: 0.8;
+  margin-left: 3px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.zs-rbx-icon {
+  flex: none;
+  color: #00a2ff;
+}
+html.zs-light #zs-brand {
+  color: #007acc;
+  background: rgba(0, 122, 204, 0.1);
+  border-color: rgba(0, 122, 204, 0.25);
+}
+
+.zs-sep {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  flex: none;
+  margin: 0 2px;
+}
+html.zs-light .zs-sep {
+  background: rgba(0, 0, 0, 0.12);
+}
+html.zs-light #zs-brand .zs-free {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+#zs-state {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 190px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #d4d4d8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zs-state-txt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  max-width: 165px;
+  vertical-align: middle;
+}
+#zs-state b { font-weight: 600; color: #e4e4e7; }
+#zs-state.zs-state-warn { color: #fca5a5; }
+#zs-state.zs-state-warn b { color: #fecaca; }
+html.zs-light #zs-state { color: #52525b; }
+html.zs-light #zs-state b { color: #18181b; }
+
+.zs-live-dot { display: none !important; }
+.zs-live-dot.idle { background: #9ca3af; animation: none; box-shadow: none; }
+
+#zs-action {
+  flex: none;
+  height: 25px;
+  padding: 2px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#zs-action[data-kind="start"] {
+  background: linear-gradient(135deg, #00b06f, #008a56);
+  color: #ffffff;
+  border: 1px solid rgba(0, 176, 111, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 176, 111, 0.35);
+}
+#zs-action[data-kind="start"]:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 3px 12px rgba(0, 176, 111, 0.55);
+  filter: brightness(1.1);
+}
+#zs-action[data-kind="start"]:active {
+  transform: translateY(0) scale(0.97);
+}
+#zs-action[data-kind="start-degraded"] {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
+}
+#zs-action:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+#zs-action.zs-flash { animation: zs-flash 0.4s ease-in-out 3; }
+@keyframes zs-flash {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(0, 162, 255, 0.5); }
+}
+
+#zs-stop {
+  flex: none;
+  height: 25px;
+  padding: 2px 11px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #e2231a, #b8181f);
+  border: 1px solid rgba(226, 35, 26, 0.6);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(226, 35, 26, 0.4);
+  transition: all 0.15s ease;
+}
+#zs-stop:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 3px 12px rgba(226, 35, 26, 0.6);
+  transform: translateY(-1px) scale(1.03);
+}
+#zs-stop[data-state="stopping"] {
+  background: #b45309; cursor: progress; opacity: 0.85;
+}
+
+#zs-switch {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 25px;
+  padding: 0 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  color: #bac0cb;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+#zs-switch:hover {
+  background: rgba(0, 162, 255, 0.15);
+  border-color: rgba(0, 162, 255, 0.4);
+  color: #ffffff;
+  transform: scale(1.03);
+}
+#zs-switch svg { opacity: 0.7; }
+
+#zs-credit {
+  flex: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #bac0cb;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  user-select: none;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+}
+#zs-credit:hover {
+  background: rgba(0, 162, 255, 0.15);
+  border-color: rgba(0, 162, 255, 0.4);
+  color: #ffffff;
+  transform: scale(1.04);
+}
+#zs-switch svg { opacity: 0.6; }
+
+html.zs-light #zs-switch,
+html.zs-light #zs-credit {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #52525b;
+}
+html.zs-light #zs-switch:hover,
+html.zs-light #zs-credit:hover {
+  background: rgba(0, 0, 0, 0.09);
+  color: #18181b;
+}
+
+/* ── the "more" menu popover (right/bottom set inline) ────────────────────── */
+/* ── input cover: fully hides the text the extension types + sends ──
+   background colour is set inline at runtime to match the input box,
+   so the masked input simply looks empty. */
+/* Live Agent HUD status is integrated directly into #zs-bar */
+
+/* belt-and-suspenders: the typed text itself is rendered invisible
+   (DeepSeek's composer is a <textarea>; the Kimi build used a contenteditable)
+   Matched on [contenteditable] with NO VALUE, deliberately. These rules used to
+   require [contenteditable='true'], but a provider that locks the composer by
+   flipping the attribute to "false" (ChatGPT's setInputLock does exactly that)
+   dropped straight out of the selector: measured live, the same node went from
+   colour rgba(0,0,0,0) to rgb(255,255,255) and max-height 140px to none the
+   instant it was locked. So the mask and the height cap were inert for the whole
+   time the input was locked - precisely when they are needed. */
+textarea.zs-typing,
+div[contenteditable].zs-typing,
+div[contenteditable].zs-typing * { color: transparent !important; }
+textarea.zs-typing,
+div[contenteditable].zs-typing { caret-color: transparent !important; }
+
+/* Keep the composer from ballooning while the extension injects the (large)
+   system prompt or a big tool output. The typed text is transparent and hidden
+   under #zs-input-cover anyway, so there is nothing to see - but without a cap
+   the editor grows to fit every line (e.g. Kimi's inner .chat-input-editor hit
+   ~1500px), which then makes the cover (sized to the editor rect) a giant white
+   slab over the page, and on composers with no clipping ancestor (DeepSeek's
+   textarea, Gemini's Quill) balloons the visible box itself. Clipping the height
+   only affects DISPLAY; the full value/content is intact and still sent. The
+   class is present only during agent injection, never while the user types, so
+   this never clips real typing. */
+textarea.zs-typing,
+div[contenteditable].zs-typing {
+  max-height: 140px !important;
+  overflow-y: hidden !important;
+}
+
+/* ── spinner element ───────────────────────────────────────── */
+.zs-spin {
+  width: 12px; height: 12px; flex: none; display: inline-block;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-top-color: #c8c8ce;
+  border-radius: 50%;
+  animation: zs-rot 0.7s linear infinite;
+}
+.zs-spin.big { width: 26px; height: 26px; border-width: 3px; }
+@keyframes zs-rot { to { transform: rotate(360deg); } }
+
+/* animated bouncing dots (ไข่ปลาขยับๆ) */
+.zs-dots {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+.zs-dots span {
+  display: inline-block;
+  animation: zs-dots-bounce 1.4s infinite ease-in-out both;
+}
+.zs-dots span:nth-child(1) { animation-delay: -0.32s; }
+.zs-dots span:nth-child(2) { animation-delay: -0.16s; }
+.zs-dots span:nth-child(3) { animation-delay: 0s; }
+@keyframes zs-dots-bounce {
+  0%, 80%, 100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2.5px);
+    color: #818cf8;
+  }
+}
+
+/* ── Responsive Action Bar ────────────────────────────────── */
+@media (max-width: 680px) {
+  #zs-bar,
+  #zs-bar.zs-bar-inline,
+  #zs-bar.zs-bar-anchored {
+    max-width: calc(100vw - 20px) !important;
+    gap: 4px !important;
+    padding: 3px 7px !important;
+  }
+  #zs-bar .zs-sep {
+    display: none !important;
+  }
+  #zs-credit {
+    display: none !important;
+  }
+  #zs-brand .zs-free {
+    display: none !important;
+  }
+  #zs-state {
+    max-width: 150px !important;
+  }
+  .zs-state-txt {
+    max-width: 140px !important;
+  }
+}
+
+@media (max-width: 440px) {
+  #zs-bar,
+  #zs-bar.zs-bar-inline,
+  #zs-bar.zs-bar-anchored {
+    top: 8px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 2px 6px !important;
+  }
+  #zs-state {
+    max-width: 110px !important;
+  }
+  .zs-state-txt {
+    max-width: 100px !important;
+  }
+  #zs-action {
+    height: 22px !important;
+    padding: 1px 8px !important;
+    font-size: 10px !important;
+  }
+  #zs-switch {
+    height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+  }
+}

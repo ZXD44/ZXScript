@@ -11,10 +11,26 @@ import subprocess
 import sys
 import winreg
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    HERE = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    HERE = os.path.dirname(os.path.abspath(__file__))
+
 ROOT_DIR = os.path.dirname(HERE)
 BRIDGE_PY = os.path.join(HERE, "bridge.py")
+EXE_PATH = os.path.join(ROOT_DIR, "ZXScript.exe")
 PORT = 17613
+
+
+def log_host(msg):
+    """Write debug diagnostics to logs/native_host.log."""
+    try:
+        log_dir = os.path.join(ROOT_DIR, "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        with open(os.path.join(log_dir, "native_host.log"), "a", encoding="utf-8") as f:
+            f.write(f"[{os.getpid()}] {msg}\n")
+    except Exception:
+        pass
 
 
 def read_msg():
@@ -38,7 +54,7 @@ def send_msg(data):
 def find_bridge_pid():
     """Find PID of process listening on port 17613."""
     try:
-        out = subprocess.check_output(f'netstat -aon | findstr :{PORT} | findstr LISTENING', shell=True).decode(errors="ignore")
+        out = subprocess.check_output(f"netstat -aon | findstr :{PORT} | findstr LISTENING", shell=True).decode(errors="ignore")
         for line in out.splitlines():
             parts = line.strip().split()
             if len(parts) >= 5:
@@ -48,50 +64,104 @@ def find_bridge_pid():
     return None
 
 
-def get_pythonw():
-    """Find pythonw.exe to run background processes invisibly."""
-    # Check current executable directory
-    base_dir = os.path.dirname(sys.executable)
-    cand = os.path.join(base_dir, "pythonw.exe")
-    if os.path.isfile(cand):
-        return cand
-    for env in ("LOCALAPPDATA", "ProgramFiles"):
-        val = os.environ.get(env, "")
-        if val:
-            for root, _, files in os.walk(val):
-                if "pythonw.exe" in files:
-                    return os.path.join(root, "pythonw.exe")
-                if root.count(os.sep) - val.count(os.sep) > 3:
-                    break
-    return sys.executable
+def find_python():
+    """Find a functional python.exe via registry and known paths."""
+    # 1. Registry lookup (fast, no subprocess overhead)
+    for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+        try:
+            k = winreg.OpenKey(root, r"Software\Python\PythonCore")
+            for i in range(winreg.QueryInfoKey(k)[0]):
+                sub = winreg.EnumKey(k, i)
+                try:
+                    k2 = winreg.OpenKey(k, rf"{sub}\InstallPath")
+                    val, _ = winreg.QueryValueEx(k2, "ExecutablePath")
+                    winreg.CloseKey(k2)
+                    if os.path.isfile(val):
+                        winreg.CloseKey(k)
+                        return val
+                except Exception:
+                    pass
+            winreg.CloseKey(k)
+        except Exception:
+            pass
+
+    # 2. LocalAppData scan
+    local = os.environ.get("LOCALAPPDATA", "")
+    if local:
+        for rel in (
+            r"Python\pythoncore-3.14-64\python.exe",
+            r"Programs\Python\Python314\python.exe",
+            r"Programs\Python\Python313\python.exe",
+            r"Programs\Python\Python312\python.exe",
+            r"Programs\Python\Python311\python.exe",
+        ):
+            cand = os.path.join(local, rel)
+            if os.path.isfile(cand):
+                return cand
+
+    return sys.executable if "python" in sys.executable.lower() else "python"
 
 
 def start_bridge():
-    """Launch bridge.py in detached background mode without cmd window."""
+    """Launch bridge.py as a detached background daemon (headless, no CMD window)."""
     pid = find_bridge_pid()
     if pid:
-        return {"ok": True, "message": f"Bridge is already running on PID {pid}", "pid": pid, "running": True}
-    
-    py = get_pythonw()
-    # DETACHED_PROCESS = 0x00000008, CREATE_NEW_PROCESS_GROUP = 0x00000200
-    flags = 0x00000008 | 0x00000200
+        log_host(f"Bridge already running (PID {pid})")
+        return {"ok": True, "message": f"Bridge already running (PID {pid})", "pid": pid, "running": True}
+
+    py = find_python()
+    log_host(f"find_python returned: {py}")
+
     try:
-        proc = subprocess.Popen([py, BRIDGE_PY], cwd=HERE, creationflags=flags, close_fds=True)
-        return {"ok": True, "message": "Bridge started successfully", "pid": proc.pid, "running": True}
+        # CREATE_NO_WINDOW (0x08000000) | CREATE_NEW_PROCESS_GROUP (0x00000200)
+        flags = 0x08000000 | 0x00000200
+        proc = subprocess.Popen(
+            [py, BRIDGE_PY],
+            cwd=HERE,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=flags,
+            close_fds=True,
+        )
+        log_host(f"Started bridge PID {proc.pid}")
+        return {"ok": True, "message": "Bridge started", "pid": proc.pid, "running": True}
     except Exception as e:
+        log_host(f"start_bridge error: {e}")
         return {"ok": False, "error": str(e), "running": False}
 
 
 def stop_bridge():
-    """Stop the running bridge process."""
-    pid = find_bridge_pid()
-    if not pid:
-        return {"ok": True, "message": "Bridge is not running", "running": False}
+    """Stop the running bridge process and close its launcher window."""
+    # 1. Kill any cmd window with ZXScript title
     try:
-        subprocess.run(f"taskkill /F /T /PID {pid}", shell=True, capture_output=True)
-        return {"ok": True, "message": f"Bridge process {pid} terminated", "running": False}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+        subprocess.run('taskkill /F /FI "WINDOWTITLE eq ZXScript*"', shell=True, capture_output=True)
+    except Exception:
+        pass
+
+    # 2. Kill the process listening on port 17613 and its children
+    pid = find_bridge_pid()
+    if pid:
+        try:
+            subprocess.run(f"taskkill /F /T /PID {pid}", shell=True, capture_output=True)
+        except Exception:
+            pass
+
+    # 3. Clean up any leftover StudioMCP.exe
+    try:
+        subprocess.run("taskkill /F /IM StudioMCP.exe", shell=True, capture_output=True)
+    except Exception:
+        pass
+
+    # Verify termination
+    pid_check = find_bridge_pid()
+    if pid_check:
+        try:
+            subprocess.run(f"taskkill /F /T /PID {pid_check}", shell=True, capture_output=True)
+        except Exception:
+            pass
+
+    return {"ok": True, "message": "Bridge stopped successfully", "running": False}
 
 
 def get_status():
@@ -117,8 +187,10 @@ def set_autostart(enable: bool):
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE | winreg.KEY_READ)
         if enable:
-            py = get_pythonw()
-            cmd = f'"{py}" "{BRIDGE_PY}"'
+            if os.path.isfile(EXE_PATH):
+                cmd = f'"{EXE_PATH}" start'
+            else:
+                cmd = f'"{find_python()}" "{BRIDGE_PY}"'
             winreg.SetValueEx(key, "ZXScriptBridge", 0, winreg.REG_SZ, cmd)
         else:
             try:
@@ -172,4 +244,23 @@ def main():
 
 
 if __name__ == "__main__":
+    log_host(f"Invoked with argv: {sys.argv}")
+    if len(sys.argv) > 1:
+        arg = " ".join(sys.argv[1:]).lower()
+        if "start" in arg or "run" in arg or "zxscript" in arg:
+            res = start_bridge()
+            log_host(f"CLI start result: {res}")
+            sys.exit(0)
+        elif "stop" in arg:
+            res = stop_bridge()
+            log_host(f"CLI stop result: {res}")
+            sys.exit(0)
+        elif "status" in arg:
+            st = get_status()
+            log_host(f"CLI status result: {st}")
+            try:
+                print(json.dumps(st))
+            except Exception:
+                pass
+            sys.exit(0)
     main()

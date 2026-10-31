@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "⚡ ZXScript • AI Roblox Studio",
-  "version": "0.0.2",
-  "description": "🤖 สั่ง AI สร้างแมพและเขียนโค้ดใน Roblox Studio อัตโนมัติ • โดย zxd44",
+  "name": "ZXScript • AI Roblox Studio",
+  "version": "0.0.3",
+  "description": "สั่ง AI สร้างแมพและเขียนโค้ดใน Roblox Studio อัตโนมัติ • โดย zxd44",
   "author": "zxd44 <gonhackergamer0@gmail.com>",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx01485ffFpF2DJd8N35jdDSjcB+gk6BGsZ4fY36aGMG8nYms2lx6g0nswxWJ8VA3qXdUW18GaGiUD3MtS//h3oRuZbFo/htumRR4BG9ztEyZYNxdy/r0YGO8/7hImji/Yg4ElobCmPEJnu3JQKwXvcO737RMZM+1NEF1/wqbzVezvO8DpYXiDxZsp5FWjcyrEcSu+0RlnGME6uH5XAYD3JXqgUjTbHvZCuWSnLVDcSYI/uWsmJZR0m1wCbjsVfbS1wxAAOEWB1+QuoXPEbd2B5t3i5BySTwGV2dIy8EUDSRcuQ0HaNFQZj2UureCi2M+SKksHeP3F45UDTU1woKcqwIDAQAB",
   "permissions": [
@@ -34,17 +34,17 @@
     "service_worker": "background.js"
   },
   "icons": {
-    "16": "icon-16.png",
-    "48": "icon-48.png",
-    "128": "icon-128.png"
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "⚡ ZXScript • AI Roblox Studio",
+    "default_popup": "popup/popup.html",
+    "default_title": "ZXScript • AI Roblox Studio",
     "default_icon": {
-      "16": "icon-16.png",
-      "48": "icon-48.png",
-      "128": "icon-128.png"
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
     }
   },
   "content_scripts": [
@@ -54,12 +54,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/deepseek.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -81,12 +94,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/chatgpt.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -96,12 +122,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/gemini.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -112,12 +151,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/kimi.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -127,12 +179,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/glm.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -142,12 +207,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/arena.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -158,12 +236,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/meta.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -183,12 +274,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/qwen.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     },
@@ -198,12 +302,25 @@
       ],
       "js": [
         "core/config.js",
+        "core/constants.js",
+        "core/icons.js",
+        "core/audio.js",
+        "core/camouflage.js",
+        "core/ui-modals.js",
+        "core/ui-menu.js",
+        "core/ui-bar.js",
+        "core/tools.js",
+        "core/response-watcher.js",
+        "core/agent.js",
         "core/parser.js",
         "providers/claude.js",
         "core/main.js"
       ],
       "css": [
-        "overlay.css"
+        "styles/overlay.css",
+        "styles/chips.css",
+        "styles/menu.css",
+        "styles/modals.css"
       ],
       "run_at": "document_idle"
     }

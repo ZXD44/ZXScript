@@ -42,7 +42,7 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
       el.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
           <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; background: rgba(226, 35, 26, 0.15); border: 1px solid rgba(226, 35, 26, 0.35); color: #f87171;">
-            <span>⚠️ ระบบ</span>
+            <span>ระบบ</span>
           </div>
           <button id="zs-err-close" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 13px; padding: 0 4px; line-height: 1; transition: color 0.15s;">✕</button>
         </div>
@@ -50,12 +50,12 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
         <div style="font-size: 11px; color: #cbd5e1; margin-bottom: 8px; word-break: break-word;">${esc(msg || title)}</div>
         ${stack ? `
           <details style="margin-bottom: 10px; font-size: 10.5px; color: #64748b;">
-            <summary style="cursor: pointer; color: #00a2ff; font-weight: 600; padding: 2px 0; user-select: none;">🔍 ดู Stack Trace / รายละเอียดเทคนิค</summary>
+            <summary style="cursor: pointer; color: #00a2ff; font-weight: 600; padding: 2px 0; user-select: none;">รายละเอียดข้อผิดพลาด</summary>
             <pre style="margin: 6px 0 0; padding: 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 9.5px; font-family: Consolas, monospace; overflow-x: auto; max-height: 110px; color: #e2e8f0; white-space: pre-wrap; word-break: break-all;">${esc(stack)}</pre>
           </details>
         ` : ""}
         <div style="display: flex; gap: 6px;">
-          <button id="zs-err-copy" style="flex: 1; height: 28px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(0, 176, 111, 0.15); border: 1px solid rgba(0, 176, 111, 0.4); color: #00b06f; transition: all 0.15s ease;">📋 คัดลอกรายงาน</button>
+          <button id="zs-err-copy" style="flex: 1; height: 28px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(0, 176, 111, 0.15); border: 1px solid rgba(0, 176, 111, 0.4); color: #00b06f; transition: all 0.15s ease;">คัดลอกรายงาน</button>
         </div>
       `;
 
@@ -63,12 +63,12 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
       const copyBtn = el.querySelector("#zs-err-copy");
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(reportPayload).then(() => {
-          copyBtn.textContent = "✓ คัดลอกแล้ว";
+          copyBtn.textContent = "คัดลอกสำเร็จ";
           copyBtn.style.background = "rgba(0, 176, 111, 0.3)";
           copyBtn.style.color = "#ffffff";
           setTimeout(() => {
             if (copyBtn) {
-              copyBtn.textContent = "📋 คัดลอกรายงาน";
+              copyBtn.textContent = "คัดลอกรายงาน";
               copyBtn.style.background = "rgba(0, 176, 111, 0.15)";
               copyBtn.style.color = "#00b06f";
             }
@@ -118,7 +118,7 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
 // feedback strings, tool categorisation. NOTHING in this file may reference a
 // specific AI site (DOM, selectors, site names) - that lives in providers/*.
 // eslint-disable-next-line no-unused-vars
-const ZS = (() => {
+(() => {
   "use strict";
 
   // Display name + unique marker injected at the top of the system prompt so the
@@ -198,7 +198,7 @@ const ZS = (() => {
       "[ข้อผิดพลาด: Extension อัปเดตใหม่]\n" +
       "• แจ้งผู้ใช้ 1 ประโยคสั้นๆ ให้กดรีเฟรชหน้านี้ (F5)",
     bridgeOffline:
-      "[ข้อผิดพลาด: Bridge ออฟไลน์]\n" +
+      "[ข้อผิดพลาด: เซิร์ฟเวอร์ออฟไลน์]\n" +
       "• แจ้งผู้ใช้ 1 ประโยคสั้นๆ ให้ดับเบิลคลิก start.bat บนคอมพิวเตอร์",
     truncated:
       "[ระบบ: ข้อความก่อนหน้าถูกตัดความยาว]\n" +
@@ -240,10 +240,10 @@ const ZS = (() => {
     if (typeof opts === "string") opts = { siteName: opts };
     const { siteName = "this AI site", customPrompt = "", providerNotes = "" } = opts;
 
-    const prompt = `บริบทระบบ (CONTEXT): ผู้ใช้ได้ติดตั้งส่วนขยายเบราว์เซอร์ ZXScript เพื่อเชื่อมต่อแชต AI เข้ากับ Roblox Studio ของผู้ใช้โดยตรงผ่าน MCP Server (Local Bridge)
+    const prompt = `บริบทระบบ (CONTEXT): ผู้ใช้ได้ติดตั้งส่วนขยายเบราว์เซอร์ ZXScript เพื่อเชื่อมต่อแชต AI เข้ากับ Roblox Studio ของผู้ใช้โดยตรงผ่าน MCP Server (Local Server)
 เมื่อคุณส่งคำสั่ง ZXScript ในข้อความตอบกลับ ส่วนขยายจะรันคำสั่งบน Roblox Studio ทันทีและส่งผลลัพธ์กลับมาในรอบถัดไป คุณจะได้รับผลลัพธ์เสมอ (ทั้งสำเร็จและแจ้ง Error) เพื่อให้คุณทำงานต่อเนื่องได้จนจบ
 
-Roblox Studio เชื่อมต่อผ่าน Local Bridge เสมอ — มีคำสั่ง StudioMCP ครบทั้ง 33 คำสั่งพร้อมใช้งานโดยตรงตามหมวดหมู่และตารางตัดสินใจ (DECISION MATRIX) ด้านล่าง ห้ามเดาคำสั่งขึ้นมาเองเด็ดขาด
+Roblox Studio เชื่อมต่อผ่าน Local Server เสมอ — มีคำสั่ง StudioMCP ครบทั้ง 33 คำสั่งพร้อมใช้งานโดยตรงตามหมวดหมู่และตารางตัดสินใจ (DECISION MATRIX) ด้านล่าง ห้ามเดาคำสั่งขึ้นมาเองเด็ดขาด
 
 ━━━ บัญชีคำสั่ง ROBLOX STUDIO MCP ทั้ง 33 คำสั่ง (33 TOOLS DIRECTORY) ━━━
 [1. สำรวจโครงสร้างและอ่านโค้ด (Inspection & Reading)]
@@ -316,7 +316,7 @@ Roblox Studio เชื่อมต่อผ่าน Local Bridge เสมอ 
 
 คำเตือนสำคัญ: ฟีเจอร์ Function Calling หรือ Code Interpreter ของเว็บ AI นี้ทำงานใน Sandbox ที่ไม่สามารถเข้าถึง Roblox Studio ในเครื่องของผู้ใช้ได้ คำสั่ง ZXScript ต้องพิมพ์เป็นข้อความธรรมดา (Plain Text) ภายในบล็อกโค้ดตามรูปแบบที่กำหนดเท่านั้น ห้ามเรียก Tool ผ่านฟังก์ชันภายในของระบบ AI
 
-⚠️ รูปแบบการเขียนคำสั่ง (บังคับ 100%): ทุกคำสั่งต้องอยู่ภายใน Fenced Code Block (ครอบด้วย \`\`\`) เสมอ
+[ข้อบังคับ] รูปแบบการเขียนคำสั่ง: ทุกคำสั่งต้องอยู่ภายใน Fenced Code Block (ครอบด้วย \`\`\`) เสมอ
 
 ━━━ รูปแบบคำสั่งมาตรฐาน (คำสั่ง JSON ทั้งหมด ยกเว้น execute_luau) ━━━
 เขียนในบล็อกโค้ด json แทนที่ placeholder ด้วยชื่อคำสั่งและพารามิเตอร์จริง:
@@ -340,7 +340,7 @@ return part.Name
 ###END_LUA###
 ${BT}
 
-🚨 กฎเหล็กโหมด CAVEMAN & การสื่อสารภาษาไทย (TOKEN EFFICIENCY สูงสุด - บังคับใช้ 100%):
+[กฎเหล็ก] โหมด CAVEMAN และการสื่อสารภาษาไทย:
 - สื่อสารด้วยภาษาไทยแบบ Caveman Mode เคร่งครัด: สั้น กระชับ ตรงเป้าหมาย ตรงประเด็น ไร้น้ำยา (Zero Fluff)
 - ห้ามพิมพ์คำทักทาย, คำเกริ่นนำ, ข้อความสุภาพ หรือคำลงท้ายที่ไม่จำเป็น (ห้ามพูดว่า "สวัสดีครับ", "ยินดีที่ได้ช่วย", "ผมจะเริ่มทำ...", "ขอตรวจสอบ...")
 - ส่งคำสั่ง Tool ทันที ไม่ต้องพิมพ์บรรยายว่าจะทำอะไร ให้ยิงคำสั่งเลย
@@ -499,7 +499,7 @@ game.ServerStorage.ZXScript.Memory (ModuleScript) เป็นหน่วยค
     );
   }
 
-  return {
+  const exportsObj = {
     APP_NAME,
     SYS_MARKER,
     RESEND_MARKER,
@@ -511,4 +511,11 @@ game.ServerStorage.ZXScript.Memory (ModuleScript) เป็นหน่วยค
     memoryNudge,
     TOOL_NOTES,
   };
+
+  if (typeof window !== "undefined") {
+    window.ZS = window.ZS || {};
+    Object.assign(window.ZS, exportsObj);
+    window.ZS.config = exportsObj;
+  }
+  return exportsObj;
 })();

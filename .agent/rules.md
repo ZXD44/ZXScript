@@ -1,88 +1,32 @@
 # ZXScript Agent Rules & Operational Constraints
 > **Owner & Maintainer:** zxd44 (ZirconX) <gonhackergamer0@gmail.com>  
 > **Project:** ZXScript - Autonomous Roblox Studio AI Agent Bridge  
-> **Version:** `0.0.1` | **License:** GPL-3.0
+> **Version:** `0.0.3` | **License:** GPL-3.0
 
-This document specifies mandatory rules for any AI agent interacting with, developing, or controlling Roblox Studio through ZXScript.
-
----
-
-## 🚨 Non-Negotiable Core Rules
-
-### Rule 1: Zero Guessing of Game Hierarchy
-- **NEVER** guess or assume Instance paths in Roblox Studio.
-- Before modifying or adding any Instance or Script, you **MUST** run `search_game_tree` or `inspect_instance` on `game.Workspace`, `game.ServerScriptService`, or `game.ReplicatedStorage`.
-- Always verify actual child names before referencing them in code.
-
-### Rule 2: Anti-Loop & Anti-Ban Rate Limit Control
-- **Maximum 3-5 tool calls per turn.**
-- Never execute open-ended monolithic requests in a single prompt (e.g. "Build the entire RPG game").
-- Break work into distinct, testable sub-systems.
-- Conclude each sub-system with a clear summary, and **HALT** to wait for user confirmation.
-- ZXScript utilizes a humanized jitter delay (`1000 - 2200ms`) to safeguard against Cloudflare and AI bot detection filters.
-
-### Rule 3: Modern Luau Standards (Strict Execution)
-- **Asynchronous Task Library:** Use `task.wait()`, `task.spawn()`, `task.delay()`, `task.cancel()`. Deprecated globals like `wait()`, `spawn()`, `delay()` are strictly prohibited.
-- **Nil Safety & Timeouts:** Always wrap instance references in `FindFirstChild()` or `WaitForChild(name, timeout)` with a 5-second timeout to avoid infinite yield crashes.
-- **Error Handling:** Wrap all external services (e.g., `DataStoreService`, `HttpService`, `MarketplaceService`) in `pcall()` or `xpcall()`.
-- **Destructive Commands:** Never run broad `Destroy()` or `ClearAllChildren()` on parent containers without explicit user confirmation.
-- **Raycasting:** Always use `workspace:Raycast()` with `RaycastParams`. Deprecated `FindPartsInRegion3` and `FindPartOnRay` are forbidden.
-
-### Rule 4: Protocol & Syntax for `execute_luau`
-- `execute_luau` **MUST ALWAYS** be formatted inside a dedicated code fence with `###LUA###` markers:
-  ```luau
-  ###LUA###
-  local part = Instance.new("Part")
-  part.Anchored = true
-  part.Parent = workspace
-  return part.Name
-  ###END_LUA###
-  ```
-- **DO NOT** embed Luau code into JSON string payloads (this causes quote-escaping failures and breaks syntax).
-- For Play mode: use `###LUA:Server###` or `###LUA:Client###`.
-- Use `return` for output values (`print()` is not captured by StudioMCP).
-
-### Rule 5: Studio Undo (`Ctrl + Z`) & Automatic Rollback
-- Every Edit mode `execute_luau` call is wrapped with `ChangeHistoryService:TryBeginRecording("ZXScript Action")`.
-- On syntax or execution error, changes automatically roll back (`Cancel`).
-- Users can press `Ctrl + Z` in Roblox Studio at any time to undo agent actions.
-
-### Rule 6: Autonomous Console Auto-Debug & Backups
-- After creating or modifying scripts, run `get_console_output` to verify runtime execution.
-- If runtime errors or missing references are detected, autonomously diagnose and patch the script.
-- Before major refactorings, archive previous script contents into `game.ServerStorage.ZXScript.Backups`.
-
-### Rule 7: Project Memory Persistence
-- Important game architecture, conventions, and state **MUST** be recorded in:
-  `game.ServerStorage.ZXScript.Memory` (ModuleScript).
-- Whenever a major milestone is reached, synchronize persistent notes into this ModuleScript using `multi_edit`.
-- When starting in a new conversation, read `game.ServerStorage.ZXScript.Memory` first.
-
-### Rule 8: Caveman Mode (Always-On Token Efficiency)
-- **Zero Fluff:** Omit all polite greetings, conversational padding, pleasantries, and boilerplate.
-- **Direct & Terse:** Provide high-density, concise explanations. Prioritize action and code diffs over explanations.
-- **100% Quality & Correctness:** Never compromise code syntax, type safety, or completeness. Deliver complete, production-ready code.
-- **Surgical Execution:** Keep edits localized and precise to minimize token consumption and context window churn.
+This document specifies mandatory rules for any AI agent interacting with or developing ZXScript.
 
 ---
 
-## 🛠️ Environment & Compatibility Notes
-- **Roblox Versions:** Supports standard Roblox Studio and **Bloxstrap** installations automatically.
-- **Bridge Port:** `ws://127.0.0.1:17613`
-- **MCP Advertised Tools:** 31 active tools.
-- **Full Rules Document:** See [`docs/RULES.md`](../docs/RULES.md)
+## 1. Clean Architecture & Code Modularity Rules
 
+1. **Strict File Line Limit:** Each file must remain under **500 - 600 lines**. Any file expanding beyond this limit must be split immediately into focused sub-modules.
+2. **Decoupled Configuration & Constants:** Constants, environment variables, and configurations must be maintained in standalone files (`constants.py`, `constants.js`, `config_manager.py`).
+3. **Headless Execution Only:** Never open external CMD terminal windows. Use `CREATE_NO_WINDOW` flags and stream output to the in-page/popup terminal.
+4. **Single Responsibility Principle:** Each module must perform exactly one function (e.g. audio synthesis, camouflage, tool execution, session management).
 
-### Rule 8: Concise & Structured UI Messages (ข้อความกระชับ จัดเรียงสวยงาม)
-- **Zero Fluff & High Density:** All user-facing alerts, banners, and modals in Thai must be concise, omitting conversational filler.
-- **Bullet & Paragraph Structure:** Messages must be separated cleanly with paragraphs and bullets:
-  - `• สถานะ / ปัญหา:` Brief description of what happened.
-  - `• วิธีแก้:` Clear 1-step resolution action.
-- **1-Click Action:** Provide dedicated action buttons (e.g. 1-click Copy Error Log, 1-click Reload) for zero-friction user workflow.
+---
 
-### Rule 9: Real-Time HUD, Sound Chime & 1-Click Chat Insertion Standards
-- **Top Dynamic Island HUD:** Status pill MUST be anchored at top-center (`top: 16px; left: 50%`) with real-time tool state updates (`⚡ รัน: execute_luau…`, `⚡ รอ AI ตอบกลับ…`) and a 1-click mini emergency stop button (`■`).
-- **Localized Luau Error Messages:** Luau execution errors MUST format internal chunk names (`AssistantCommand:XX:`) into Thai (`สคริปต์บรรทัดที่ XX:`) with structured bulleted causes and fix hints.
-- **Synthesized Web Audio Chimes:** Use zero-latency Web Audio API synthesizers for success chimes (warm 2-tone) and error alerts. Configurable via popup bell toggle.
-- **Zero-F5 Auto-Recovery:** Bridge and Studio state reconnects automatically without requiring page reloads (auto-dismissing stale banners).
-- **1-Click Prompt Insertion:** Popup must provide 1-click insertion into the active AI chat's composer.
+## 2. Roblox Studio & Luau Coding Standards (Roblox 0.744+)
+
+1. **Modern Task Library Only:** Never generate `wait()`, `spawn()`, or `delay()`. Always use `task.wait()`, `task.spawn()`, `task.delay()`, and `task.cancel()`.
+2. **Server-Authoritative Game Architecture:** Keep data, combat logic, and persistence on the Server (`ServerScriptService`). Client scripts must only handle user input and local rendering.
+3. **ProfileStore Persistence:** Save player data through ProfileStore or DataStoreService with session locking and `game:BindToClose()` auto-saving.
+4. **Zero Guessing:** Always inspect or search the game tree before editing scripts to guarantee correct instance paths.
+
+---
+
+## 3. Communication & UI Guidelines
+
+1. **Caveman Mode Communication:** Keep Thai messages concise, direct, high-density, and free of conversational fluff.
+2. **Impeccable Style UI:** No emojis on buttons or status indicators. Maintain clean typography, subtle borders, and smooth 60fps transitions.
+3. **No 'Bridge' Terminology in UI:** Never use the word "Bridge" in user-facing UI and alerts (user strongly dislikes this term). Use "Studio", "ระบบเชื่อมต่อ", or "การเชื่อมต่อ" instead. Replace globe icon with developer credit "ZXD44". Ensure action bar is responsive and concise.

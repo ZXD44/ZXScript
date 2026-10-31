@@ -1,0 +1,347 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* modals.css - Modals, setup card, alerts, and toasts */
+
+/* ── toast ─────────────────────────────────────────────────── */
+.zs-toast {
+  position: fixed; right: 18px; top: 80px;
+  max-width: 300px; padding: 9px 13px;
+  background: rgba(30, 30, 36, 0.96); color: #e8e8ec;
+  border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px;
+  font-size: 11.5px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0; transform: translateY(8px); transition: all 0.25s ease;
+}
+.zs-toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── Smart Error & Notification Banner (Roblox Studio Dark Glass) ── */
+.zs-banner {
+  position: fixed !important;
+  top: 18px !important;
+  right: 18px !important;
+  width: 340px !important;
+  max-width: calc(100vw - 36px) !important;
+  box-sizing: border-box !important;
+  padding: 13px 15px !important;
+  border-radius: 14px !important;
+  background: rgba(20, 22, 27, 0.96) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-left: 3.5px solid #00a2ff !important;
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 162, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  font-family: "Builder Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
+  font-size: 12px !important;
+  z-index: 2147483645 !important;
+  animation: zs-banner-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: all 0.2s ease !important;
+}
+
+@keyframes zs-banner-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.zs-banner.zs-shake {
+  animation: zs-shake 0.35s ease-in-out !important;
+}
+@keyframes zs-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.zs-banner.warn {
+  border-left-color: #f59e0b !important;
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 14px rgba(245, 158, 11, 0.2) !important;
+}
+.zs-banner.limit {
+  border-left-color: #e2231a !important;
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 14px rgba(226, 35, 26, 0.25) !important;
+}
+
+.zs-banner-hdr {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 7px !important;
+}
+.zs-banner-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 2px 7px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.02em !important;
+}
+.zs-banner-close {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+  line-height: 1 !important;
+}
+.zs-banner-close:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.zs-banner-t {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin-bottom: 6px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.zs-banner-m {
+  font-size: 11.5px !important;
+  line-height: 1.55 !important;
+  color: #94a3b8 !important;
+  margin-bottom: 10px !important;
+}
+.zs-banner-bullet {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  margin-bottom: 4px !important;
+}
+.zs-bullet-dot {
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: #64748b !important;
+  margin-top: 6px !important;
+  flex: none !important;
+}
+.zs-banner-sol {
+  margin-top: 6px !important;
+  padding: 6px 9px !important;
+  border-radius: 8px !important;
+  background: rgba(0, 162, 255, 0.1) !important;
+  border: 1px solid rgba(0, 162, 255, 0.25) !important;
+  color: #e2e8f0 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+.zs-sol-badge {
+  display: inline-block !important;
+  padding: 1px 5px !important;
+  border-radius: 4px !important;
+  background: #00a2ff !important;
+  color: #ffffff !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  margin-right: 4px !important;
+}
+
+.zs-banner-diag {
+  margin-bottom: 10px !important;
+  font-size: 10.5px !important;
+  color: #64748b !important;
+}
+.zs-banner-diag summary {
+  cursor: pointer !important;
+  user-select: none !important;
+  color: #00a2ff !important;
+  font-weight: 600 !important;
+  padding: 3px 0 !important;
+}
+.zs-banner-diag pre {
+  margin: 6px 0 0 !important;
+  padding: 8px !important;
+  border-radius: 6px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  font-size: 10px !important;
+  font-family: Consolas, monospace !important;
+  overflow-x: auto !important;
+  max-height: 120px !important;
+  color: #e2e8f0 !important;
+}
+
+.zs-banner-acts {
+  display: flex !important;
+  gap: 7px !important;
+}
+.zs-banner-acts button,
+.zs-banner-acts a {
+  flex: 1 !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  transition: all 0.15s ease !important;
+}
+.zs-banner-acts button:hover,
+.zs-banner-acts a:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+.zs-banner-action {
+  background: rgba(0, 162, 255, 0.15) !important;
+  border-color: rgba(0, 162, 255, 0.4) !important;
+  color: #00a2ff !important;
+}
+.zs-banner-action:hover {
+  background: rgba(0, 162, 255, 0.28) !important;
+  border-color: rgba(0, 162, 255, 0.6) !important;
+  color: #ffffff !important;
+}
+.zs-banner-copy {
+  background: rgba(0, 176, 111, 0.12) !important;
+  border-color: rgba(0, 176, 111, 0.35) !important;
+  color: #00b06f !important;
+}
+.zs-banner-copy:hover {
+  background: rgba(0, 176, 111, 0.22) !important;
+  border-color: rgba(0, 176, 111, 0.5) !important;
+  color: #ffffff !important;
+}
+
+html.zs-light .zs-banner {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 12px rgba(0, 162, 255, 0.1) !important;
+  color: #1e293b !important;
+}
+html.zs-light .zs-banner-t { color: #0f172a !important; }
+html.zs-light .zs-banner-m { color: #475569 !important; }
+html.zs-light .zs-banner-tag { background: rgba(0, 0, 0, 0.05) !important; border-color: rgba(0, 0, 0, 0.08) !important; color: #64748b !important; }
+html.zs-light .zs-banner-close { color: #94a3b8 !important; }
+html.zs-light .zs-banner-close:hover { background: rgba(0, 0, 0, 0.06) !important; color: #0f172a !important; }
+html.zs-light .zs-banner-sol { background: rgba(0, 162, 255, 0.08) !important; border-color: rgba(0, 162, 255, 0.2) !important; color: #1e293b !important; }
+html.zs-light .zs-banner-acts button,
+html.zs-light .zs-banner-acts a { background: rgba(0, 0, 0, 0.05) !important; border-color: rgba(0, 0, 0, 0.08) !important; color: #334155 !important; }
+html.zs-light .zs-banner-acts button:hover,
+html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !important; color: #0f172a !important; }
+
+/* ── first-time onboarding card (bridge missing; pinned top-right) ───────── */
+#zs-setup {
+  position: fixed;
+  top: 18px; right: 18px;
+  width: 288px;
+  padding: 0 0 14px;
+  background: #161618;
+  color: #ececee;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+  font-size: 11.5px;
+  z-index: 2147483600;
+  animation: zs-pop 0.2s ease-out;
+}
+#zs-setup-head {
+  display: flex; align-items: baseline; gap: 7px;
+  padding: 12px 15px 11px; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+#zs-setup-logo { font-weight: 700; font-size: 13px; letter-spacing: -0.1px; color: #f4f4f6; }
+#zs-setup-tag { font-size: 10.5px; font-weight: 500; color: #7a7a82; }
+#zs-setup-sub { color: #9a9aa2; font-size: 11.5px; line-height: 1.5; margin: 12px 15px 12px; }
+/* the steps ARE a real sequence, so numbered markers earn their place here */
+#zs-setup-steps {
+  list-style: none; margin: 0 15px 13px; padding: 0;
+  counter-reset: zs-step; font-size: 11.5px; line-height: 1.4;
+}
+#zs-setup-steps li {
+  counter-increment: zs-step;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0; color: #cacacf;
+}
+#zs-setup-steps li + li { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+#zs-setup-steps li::before {
+  content: counter(zs-step);
+  flex: none; font-size: 11px; font-weight: 600; color: #7a7a82;
+  min-width: 14px;
+}
+#zs-setup-steps code {
+  background: rgba(255, 255, 255, 0.08); padding: 0 4px; border-radius: 4px;
+  font-family: ui-monospace, "Cascadia Mono", monospace; font-size: 10.5px;
+}
+.zs-setup-copy-row { display: flex; gap: 6px; margin: 0 15px 10px; }
+.zs-setup-copy-row input {
+  flex: 1; min-width: 0;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px; color: #b8b8bf; font-size: 10px;
+  padding: 6px 8px; font-family: ui-monospace, "Cascadia Mono", monospace;
+  outline: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#zs-setup-copy {
+  background: rgba(255, 255, 255, 0.09); color: #ededf0;
+  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 7px;
+  padding: 6px 11px; font-size: 11px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; transition: background 0.13s ease;
+}
+#zs-setup-copy:hover { background: rgba(255, 255, 255, 0.15); }
+#zs-setup-video {
+  display: block; margin: 0 15px 10px; padding: 8px; box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.05); color: #e4e4e8;
+  border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
+  font-size: 11.5px; font-weight: 600; text-align: center; text-decoration: none;
+  transition: background 0.13s ease;
+}
+#zs-setup-video:hover { background: rgba(255, 255, 255, 0.09); }
+#zs-setup-dismiss {
+  display: block; width: calc(100% - 30px); margin: 0 15px; padding: 8px;
+  border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent; color: #a0a0a8;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: background 0.13s ease;
+}
+#zs-setup-dismiss:hover { background: rgba(255, 255, 255, 0.06); }
+
+/* ── In-page Security Modal Dialog (Red Dragon Pixel Art) ── */
+.zs-modal-backdrop {
+  position: fixed; inset: 0; z-index: 9999999;
+  background: rgba(10, 3, 8, 0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; animation: zs-modal-fade 0.15s ease forwards;
+}
+@keyframes zs-modal-fade { to { opacity: 1; } }
+.zs-modal-card {
+  width: 90%; max-width: 420px; background: #150611;
+  border: 2px solid #731738; border-radius: 4px;
+  padding: 18px; box-shadow: 4px 4px 0 #000, 0 0 24px rgba(225, 29, 72, 0.25);
+  color: #fff1f2; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  transform: translateY(4px); animation: zs-modal-pop 0.15s ease forwards;
+  image-rendering: pixelated;
+}
+@keyframes zs-modal-pop { to { transform: translateY(0); } }
+.zs-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #4a1024; padding-bottom: 6px; }
+.zs-modal-tag { font-size: 9px; font-weight: 700; font-family: monospace; text-transform: uppercase; letter-spacing: 0.5px; color: #f43f5e; background: #27091d; padding: 2px 8px; border: 1px solid #731738; }
+.zs-modal-close { background: #27091d; border: 1px solid #731738; color: #fda4af; font-size: 14px; cursor: pointer; padding: 1px 6px; line-height: 1; }
+.zs-modal-close:hover { color: #ffffff; background: #e11d48; border-color: #ff708f; }
+.zs-modal-title { font-size: 14px; font-weight: 700; color: #fff1f2; margin-bottom: 6px; text-shadow: 1px 1px 0 #4c0519; }
+.zs-modal-body { font-size: 11.5px; color: #fecdd3; line-height: 1.45; margin-bottom: 12px; }
+.zs-modal-info { background: #0d040a; border: 1px solid #4a1024; border-radius: 2px; padding: 8px 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; box-shadow: 1px 1px 0 #000; }
+.zs-modal-info-row { display: flex; justify-content: space-between; font-size: 10.5px; }
+.zs-modal-info-label { color: #9f7584; font-family: monospace; font-size: 9px; }
+.zs-modal-info-val { color: #fecdd3; font-family: Consolas, monospace; font-size: 10px; font-weight: 600; }
+.zs-modal-log { background: #080206; border: 1px solid #5a142c; border-radius: 2px; padding: 8px; margin-bottom: 12px; max-height: 110px; overflow-y: auto; font-family: Consolas, monospace; font-size: 9.5px; color: #fda4af; line-height: 1.4; white-space: pre-wrap; box-shadow: inset 0 0 8px rgba(0,0,0,0.8); }
+.zs-modal-log .log-ok { color: #34d399; font-weight: 600; }
+.zs-modal-log .log-err { color: #f87171; font-weight: 600; }
+.zs-modal-log .log-info { color: #f43f5e; }
+.zs-modal-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.zs-modal-btn { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 2px; cursor: pointer; transition: all 0.1s ease; border: 1px solid transparent; image-rendering: pixelated; }
+.zs-modal-btn.secondary { background: #240a1b; color: #fecdd3; border: 1px solid #5a142c; box-shadow: 1px 1px 0 #000; }
+.zs-modal-btn.secondary:hover { background: #38102a; border-color: #f43f5e; color: #ffffff; }
+.zs-modal-btn.primary { background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%); color: #ffffff; border: 1px solid #ff708f; box-shadow: 0 2px 0 #4c0519; text-shadow: 1px 1px 0 #000; }
+.zs-modal-btn.primary:hover { background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%); }
+.zs-modal-btn.primary:active { transform: translateY(1px); box-shadow: none; }
+.zs-modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }

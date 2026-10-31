@@ -165,7 +165,7 @@ global.getComputedStyle = () => ({});
 
 // ── Load Claude Provider ────────────────────────────────────────────────────
 const P = new Function(
-  fs.readFileSync(__dirname + "/providers/claude.js", "utf8") + "; return ZSProvider;"
+  fs.readFileSync(__dirname + "/../providers/claude.js", "utf8") + "; return ZSProvider;"
 )();
 
 const ok = (name, cond) => {

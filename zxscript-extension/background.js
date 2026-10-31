@@ -16,7 +16,7 @@ const URL = `ws://127.0.0.1:${PORT}`;
 const PROVIDER_URLS = ["https://chat.deepseek.com/*", "https://deepseek.com/*", "https://chatgpt.com/*", "https://chat.openai.com/*", "https://gemini.google.com/*", "https://www.kimi.ai/*", "https://kimi.ai/*", "https://chat.z.ai/*", "https://z.ai/*", "https://www.z.ai/*", "https://chat.qwen.ai/*", "https://arena.ai/*", "https://www.meta.ai/*", "https://meta.ai/*", "https://claude.ai/*"];
 
 const RECONNECT_MIN = 1000;
-const RECONNECT_MAX = 5000;
+const RECONNECT_MAX = 15000;
 const HEARTBEAT_MS = 10000;
 // If no message (incl. pong) arrives within this window while we believe we're
 // connected, the socket is half-open: force a reconnect instead of letting
@@ -56,18 +56,52 @@ function log(...a) {
   console.log("[zs-bg]", ...a);
 }
 
+function checkBridgeRunning() {
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "status" }, (resp) => {
+        if (chrome.runtime.lastError || !resp) {
+          resolve(null);
+        } else {
+          resolve(resp.running === true);
+        }
+      });
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+let isConnecting = false;
+
 // ── WebSocket lifecycle ─────────────────────────────────────────────────
-function connect() {
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+async function connect() {
+  if (isConnecting || (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))) {
     return;
   }
   clearTimeout(reconnectTimer);
+  isConnecting = true;
+
   try {
+    // If native messaging host is available, verify bridge is active first.
+    // This avoids Chromium logging net::ERR_CONNECTION_REFUSED to chrome://extensions.
+    const isRunning = await checkBridgeRunning();
+    if (isRunning === false) {
+      if (connected) {
+        connected = false;
+        broadcastStatus();
+      }
+      scheduleReconnect();
+      return;
+    }
+
     ws = new WebSocket(URL);
   } catch (e) {
     log("WebSocket ctor failed", e);
     scheduleReconnect();
     return;
+  } finally {
+    isConnecting = false;
   }
 
   ws.onopen = () => {
@@ -104,8 +138,7 @@ function connect() {
   };
 
   ws.onerror = () => {
-    // onclose will follow; nothing to do here but avoid an unhandled error.
-    try { ws.close(); } catch {}
+    // Expected when bridge (start.bat) is offline. onclose handles backoff.
   };
 }
 
@@ -392,24 +425,39 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         try {
           chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "start" }, (resp) => {
             if (chrome.runtime.lastError || !resp || !resp.ok) {
-              chrome.tabs.create({ url: "zxscript://start" }, (t) => {
-                if (t && t.id) setTimeout(() => chrome.tabs.remove(t.id).catch(() => {}), 1500);
-              });
-              sendResponse({ ok: true, via: "protocol", message: "เปิดผ่าน zxscript:// protocol สำเร็จ" });
+              const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : (resp && resp.error) || "Native host did not respond";
+              log("native_start failed:", err);
+              // Do NOT open zxscript://start via chrome.tabs.create: that triggers the browser's native
+              // "เปิด Windows Command Processor ไหม" dialog. Return status so UI shows our custom CSS modal.
+              sendResponse({ ok: false, error: err, needModal: true });
             } else {
               setTimeout(connect, 1200);
-              sendResponse(resp);
+              sendResponse({ ok: true, running: true, message: "Bridge เริ่มทำงานเรียบร้อยแล้ว", ...resp });
             }
           });
         } catch (e) {
-          chrome.tabs.create({ url: "zxscript://start" });
-          sendResponse({ ok: true, via: "protocol" });
+          sendResponse({ ok: false, error: String(e), needModal: true });
         }
         break;
       }
       case "native_stop": {
+        if (ws) {
+          try { ws.close(); } catch {}
+          ws = null;
+        }
+        connected = false;
+        mcpAlive = false;
+        studioConnected = null;
+        studioApp = null;
+        studioProc = null;
+        serversCache = [];
+        stopHeartbeat();
+        failAllPending("bridge stopped by user");
+        broadcastStatus();
         chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "stop" }, (resp) => {
-          sendResponse(resp || { ok: false, error: chrome.runtime.lastError ? chrome.runtime.lastError.message : "Error" });
+          connected = false;
+          broadcastStatus();
+          sendResponse(resp || { ok: true, running: false });
         });
         break;
       }

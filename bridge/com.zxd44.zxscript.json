@@ -1,12 +1,12 @@
 {
   "name": "com.zxd44.zxscript",
   "description": "ZXScript Native Bridge Host",
-  "path": "C:\\Users\\ZirconX\\Documents\\New folder\\bridge\\native_host.bat",
+  "path": "C:\\Users\\ZirconX\\Documents\\New folder\\bridge\\native_host.exe",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://cbmadojiljkhmecogmghiaeclhkjinak/",
     "chrome-extension://bcamodijjlhkemocmghgaicehljknika/",
-    "edge-extension://cbmadojiljkhmecogmghiaeclhkjinak/",
-    "edge-extension://bcamodijjlhkemocmghgaicehljknika/"
+    "chrome-extension://cbmadojiljkhmecogmghiaeclhkjinak/",
+    "edge-extension://bcamodijjlhkemocmghgaicehljknika/",
+    "edge-extension://cbmadojiljkhmecogmghiaeclhkjinak/"
   ]
 }

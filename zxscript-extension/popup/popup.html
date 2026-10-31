@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="popup-modal.css">
+</head>
+<body>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="title-group">
+      <div class="logo-container">
+        <img src="../icons/icon-48.png" width="18" height="18" class="dragon-avatar" alt="Red Dragon" />
+      </div>
+      <span class="title">ZX<span class="title-badge">SCRIPT</span></span>
+      <span id="ver" class="ver"></span>
+    </div>
+    <div class="header-actions">
+      <button id="btn-sound-toggle" class="btn-sound-toggle" title="เปิด/ปิดเสียงแจ้งเตือน">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      </button>
+      <span class="credit-badge" title="ผู้พัฒนา ZXD44">
+        <svg width="9" height="9" viewBox="0 0 10 10" fill="currentColor" style="image-rendering:pixelated;"><path d="M4 0h2v2H4zM3 2h4v2H3zM2 4h6v2H2zM1 6h8v2H1zM2 8h6v2H2z" fill="#f43f5e"/></svg>
+        <span>ZXD44</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- STATUS MONITOR SCREEN -->
+  <div class="screen-box">
+    <div class="screen-header">
+      <span class="screen-title">สถานะระบบ</span>
+      <div class="dot-wrap">
+        <span id="screen-dot" class="dot"></span>
+      </div>
+    </div>
+
+    <div id="screen-state" class="status-main">กำลังตรวจสอบสถานะ…</div>
+
+    <div class="screen-grid">
+      <div class="screen-row">
+        <span class="screen-label">สถานะเซิร์ฟเวอร์</span>
+        <span id="val-bridge" class="screen-val">127.0.0.1:17613</span>
+      </div>
+      <div class="screen-row">
+        <span class="screen-label">Roblox Studio</span>
+        <span id="val-studio" class="screen-val">Bloxstrap MCP</span>
+      </div>
+      <div class="screen-row">
+        <span class="screen-label">คำสั่งพร้อมใช้งาน</span>
+        <span id="val-tools" class="screen-val">0 รายการ</span>
+      </div>
+      <div class="screen-row">
+        <span class="screen-label">เริ่มตอนเปิดเครื่อง</span>
+        <span id="val-autostart" class="screen-val">พร้อมใช้งาน</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNNER CONTROLS -->
+  <div class="runner-controls">
+    <button id="btn-run-bridge" class="btn-primary">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      เปิดการเชื่อมต่อ
+    </button>
+
+    <div id="online-actions" class="btn-row" style="display: none;">
+      <button id="btn-stop-bridge" class="btn-stop">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+        หยุดทำงาน
+      </button>
+      <button id="btn-restart-bridge" class="btn-restart">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        รีสตาร์ต
+      </button>
+      <button id="btn-refresh-state" class="btn-refresh">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        รีเฟรช
+      </button>
+    </div>
+
+    <label class="autostart-toggle">
+      <span>เริ่มทำงานอัตโนมัติเมื่อเปิดเครื่อง</span>
+      <div class="switch">
+        <input type="checkbox" id="chk-autostart" />
+        <span class="slider"></span>
+      </div>
+    </label>
+  </div>
+
+  <!-- SEGMENTED NAVIGATION -->
+  <div class="nav-seg">
+    <button class="seg-btn active" data-pane="pane-ai">โมเดล AI</button>
+    <button class="seg-btn" data-pane="pane-tools">คำสั่ง MCP</button>
+    <button class="seg-btn" data-pane="pane-prompt">คำสั่งระบบ</button>
+  </div>
+
+  <!-- PANE 1: AI MODELS (3x3 Grid) -->
+  <div id="pane-ai" class="seg-pane active">
+    <div class="section-hint">
+      <span>โมเดล AI ที่รองรับ (9 แพลตฟอร์ม)</span>
+      <span>คลิกเพื่อสลับ/เปิดแท็บ</span>
+    </div>
+    <div class="ai-grid">
+      <!-- 1. DeepSeek -->
+      <div class="ai-card" data-url="https://chat.deepseek.com/" data-host="chat.deepseek.com" title="DeepSeek">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">DeepSeek</span>
+          <span class="ai-card-sub">V3 / R1</span>
+        </div>
+      </div>
+
+      <!-- 2. ChatGPT -->
+      <div class="ai-card" data-url="https://chatgpt.com/" data-host="chatgpt.com" title="ChatGPT">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">ChatGPT</span>
+          <span class="ai-card-sub">4o / o1</span>
+        </div>
+      </div>
+
+      <!-- 3. Claude -->
+      <div class="ai-card" data-url="https://claude.ai/new" data-host="claude.ai" title="Claude">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Claude</span>
+          <span class="ai-card-sub">3.7 Sonnet</span>
+        </div>
+      </div>
+
+      <!-- 4. Gemini -->
+      <div class="ai-card" data-url="https://gemini.google.com/" data-host="gemini.google.com" title="Gemini">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.627 12 12 0-6.373 5.627-12 12-12-6.373 0-12-5.373-12-12z"/></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Gemini</span>
+          <span class="ai-card-sub">Flash / Pro</span>
+        </div>
+      </div>
+
+      <!-- 5. Qwen -->
+      <div class="ai-card" data-url="https://chat.qwen.ai/" data-host="chat.qwen.ai" title="Qwen">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Qwen</span>
+          <span class="ai-card-sub">2.5 Coder</span>
+        </div>
+      </div>
+
+      <!-- 6. Kimi -->
+      <div class="ai-card" data-url="https://kimi.ai/" data-host="kimi.ai" title="Kimi">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Kimi</span>
+          <span class="ai-card-sub">K1.5 Long</span>
+        </div>
+      </div>
+
+      <!-- 7. Z.ai / GLM -->
+      <div class="ai-card" data-url="https://chat.z.ai/" data-host="chat.z.ai" title="Z.ai / GLM">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Z.ai / GLM</span>
+          <span class="ai-card-sub">GLM-4 / Plus</span>
+        </div>
+      </div>
+
+      <!-- 8. Meta AI -->
+      <div class="ai-card" data-url="https://www.meta.ai/" data-host="meta.ai" title="Meta AI">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.26-8-12.355-8-5.096 0-5.096 8 0 8 5.095 0 7.26-8 12.355-8z"></path></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Meta AI</span>
+          <span class="ai-card-sub">Llama 3.3</span>
+        </div>
+      </div>
+
+      <!-- 9. Arena -->
+      <div class="ai-card" data-url="https://arena.ai/" data-host="arena.ai" title="Arena">
+        <div class="ai-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 2h12v7a6 6 0 0 1-12 0V2z"></path></svg>
+        </div>
+        <div class="ai-card-info">
+          <span class="ai-card-name">Arena</span>
+          <span class="ai-card-sub">Direct Eval</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANE 2: TOOLS (Roblox Studio MCP) -->
+  <div id="pane-tools" class="seg-pane">
+    <div class="search-box-wrap">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="tool-search" class="search-box" placeholder="ค้นหาคำสั่ง เช่น execute_luau, multi_edit..." />
+    </div>
+    <div id="tools-box" class="tools-list">
+      <!-- Injected by popup.js -->
+    </div>
+  </div>
+
+  <!-- PANE 3: PROMPT / CAVEMAN -->
+  <div id="pane-prompt" class="seg-pane">
+    <div style="margin-bottom: 7px;">
+      <select id="sel-template" class="sel-box">
+        <option value="">-- เลือกเทมเพลตคำสั่งระบบ --</option>
+        <option value="caveman">Caveman Mode (ประหยัด token สูงสุด)</option>
+        <option value="rules">Rules (ความปลอดภัย & ป้องกันการแบน)</option>
+        <option value="rest">Memory Sync (บันทึกลง ServerStorage)</option>
+        <option value="architecture">Architecture (Modular Service Lifecycle)</option>
+        <option value="combat">Combat & Anti-Exploit (Server-Authoritative)</option>
+        <option value="parallel">Parallel Luau & Multithreaded Actors</option>
+        <option value="datastore">Data Persistence (ProfileStore & Session Lock)</option>
+        <option value="procedural">Procedural World Generation</option>
+        <option value="animation">Animations & Procedural IK</option>
+        <option value="leaderstats">Leaderstats & Currency</option>
+        <option value="inventory">Inventory & Shop UI</option>
+        <option value="npc_ai">NPC Pathfinding & State Machine</option>
+      </select>
+    </div>
+
+    <textarea id="prompt-input" class="prompt-box" placeholder="คำสั่งเพิ่มเติมสำหรับส่งให้ AI ทุกรอบ..."></textarea>
+    
+    <div class="btn-preset-row">
+      <button id="btn-rules">กฎเหล็ก</button>
+      <button id="btn-caveman">Caveman</button>
+      <button id="btn-rest">บันทึกงาน</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <button id="btn-insert-chat" class="btn-primary" style="justify-content: center; font-size: 11px; padding: 7px 12px; cursor: pointer;">
+        แทรกลงในแชททันที
+      </button>
+      <button id="btn-save-prompt" style="justify-content: center; font-size: 10px; padding: 6px 10px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm);">
+        บันทึกเป็นคำสั่งเริ่มต้น
+      </button>
+    </div>
+  </div>
+
+  <!-- Launch Modal with Live Logs -->
+  <div id="zs-popup-modal" class="zs-modal-backdrop" style="display: none;">
+    <div class="zs-modal-card">
+      <div class="zs-modal-header">
+        <span class="zs-modal-tag">Studio</span>
+        <button id="zs-modal-close-btn" class="zs-modal-close" title="Close">&times;</button>
+      </div>
+      <div class="zs-modal-title">เชื่อมต่อ Roblox Studio</div>
+      <div class="zs-modal-body">
+        เริ่มระบบเชื่อมต่อในพื้นหลัง (Headless) เพื่อสั่งการ Roblox Studio
+      </div>
+      <div class="zs-modal-info">
+        <div class="zs-modal-info-row">
+          <span class="zs-modal-info-label">Server</span>
+          <span class="zs-modal-info-val">127.0.0.1:17613</span>
+        </div>
+        <div class="zs-modal-info-row">
+          <span class="zs-modal-info-label">Mode</span>
+          <span class="zs-modal-info-val">Headless (No CMD window)</span>
+        </div>
+      </div>
+      <div id="zs-modal-log" class="zs-modal-log" style="display:none;"></div>
+      <div class="zs-modal-actions">
+        <button id="zs-modal-cancel-btn" class="zs-modal-btn secondary">ยกเลิก</button>
+        <button id="zs-modal-copy-btn" class="zs-modal-btn secondary">คัดลอกคำสั่ง</button>
+        <button id="zs-modal-start-btn" class="zs-modal-btn primary">เปิดการเชื่อมต่อ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-msg" class="feedback-msg"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

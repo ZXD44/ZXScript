@@ -56,14 +56,14 @@ function render(s) {
     ? (ok ? "เชื่อมต่อแล้ว — Studio พร้อมทำงาน"
         : studioOff ? `รอการเชื่อมต่อ Studio${DOTS} (เปิด Assistant &gt; MCP)`
         : `กำลังเชื่อมต่อ Studio MCP${DOTS}`)
-    : "Bridge ออฟไลน์";
+    : "ออฟไลน์";
 
   valBridge.textContent = s.connected ? "ออนไลน์" : "ออฟไลน์";
   valBridge.style.color = s.connected ? "#10b981" : "#71717a";
 
   valStudio.textContent = s.connected
     ? (ok ? "พร้อมทำงาน" : studioOff ? "รอเปิด Place" : "กำลังโหลด")
-    : "รอเปิด Bridge";
+    : "รอเชื่อมต่อ";
   valStudio.style.color = ok ? "#10b981" : "#f59e0b";
 
   const count = s.tools || (s.connected ? toolsList.length : 0);
@@ -90,23 +90,162 @@ function refresh() {
   });
 }
 
+// ── Bridge Launch Modal with Live Logs ──────────────────────────────────────
+const popupModal = document.getElementById("zs-popup-modal");
+const modalLogBox = document.getElementById("zs-modal-log");
+const modalStartBtn = document.getElementById("zs-modal-start-btn");
+const modalCloseBtn = document.getElementById("zs-modal-close-btn");
+const modalCancelBtn = document.getElementById("zs-modal-cancel-btn");
+const modalCopyBtn = document.getElementById("zs-modal-copy-btn");
+let modalLogTimer = null;
+
+if (modalCopyBtn) {
+  modalCopyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText("start.bat").then(() => {
+      modalCopyBtn.textContent = "คัดลอกสำเร็จ";
+      showToast("คัดลอก start.bat แล้ว");
+      setTimeout(() => {
+        if (modalCopyBtn) modalCopyBtn.textContent = "คัดลอก start.bat";
+      }, 2000);
+    });
+  });
+}
+
+function showPopupModal() {
+  if (popupModal) {
+    popupModal.style.display = "flex";
+    if (modalLogBox) {
+      modalLogBox.style.display = "none";
+      modalLogBox.innerHTML = "";
+    }
+    if (modalStartBtn) {
+      modalStartBtn.disabled = false;
+      modalStartBtn.textContent = "เปิดการเชื่อมต่อ";
+    }
+    if (modalLogTimer) {
+      clearInterval(modalLogTimer);
+      modalLogTimer = null;
+    }
+  }
+}
+
+function hidePopupModal() {
+  if (popupModal) popupModal.style.display = "none";
+  if (modalLogTimer) {
+    clearInterval(modalLogTimer);
+    modalLogTimer = null;
+  }
+}
+
+function addModalLog(text, cls) {
+  if (!modalLogBox) return;
+  modalLogBox.style.display = "";
+  const line = document.createElement("div");
+  if (cls) line.className = cls;
+  const ts = new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  line.textContent = `[${ts}] ${text}`;
+  modalLogBox.appendChild(line);
+  modalLogBox.scrollTop = modalLogBox.scrollHeight;
+}
+
+if (modalCloseBtn) modalCloseBtn.addEventListener("click", hidePopupModal);
+if (modalCancelBtn) modalCancelBtn.addEventListener("click", hidePopupModal);
+if (popupModal) {
+  popupModal.addEventListener("click", (e) => {
+    if (e.target === popupModal) hidePopupModal();
+  });
+}
+
+function startBridgePolling(onDone) {
+  let polls = 0;
+  if (modalLogTimer) clearInterval(modalLogTimer);
+  modalLogTimer = setInterval(() => {
+    polls++;
+    chrome.runtime.sendMessage({ type: "status" }, (s) => {
+      if (s && s.connected) {
+        clearInterval(modalLogTimer);
+        modalLogTimer = null;
+        addModalLog("เชื่อมต่อสำเร็จ (34 เครื่องมือพร้อมใช้งาน)", "log-ok");
+        if (modalStartBtn) {
+          modalStartBtn.disabled = false;
+          modalStartBtn.textContent = "เชื่อมต่อแล้ว";
+        }
+        showToast("เชื่อมต่อเรียบร้อยแล้ว");
+        setTimeout(() => {
+          hidePopupModal();
+          refresh();
+          if (onDone) onDone();
+        }, 700);
+      }
+    });
+    if (polls > 14) {
+      clearInterval(modalLogTimer);
+      modalLogTimer = null;
+      addModalLog("หมดเวลาเชื่อมต่อ: ตรวจสอบสถานะแล้วลองใหม่อีกครั้ง", "log-err");
+      if (modalStartBtn) {
+        modalStartBtn.disabled = false;
+        modalStartBtn.textContent = "ลองอีกครั้ง";
+      }
+    }
+  }, 1200);
+}
+
+if (modalStartBtn) {
+  modalStartBtn.addEventListener("click", () => {
+    modalStartBtn.disabled = true;
+    modalStartBtn.textContent = "กำลังเปิด...";
+
+    // 1. Check if already connected
+    chrome.runtime.sendMessage({ type: "status" }, (st) => {
+      if (st && st.connected) {
+        addModalLog("เชื่อมต่ออยู่แล้ว (พร้อมใช้งาน)", "log-ok");
+        modalStartBtn.disabled = false;
+        modalStartBtn.textContent = "เชื่อมต่อแล้ว";
+        setTimeout(() => { hidePopupModal(); refresh(); }, 600);
+        return;
+      }
+
+      addModalLog("กำลังส่งคำสั่งเชื่อมต่อในเบื้องหลัง...", "log-info");
+      chrome.runtime.sendMessage({ type: "native_start" }, (resp) => {
+        if (resp && resp.ok) {
+          addModalLog("ระบบเชื่อมต่อเริ่มทำงานแล้ว (PID: " + (resp.pid || "Headless") + ")", "log-ok");
+          startBridgePolling();
+        } else {
+          const err = (resp && resp.error) || "Native host did not respond";
+          addModalLog("Host: " + err, "log-err");
+          // Fallback to Protocol Handler immediately
+          addModalLog("กำลังสลับไปเปิดผ่าน Windows Protocol (zxscript://)...", "log-info");
+          const link = document.createElement("a");
+          link.href = "zxscript://start";
+          link.style.display = "none";
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => link.remove(), 1000);
+          addModalLog("หากเบราว์เซอร์แจ้งเตือน ให้กดยืนยันเพื่อเริ่มการเชื่อมต่อ", "log-ok");
+          startBridgePolling();
+        }
+      });
+    });
+  });
+}
+
 // ── Runner Controls ─────────────────────────────────────────────────────────
 document.getElementById("btn-run-bridge").addEventListener("click", () => {
-  const btn = document.getElementById("btn-run-bridge");
-  btn.textContent = "กำลังเริ่มการทำงาน...";
-  chrome.runtime.sendMessage({ type: "native_start" }, () => {
-    showToast("เริ่มการทำงานแล้ว");
-    setTimeout(() => {
-      btn.textContent = "เริ่มการทำงาน Bridge";
-      refresh();
-    }, 1200);
-  });
+  showPopupModal();
 });
 
 document.getElementById("btn-stop-bridge").addEventListener("click", () => {
+  const btn = document.getElementById("btn-stop-bridge");
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = `กำลังหยุด...`;
+  btn.disabled = true;
   chrome.runtime.sendMessage({ type: "native_stop" }, () => {
-    showToast("หยุดการทำงานแล้ว");
-    setTimeout(refresh, 800);
+    showToast("หยุดการทำงานเรียบร้อย");
+    setTimeout(() => {
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
+      refresh();
+    }, 500);
   });
 });
 
@@ -188,33 +327,6 @@ document.querySelectorAll(".ai-card, .ai-btn").forEach((btn) => {
         chrome.tabs.create({ url: targetUrl });
       }
     });
-  });
-});
-
-document.getElementById("btn-open-overlay").addEventListener("click", () => {
-  const supported = [
-    "chat.deepseek.com", "deepseek.com",
-    "chatgpt.com", "chat.openai.com",
-    "claude.ai",
-    "gemini.google.com",
-    "chat.qwen.ai",
-    "kimi.ai", "www.kimi.ai",
-    "chat.z.ai", "z.ai", "www.z.ai",
-    "meta.ai", "www.meta.ai",
-    "arena.ai"
-  ];
-  chrome.tabs.query({}, (tabs) => {
-    const match = tabs.find((t) => t.url && supported.some((h) => t.url.includes(h)));
-    if (match) {
-      chrome.tabs.update(match.id, { active: true }, () => {
-        chrome.tabs.sendMessage(match.id, { type: "zs-open-menu" }, () => {
-          void chrome.runtime.lastError;
-        });
-      });
-      showToast("เปิดแถบควบคุมแล้ว");
-    } else {
-      chrome.tabs.create({ url: "https://chat.deepseek.com/" });
-    }
   });
 });
 
@@ -302,7 +414,7 @@ if (btnRest) {
     chrome.storage.local.set({ zsCustomPrompt: REST_PRESET }, () => {
       chrome.runtime.sendMessage({ type: "sync_memory" }, (res) => {
         if (res && res.ok) {
-          showToast("✅ บันทึก Memory ของ Place ลงดิสก์สำเร็จ");
+          showToast("บันทึก Memory ของ Place ลงดิสก์สำเร็จ");
         } else {
           showToast("เปิดคำสั่งพักผ่อน/บันทึกแล้ว");
         }
@@ -361,14 +473,14 @@ const btnSound = document.getElementById("btn-sound-toggle");
 if (btnSound) {
   chrome.storage.local.get({ soundEnabled: true }, (res) => {
     const on = res.soundEnabled !== false;
-    btnSound.textContent = on ? "🔔" : "🔕";
+    btnSound.style.opacity = on ? "1" : "0.35";
     btnSound.title = on ? "เสียงแจ้งเตือน: เปิดอยู่ (คลิกเพื่อปิด)" : "เสียงแจ้งเตือน: ปิดอยู่ (คลิกเพื่อเปิด)";
   });
   btnSound.addEventListener("click", () => {
     chrome.storage.local.get({ soundEnabled: true }, (res) => {
       const next = !res.soundEnabled;
       chrome.storage.local.set({ soundEnabled: next }, () => {
-        btnSound.textContent = next ? "🔔" : "🔕";
+        btnSound.style.opacity = next ? "1" : "0.35";
         btnSound.title = next ? "เสียงแจ้งเตือน: เปิดอยู่ (คลิกเพื่อปิด)" : "เสียงแจ้งเตือน: ปิดอยู่ (คลิกเพื่อเปิด)";
         showToast(next ? "เปิดเสียงแจ้งเตือนแล้ว" : "ปิดเสียงแจ้งเตือนแล้ว");
         chrome.tabs.query({}, (tabs) => {
@@ -433,14 +545,14 @@ function sendInsert(tabId, text) {
   chrome.tabs.sendMessage(tabId, { type: "zs-insert-text", text }, (res) => {
     const err = chrome.runtime.lastError;
     if (err) {
-      showToast("⚠️ กรุณารีเฟรช (F5) หน้าเว็บแชท AI ก่อนใช้งานปุ่มนี้");
+      showToast("กรุณารีเฟรช (F5) หน้าเว็บแชท AI ก่อนใช้งาน");
       return;
     }
     if (res && res.ok === false) {
       showToast("แทรกไม่สำเร็จ: " + (res.error || "เกิดข้อผิดพลาด"));
       return;
     }
-    showToast("⚡ แทรกข้อความลงในแชทสำเร็จ!");
+    showToast("แทรกข้อความลงในแชทสำเร็จ");
     setTimeout(() => {
       try { window.close(); } catch {}
     }, 450);

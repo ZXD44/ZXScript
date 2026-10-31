@@ -3,23 +3,26 @@
 > **Author & Maintainer:** [zxd44](https://github.com/zxd44) (ZirconX)  
 > **Website:** [www.zirconx.xyz](https://www.zirconx.xyz)  
 > **Contact:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)  
-> **Version:** `0.0.1` | **License:** GPL-3.0
+> **Version:** `0.0.3` | **License:** GPL-3.0
 
 ---
 
-## 🏛️ System Topology
+## System Topology
 
 ```text
 [ Web AI: DeepSeek / ChatGPT / Claude / Gemini / Qwen / Kimi / Z.ai / Meta AI / Arena ]
                          │
-                         ▼ DOM Content Scripts & Parser (###LUA### detection)
+                         ▼ DOM Content Scripts & Modular Parser
              [ zxscript-extension (Manifest v3) ]
                          │
                          ▼ WebSocket (ws://127.0.0.1:17613)
-                [ ZXScript Bridge ] (bridge/bridge.py)
-                   ├── Luau Modernizer (wait -> task.wait)
-                   ├── Studio Ctrl+Z Recorder (ChangeHistoryService)
-                   └── Tree Pruner (CorePackages filter)
+                [ ZXScript Bridge ] (Headless CREATE_NO_WINDOW)
+                   ├── constants.py (System paths, ANSI, Logger)
+                   ├── config_manager.py (Atomic config.json manager)
+                   ├── mcp_server.py (JSON-RPC MCP client supervisor)
+                   ├── studio_watcher.py (Studio process monitor & zombie cleaner)
+                   ├── tool_dispatcher.py (Luau modernizer & ChangeHistoryService)
+                   └── bridge_server.py (WebSocket handler & broadcaster)
                          │
                          ▼ stdio / JSON-RPC
              [ bridge/launch_studio_mcp.py ]
@@ -33,63 +36,36 @@
 
 ---
 
-## 📂 Modular Architecture & File Roles
+## Modular Architecture & File Roles
 
+All files conform strictly to the Single Responsibility Principle and the **under 500-600 line limit**:
+
+### 1. Backend Modules (`bridge/`)
 | Path | Component | Responsibility |
 |---|---|---|
-| `bridge/bridge.py` | Local WebSocket Server | Listens on `ws://127.0.0.1:17613`. Routes JSON-RPC calls, modernizes Luau calls, wraps execution in `ChangeHistoryService` (Ctrl+Z), prunes game tree, handles zombie process cleanup. |
-| `bridge/launch_studio_mcp.py` | Roblox MCP Discovery | Auto-discovers `StudioMCP.exe` across vanilla `%LOCALAPPDATA%\Roblox\Versions` and `%LOCALAPPDATA%\Bloxstrap\Versions`. Launches server on port 13469. |
-| `bridge/native_host.py` | Native Messaging Host | Chrome/Edge Native Messaging protocol bridge allowing in-browser direct process control. |
-| `bridge/register.py` | System Registry Setup | Registers Native Messaging host manifest and `zxscript://` custom URI scheme in Windows Registry. |
-| `bridge/config.json` | Server Registry | Configures MCP child servers (primary: `roblox`, 33 active tools). |
-| `scripts/start.bat` | Windows Launcher | 1-Click launcher verifying Python 3.9+, auto-installing dependencies, clearing port conflicts, and launching the bridge. |
-| `scripts/setup_service.bat` | Windows Host Setup | 1-Click registration of Native Messaging and system startup tasks. |
-| `scripts/MacOS_Start.command` | macOS Launcher | Shell launcher equivalent for macOS environments. |
-| `scripts/generate_assets.py` | Design Asset Generator | Vector and raster branding asset synthesizer. |
-| `zxscript-extension/` | Browser Extension | Manifest v3 extension with content scripts for all major AI chat providers. |
-| `zxscript-extension/core/main.js` | Agentic Control Loop | Turn-taking engine, chip decoration, anti-amnesia tool reminder (every 8 calls), humanized jitter (`1000–2200ms`), and native Web Audio chime. |
-| `zxscript-extension/core/config.js` | System Prompt & Rules | Master prompt builder, provider rules, modern Luau constraints, autonomous console debug rules, and tool descriptions. |
-| `zxscript-extension/core/parser.js` | Command Parser | High-resilience streaming parser for JSON commands and raw `###LUA###` blocks with auto-salvage. |
-| `zxscript-extension/popup.html` | Extension Mini-Dashboard | Minimalist zinc-950 status monitor, direct bridge runner, autostart toggle, and 1-Click Game System / Rules Prompt Templates. |
-| `docs/RULES.md` | Master Operational Rules | Complete 7-category rulebook covering Anti-Ban, Modern Luau, Zero Guessing, Undo, Auto-Debug, Memory, and Caveman Mode. |
-| `docs/ZXScript_Guide.md` | User Manual (TH) | Complete installation, troubleshooting, and copy-paste prompt library in Thai. |
-| `docs/CHANGELOG.md` | Version History | Semantic version release logs. |
-| `assets/` | Brand Assets | Concept 4 Terminal Chevron iconography (16, 32, 48, 128, 512, SVG) and GitHub banner. |
+| `bridge/bridge.py` | Supervisor Entry Point | Coordinates startup checks, supervisors, and shutdown handlers (< 250 lines). |
+| `bridge/constants.py` | Constants & Logging | Central repository for ports, paths, ANSI formatting, and logger (< 150 lines). |
+| `bridge/config_manager.py` | Config Manager | Atomic read/write of `config.json` and in-place restart coordinator (< 100 lines). |
+| `bridge/mcp_server.py` | MCP Client & Process Manager | Manages JSON-RPC stdio subprocesses and tool forwarding (< 400 lines). |
+| `bridge/studio_watcher.py` | Studio Process Monitor | Detects Roblox Studio, eliminates port squatters, and cleans zombies (< 490 lines). |
+| `bridge/tool_dispatcher.py` | Tool Execution Dispatcher | Wraps Luau in ChangeHistoryService, prunes trees, and caches scripts (< 300 lines). |
+| `bridge/bridge_server.py` | WebSocket Server | Handles incoming client connections and broadcasts status (< 210 lines). |
+| `bridge/native_host.py` | Headless Native Host | Runs background headless process (`CREATE_NO_WINDOW`) with log streaming (< 230 lines). |
+| `bridge/launch_studio_mcp.py`| Studio Discovery | Auto-locates `StudioMCP.exe` across vanilla and Bloxstrap paths (< 190 lines). |
+| `bridge/register.py` | Registry Installer | Registers Native Messaging host manifest in Windows Registry (< 70 lines). |
 
----
-
-## 🔌 Port Mapping & Protocols
-
-- **WebSocket Bridge:** `ws://127.0.0.1:17613` (Extension communicates with `bridge.py`)
-- **Studio MCP Server:** `http://127.0.0.1:13469` / stdio (Roblox Studio internal MCP listener)
-- **Primary MCP Server ID:** `roblox` (33 active tools)
-- **Native Protocol:** `zxscript://`
-
----
-
-## 🧠 Memory Protocol
-
-- **Location:** `game.ServerStorage.ZXScript.Memory`
-- **Class:** `ModuleScript`
-- **Format:**
-  ```lua
-  return [==[
-  # Project memory
-  ## Overview
-  ## Where things live
-  ## Conventions
-  ## Key systems
-  ## Decisions & gotchas
-  ## User preferences
-  ## Open questions / TODO
-  ]==]
-  ```
-- **Sync Rule:** Persists long-term project knowledge across separate AI sessions and new chats.
-
----
-
-## 🛡️ Backup & Auto-Debug Protocols
-
-- **Auto-Backups:** Archived script code before major refactorings resides in `game.ServerStorage.ZXScript.Backups`.
-- **Auto-Debug Loop:** `get_console_output` is invoked autonomously after script deployment to inspect runtime errors and self-heal without user intervention.
-- **Studio Undo:** Every edit action is recorded in `ChangeHistoryService` as `"ZXScript Action"` with automatic rollback on error.
+### 2. Frontend Core Modules (`zxscript-extension/core/`)
+| Path | Component | Responsibility |
+|---|---|---|
+| `core/constants.js` | Constants & Global State | Shared state `A`, diagnostic logger, timing configurations (< 160 lines). |
+| `core/icons.js` | Vector Icons | Reusable inline vector SVG icon paths (< 60 lines). |
+| `core/audio.js` | Web Audio Synthesizer | Synthesizes pleasant two-tone chimes natively without external audio files (< 230 lines). |
+| `core/camouflage.js` | DOM Camouflage & Tool Cards| Replaces raw JSON/Luau codeblocks with interactive, styled chips (< 480 lines). |
+| `core/ui-modals.js` | In-Page Modals & Toasts | Headless bridge modal with live log terminal, toasts, and smart banners (< 410 lines). |
+| `core/ui-menu.js` | Dropdown Menu & Settings | AI switcher popover, custom MCP server registry, prompt settings (< 400 lines). |
+| `core/ui-bar.js` | Dynamic Island Action Bar | Floating dynamic island capsule and theme engine (< 480 lines). |
+| `core/tools.js` | Tool Invoker & RPC Bridge | Sends tool requests to bridge, handles chunked responses (< 460 lines). |
+| `core/response-watcher.js`| AI Stream Watcher | Detects streaming state, token progress, and completion (< 410 lines). |
+| `core/agent.js` | Autonomous Agent Loop | Controls agent cycle, turn-memory deduplication, and auto-resume (< 580 lines). |
+| `core/parser.js` | Command Parser | Extracts Luau and JSON tool calls from assistant text (< 390 lines). |
+| `core/main.js` | Extension Orchestrator | Hooks lifecycle listeners, status poller, and supervisory watchdog (< 240 lines). |

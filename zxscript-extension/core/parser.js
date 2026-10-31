@@ -372,10 +372,17 @@ const ZSParse = (() => {
            CMD_KEY_RE.test(txt); // command/tool with OR without params (e.g. list_commands)
   }
 
-  return {
+  const parseObj = {
     START_M, END_M, LUA_START_RE, LUA_END_RE, CMD_KEY_RE, DSML_RE,
     findLuaStart, findLuaEnd, matchBrace, extractJson, normalizeCall,
     hasToolSignature, hasOpenToolBlock, parseToolCalls, salvageCutOff, toolNameFromText,
     isInjectedFeedback, hasCommandShape,
   };
+  if (typeof window !== "undefined") {
+    window.ZSParse = parseObj;
+    window.ZS = window.ZS || {};
+    window.ZS.parser = parseObj;
+  }
+  return parseObj;
 })();
+if (typeof module !== "undefined" && module.exports) module.exports = ZSParse;

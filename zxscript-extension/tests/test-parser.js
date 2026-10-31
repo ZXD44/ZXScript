@@ -1,6 +1,6 @@
 // Quick Node smoke test for core/parser.js (run: node test-parser.js). Not shipped.
 const fs = require("fs");
-const ZSParse = new Function(fs.readFileSync(__dirname + "/core/parser.js", "utf8") + "; return ZSParse;")();
+const ZSParse = new Function(fs.readFileSync(__dirname + "/../core/parser.js", "utf8") + "; return ZSParse;")();
 
 const ok = (name, cond) => { console.log((cond ? "PASS" : "FAIL") + "  " + name); if (!cond) process.exitCode = 1; };
 
