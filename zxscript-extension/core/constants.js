@@ -144,9 +144,19 @@
     initStallDetector,
   };
 
+
+  const getProvider = () =>
+    (typeof window !== "undefined" && window.ZSProvider) ||
+    (typeof window !== "undefined" && window.ZS && window.ZS.provider) ||
+    (typeof ZSProvider !== "undefined" ? ZSProvider : null);
+
+  constantsObj.getProvider = getProvider;
+
   // Export to namespace
   Object.assign(window.ZS, constantsObj);
   window.ZS.constants = window.ZS;
+  window.ZS.getProvider = getProvider;
+  window.getProvider = getProvider;
 
   window.bareToolName = bareToolName;
   window.IMAGE_FEEDBACK_RE = IMAGE_FEEDBACK_RE;

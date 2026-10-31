@@ -47,7 +47,11 @@ async def handler(ws, mgr):
     clients.add(ws)
     log(f"extension connected ({peer}) [{len(clients)} client(s)]", "gr")
     try:
-        st = await asyncio.to_thread(probe_studio, mgr)
+        try:
+            st = await asyncio.to_thread(probe_studio, mgr)
+        except Exception as e:
+            st = {"place": None, "app": None}
+            log(f"probe_studio initial error: {e}", "yl")
         await ws.send(json.dumps({
             "type": "connected",
             "mcp_alive": mgr.any_alive(),

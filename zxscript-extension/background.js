@@ -58,8 +58,18 @@ function log(...a) {
 
 function checkBridgeRunning() {
   return new Promise((resolve) => {
+    let done = false;
+    const timer = setTimeout(() => {
+      if (!done) {
+        done = true;
+        resolve(null);
+      }
+    }, 600);
     try {
       chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "status" }, (resp) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
         if (chrome.runtime.lastError || !resp) {
           resolve(null);
         } else {
@@ -67,7 +77,11 @@ function checkBridgeRunning() {
         }
       });
     } catch {
-      resolve(null);
+      if (!done) {
+        done = true;
+        clearTimeout(timer);
+        resolve(null);
+      }
     }
   });
 }
@@ -75,7 +89,7 @@ function checkBridgeRunning() {
 let isConnecting = false;
 
 // ── WebSocket lifecycle ─────────────────────────────────────────────────
-async function connect() {
+async function connect(force = false) {
   if (isConnecting || (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))) {
     return;
   }
@@ -85,14 +99,16 @@ async function connect() {
   try {
     // If native messaging host is available, verify bridge is active first.
     // This avoids Chromium logging net::ERR_CONNECTION_REFUSED to chrome://extensions.
-    const isRunning = await checkBridgeRunning();
-    if (isRunning === false) {
-      if (connected) {
-        connected = false;
-        broadcastStatus();
+    if (!force) {
+      const isRunning = await checkBridgeRunning();
+      if (isRunning === false) {
+        if (connected) {
+          connected = false;
+          broadcastStatus();
+        }
+        scheduleReconnect();
+        return;
       }
-      scheduleReconnect();
-      return;
     }
 
     ws = new WebSocket(URL);
@@ -110,6 +126,8 @@ async function connect() {
     lastMessageAt = Date.now();
     log("connected to bridge");
     startHeartbeat();
+    send({ type: "studio_status" }).catch(() => {});
+    send({ type: "list_tools" }).catch(() => {});
     broadcastStatus();
   };
 
@@ -139,6 +157,7 @@ async function connect() {
 
   ws.onerror = () => {
     // Expected when bridge (start.bat) is offline. onclose handles backoff.
+    log("คุณต้องเปิด start.bat ก่อนสิ! (ยังไม่พบ Bridge Server ที่ ws://127.0.0.1:" + PORT + ")");
   };
 }
 
@@ -319,13 +338,19 @@ function failAllPending(reason) {
 
 // ── status push to any open DeepSeek tab + popup ─────────────────────────
 function statusObj() {
-  return { type: "zs-status", connected, mcpAlive, studio: studioConnected, studioApp, studioProc, tools: toolsCache.length, servers: serversCache };
+  return { ok: true, type: "zs-status", connected, mcpAlive, studio: studioConnected, studioApp, studioProc, tools: toolsCache.length, servers: serversCache };
 }
 
 function broadcastStatus() {
-  chrome.runtime.sendMessage(statusObj()).catch(() => {});
-  chrome.tabs.query({ url: PROVIDER_URLS }, (tabs) => {
-    for (const t of tabs) chrome.tabs.sendMessage(t.id, statusObj()).catch(() => {});
+  const s = statusObj();
+  chrome.runtime.sendMessage(s).catch(() => {});
+  chrome.tabs.query({}, (tabs) => {
+    if (!tabs) return;
+    for (const t of tabs) {
+      if (t && t.id) {
+        chrome.tabs.sendMessage(t.id, s).catch(() => {});
+      }
+    }
   });
 }
 
@@ -333,10 +358,14 @@ function broadcastStatus() {
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   (async () => {
     switch (msg.type) {
-      case "status":
-        if (!connected) connect(); // self-heal after a worker wake-up
+      case "status": {
+        if (!connected) {
+          connect();
+          await waitForConnection(1200);
+        }
         sendResponse(statusObj());
         break;
+      }
       case "list_tools": {
         // Prefer a live refresh; fall back to cache so the loop never stalls.
         // 10s, not 25s: a catalogue request only blocks this long when one of the
@@ -416,11 +445,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         sendResponse({ ok: true });
         break;
       }
-      case "reconnect":
+      case "reconnect": {
         reconnectDelay = RECONNECT_MIN;
-        connect();
-        sendResponse({ ok: true });
+        connect(true);
+        await waitForConnection(2500);
+        sendResponse(statusObj());
         break;
+      }
       case "native_start": {
         try {
           chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "start" }, (resp) => {
@@ -431,7 +462,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
               // "เปิด Windows Command Processor ไหม" dialog. Return status so UI shows our custom CSS modal.
               sendResponse({ ok: false, error: err, needModal: true });
             } else {
-              setTimeout(connect, 1200);
+              connect(true);
               sendResponse({ ok: true, running: true, message: "Bridge เริ่มทำงานเรียบร้อยแล้ว", ...resp });
             }
           });
@@ -499,7 +530,18 @@ if (chrome.notifications && chrome.notifications.onClicked) {
 }
 
 // Wake/keepalive hooks.
-chrome.runtime.onStartup.addListener(connect);
-chrome.runtime.onInstalled.addListener(connect);
+chrome.runtime.onStartup.addListener(() => connect(true));
+chrome.runtime.onInstalled.addListener(() => connect(true));
+
+if (chrome.alarms) {
+  try {
+    chrome.alarms.create("zs-keepalive", { periodInMinutes: 0.25 });
+    chrome.alarms.onAlarm.addListener((alarm) => {
+      if (alarm.name === "zs-keepalive" && !connected) {
+        connect();
+      }
+    });
+  } catch {}
+}
 
 connect();

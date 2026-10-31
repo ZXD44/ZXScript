@@ -6,7 +6,10 @@
   "use strict";
 
   window.ZS = window.ZS || {};
-  const { A, diag, sleep, log, jitterBeforeSend, bareToolName, ui } = window.ZS;
+  const { A, diag, sleep, log, jitterBeforeSend, bareToolName } = window.ZS;
+  const ui = window.ZS.ui || {};
+  if (!ui.banner) ui.banner = (...a) => (window.ZS.banner ? window.ZS.banner(...a) : console.warn("[ZS banner]", ...a));
+  if (!ui.toast) ui.toast = (...a) => (window.ZS.toast ? window.ZS.toast(...a) : console.log("[ZS toast]", ...a));
 
   async function waitFor(pred, timeout) {
     const t0 = Date.now();
@@ -85,7 +88,13 @@
       const preUser = P && P.userCount ? P.userCount() : 0;
       A.injectPreUser = preUser;
       A.injectHideUntil = Date.now() + 2500;
-      const landed = () => (P ? P.userCount() > preUser || P.assistantCount() > base : true);
+      const landed = () => {
+        const p = (window.ZS && window.ZS.getProvider ? window.ZS.getProvider() : null) || window.ZSProvider;
+        if (!p) return false;
+        const curUser = (p.userCount && typeof p.userCount === "function") ? p.userCount() : 0;
+        const curAst = (p.assistantCount && typeof p.assistantCount === "function") ? p.assistantCount() : 0;
+        return curUser > preUser || curAst > base;
+      };
 
       let tries = 0;
       let messageSent = false;
@@ -95,11 +104,19 @@
           if (!(await waitVisible()) || A.stop) break;
         }
         await jitterBeforeSend();
-        diag("submit.typeAndSend", { hasImages: !!(images && images.length) });
-        if (P) await P.typeAndSend(text, images);
+        const p = (window.ZS && window.ZS.getProvider ? window.ZS.getProvider() : null) || window.ZSProvider;
+        diag("submit.typeAndSend", { hasImages: !!(images && images.length), tries });
+        if (p && p.typeAndSend) {
+          try {
+            await p.typeAndSend(text, images);
+          } catch (err) {
+            console.error("[ZXScript] typeAndSend error:", err);
+          }
+        }
         A.injectHideUntil = Date.now() + 2500;
         await waitFor(() => {
-          if (P && P.editorText && P.editorText().trim() === "") messageSent = true;
+          const pNow = (window.ZS && window.ZS.getProvider ? window.ZS.getProvider() : null) || window.ZSProvider;
+          if (pNow && pNow.editorText && pNow.editorText().trim() === "") messageSent = true;
           return messageSent || landed();
         }, 3500);
         tries++;

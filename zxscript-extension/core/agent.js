@@ -11,7 +11,6 @@
     diag,
     sleep,
     bareToolName,
-    ui,
     decorate,
     runTool,
     argSummary,
@@ -25,6 +24,11 @@
     waitForResponse,
     waitVisible,
   } = window.ZS;
+
+  const ui = window.ZS.ui || {};
+  if (!ui.banner) ui.banner = (...a) => (window.ZS.banner ? window.ZS.banner(...a) : console.warn("[ZS banner]", ...a));
+  if (!ui.toast) ui.toast = (...a) => (window.ZS.toast ? window.ZS.toast(...a) : console.log("[ZS toast]", ...a));
+  if (!ui.clearBanner) ui.clearBanner = (...a) => (window.ZS.clearBanner ? window.ZS.clearBanner(...a) : undefined);
 
   const halted = new Map();
   const executed = new Map();
@@ -411,11 +415,19 @@
   }
 
   async function startSession() {
-    const P = window.ZSProvider;
+    const P = (window.ZS && window.ZS.getProvider ? window.ZS.getProvider() : null) || window.ZSProvider;
     if (A.running || A.starting) return;
     if (P && !P.chatIsEmpty() && !A.started) {
-      ui.toast("เปิดแชตใหม่ที่ว่างเปล่าเพื่อเริ่มใช้งาน");
-      return;
+      const lastAst = P.lastAssistant ? P.lastAssistant() : null;
+      const txt = lastAst ? (P.itemText ? P.itemText(lastAst) : "") : "";
+      if (lastAst && window.ZSParse && window.ZSParse.hasToolSignature(txt)) {
+        A.started = true;
+        rememberSession(P.conversationKey ? P.conversationKey() : null);
+        if (ui.setStarted) ui.setStarted(true);
+        if (ui.toast) ui.toast("พบคำสั่งค้างอยู่ กำลังทำงานต่อ…");
+        setTimeout(() => agentLoop(P.assistantCount ? P.assistantCount() - 1 : 0), 300);
+        return;
+      }
     }
     A.userStopped = false;
     A.stop = false;
@@ -425,26 +437,81 @@
     A.startingKey = null;
     const alive = () => A.startGen === myGen;
     A.toolCallsSinceReminder = 0;
-    ui.setStarting(true);
+    if (ui.setStartingProgress) ui.setStartingProgress(10, "ตรวจสอบ Bridge Server…");
+    else if (ui.setStarting) ui.setStarting(true);
     ui.updateStartGate();
     if (P) P.setInputLock(true);
     ui.inputCover(true);
 
     try {
+      // ── Step 1: Real Bridge Verification (127.0.0.1:17613) ────────
+      if (ui.setStartingProgress) ui.setStartingProgress(20, "เช็กพอร์ต 17613…");
+      const bgFn = window.ZS.bg || ((m) => new Promise((r) => chrome.runtime.sendMessage(m, r)));
+      let st = null;
       try {
-        await ensureTools(true);
+        st = await bgFn({ type: "reconnect" });
       } catch {}
+      if (!st || !st.connected) {
+        try { st = await bgFn({ type: "status" }); } catch {}
+      }
       if (!alive()) return;
+
+      if (!st || !st.connected) {
+        if (ui.setStarting) ui.setStarting(false);
+        if (ui.inputCover) ui.inputCover(false);
+        if (P) P.setInputLock(false);
+        if (ui.banner) {
+          ui.banner(
+            "warn",
+            "คุณต้องเปิด start.bat ก่อนสิ!",
+            "ยังไม่ได้เปิด Bridge Server (127.0.0.1:17613)\n• คุณต้องเปิดไฟล์ start.bat ก่อนสิ หรือกดปุ่ม 'เปิดการเชื่อมต่อ' ในหน้าต่างที่เปิดขึ้นมา"
+          );
+        }
+        if (ui.showBridgeModal) ui.showBridgeModal();
+        return;
+      }
+
+      // ── Step 2: Real Roblox Studio & MCP Tools Verification ───────
+      if (ui.setStartingProgress) ui.setStartingProgress(35, "ตรวจสอบ Roblox Studio…");
+      await ensureTools(true);
+      if (!alive()) return;
+
+      const currentTools = A.toolList || [];
+      if (!currentTools.length) {
+        if (ui.setStarting) ui.setStarting(false);
+        if (ui.inputCover) ui.inputCover(false);
+        if (P) P.setInputLock(false);
+        const reason = (st.studioProc)
+          ? "ตรวจพบโปรเซส Studio แล้ว แต่ยังไม่พบแมพที่เปิด (0 คำสั่ง)\n• วิธีแก้: เปิด Place/แมพ ใน Roblox Studio เพื่อโหลดคำสั่งอัตโนมัติ"
+          : "ยังไม่ได้เปิดโปรแกรม Roblox Studio (0 คำสั่ง)\n• วิธีแก้: เปิดโปรแกรม Roblox Studio และเปิดแมพ";
+        if (ui.banner) ui.banner("warn", "Roblox Studio ยังไม่พร้อม", reason);
+        if (ui.showBridgeModal) ui.showBridgeModal();
+        return;
+      }
+
+      if (ui.setStartingProgress) ui.setStartingProgress(50, `พบ ${currentTools.length} คำสั่ง Studio…`);
+      await sleep(150);
+
+      // ── Step 3: Check AI Model Composer ──────────────────────────
+      if (ui.setStartingProgress) ui.setStartingProgress(65, "เตรียมช่องแชท AI…");
       const modeState = P && P.ensureComposerReady ? await P.ensureComposerReady("startup") : { ready: true };
       if (!alive()) return;
       if (!modeState.ready) {
-        ui.banner("warn", "โหมด AI ไม่พร้อม", "สลับโหมดไม่สำเร็จ");
+        if (ui.setStarting) ui.setStarting(false);
+        if (ui.inputCover) ui.inputCover(false);
+        if (P) P.setInputLock(false);
+        if (ui.banner) ui.banner("warn", "โหมด AI ไม่พร้อม", modeState.reason || "สลับโหมดไม่สำเร็จ");
         return;
       }
+
+      // ── Step 4: Submit System Prompt ──────────────────────────────
+      if (ui.setStartingProgress) ui.setStartingProgress(80, "ส่งคำสั่งตั้งค่าเริ่มต้น…");
       const prompt = systemPrompt();
       const base = await submitAndGetBase(prompt);
       if (!alive()) return;
 
+      // ── Step 5: Await AI Acknowledgement ──────────────────────────
+      if (ui.setStartingProgress) ui.setStartingProgress(90, "รอ AI ตอบรับคำสั่ง…");
       decorate.sweep();
       const startRes = await waitForResponse(base);
       if (!alive()) return;
@@ -457,6 +524,7 @@
         startRes.calls.length === 1 &&
         (firstName === "list_commands" || firstName === "list_tools")
       ) {
+        if (ui.setStartingProgress) ui.setStartingProgress(95, "ยืนยันรายชื่อคำสั่ง…");
         decorate.toolBox(startRes.item, "กำลังโหลดคำสั่ง", "run", "", true);
         const toolFeedback = await runTool(startRes.calls[0]);
         if (/Roblox Studio is currently OFFLINE/.test(toolFeedback)) {
@@ -470,18 +538,23 @@
         if (!alive()) return;
         if (A.stop || readyRes.kind === "stopped") return;
       }
+
+      // ── Step 6: 100% Ready ────────────────────────────────────────
+      if (ui.setStartingProgress) ui.setStartingProgress(100, `เชื่อมต่อสำเร็จ (${currentTools.length} คำสั่ง)`);
       A.started = true;
       rememberSession(P ? P.conversationKey() : null);
-      ui.setStarted(true);
-      ui.toast(`AI พร้อมทำงานแล้ว บอกให้สร้างแมพใน Roblox ได้เลย`);
+      if (ui.setStarted) ui.setStarted(true);
+      if (ui.toast) ui.toast(`AI พร้อมทำงานแล้ว บอกให้สร้างแมพใน Roblox ได้เลย`);
     } catch (e) {
-      if (alive()) ui.banner("warn", "เริ่มต้นระบบไม่สำเร็จ", String((e && e.message) || e));
+      try {
+        if (alive() && ui.banner) ui.banner("warn", "เริ่มต้นระบบไม่สำเร็จ", String((e && e.message) || e));
+      } catch {}
     } finally {
       if (alive()) {
         A.starting = false;
         A.startingKey = null;
-        ui.setStarting(false);
-        ui.inputCover(false);
+        if (ui.setStarting) ui.setStarting(false);
+        if (ui.inputCover) ui.inputCover(false);
         if (P) P.setInputLock(false);
         decorate.sweep();
       }

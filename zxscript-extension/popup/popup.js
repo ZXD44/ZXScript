@@ -45,31 +45,39 @@ function render(s) {
   const runBtn = document.getElementById("btn-run-bridge");
   const onlineActions = document.getElementById("online-actions");
 
-  const list = s.servers || [];
-  const up = list.filter((x) => x.alive).length;
-  const mcpOk = s.connected && (s.mcpAlive || up > 0 || s.tools > 0);
-  const studioOff = mcpOk && s.studio === false;
-  const ok = mcpOk && !studioOff;
+  const bridgeConnected = !!(s && s.connected);
+  const totalTools = (s && s.tools) || 0;
+  const studioReady = bridgeConnected && (s.studio === true || totalTools > 0);
+  const studioProcRunning = !!(s && s.studioProc);
 
-  dot.className = "dot " + (s.connected ? (ok ? "on" : "warn") : "");
-  state.innerHTML = s.connected
-    ? (ok ? "เชื่อมต่อแล้ว — Studio พร้อมทำงาน"
-        : studioOff ? `รอการเชื่อมต่อ Studio${DOTS} (เปิด Assistant &gt; MCP)`
-        : `กำลังเชื่อมต่อ Studio MCP${DOTS}`)
-    : "ออฟไลน์";
+  dot.className = "dot " + (bridgeConnected ? (studioReady ? "on" : "warn") : "");
 
-  valBridge.textContent = s.connected ? "ออนไลน์" : "ออฟไลน์";
-  valBridge.style.color = s.connected ? "#10b981" : "#71717a";
+  if (!bridgeConnected) {
+    state.textContent = "ออฟไลน์ (ยังไม่ได้เชื่อมต่อ Bridge)";
+    valBridge.textContent = "ออฟไลน์";
+    valBridge.style.color = "#71717a";
+    valStudio.textContent = "รอเชื่อมต่อ Bridge";
+    valStudio.style.color = "#71717a";
+    valTools.textContent = "0 รายการ";
+  } else if (!studioReady) {
+    state.innerHTML = studioProcRunning
+      ? `Bridge ออนไลน์ — รอเปิดแมพใน Studio${DOTS}`
+      : `Bridge ออนไลน์ — ยังไม่ได้เปิด Roblox Studio${DOTS}`;
+    valBridge.textContent = "ออนไลน์ (127.0.0.1:17613)";
+    valBridge.style.color = "#10b981";
+    valStudio.textContent = studioProcRunning ? "รอเปิด Place ใน Studio" : "ยังไม่เปิด Studio";
+    valStudio.style.color = "#f59e0b";
+    valTools.textContent = totalTools > 0 ? `${totalTools} รายการ` : "0 รายการ (รอ Studio)";
+  } else {
+    state.textContent = `เชื่อมต่อสำเร็จ — Roblox Studio พร้อมทำงาน (${totalTools} คำสั่ง)`;
+    valBridge.textContent = "ออนไลน์ (127.0.0.1:17613)";
+    valBridge.style.color = "#10b981";
+    valStudio.textContent = "พร้อมทำงาน";
+    valStudio.style.color = "#10b981";
+    valTools.textContent = `${totalTools} รายการ`;
+  }
 
-  valStudio.textContent = s.connected
-    ? (ok ? "พร้อมทำงาน" : studioOff ? "รอเปิด Place" : "กำลังโหลด")
-    : "รอเชื่อมต่อ";
-  valStudio.style.color = ok ? "#10b981" : "#f59e0b";
-
-  const count = s.tools || (s.connected ? toolsList.length : 0);
-  valTools.textContent = `${count} รายการ`;
-
-  if (s.connected) {
+  if (bridgeConnected) {
     runBtn.style.display = "none";
     onlineActions.style.display = "flex";
   } else {
@@ -97,16 +105,48 @@ const modalStartBtn = document.getElementById("zs-modal-start-btn");
 const modalCloseBtn = document.getElementById("zs-modal-close-btn");
 const modalCancelBtn = document.getElementById("zs-modal-cancel-btn");
 const modalCopyBtn = document.getElementById("zs-modal-copy-btn");
+const modalProgFill = document.getElementById("zs-modal-prog-fill");
+const modalProgPct = document.getElementById("zs-modal-prog-pct");
+const modalProgLabel = document.getElementById("zs-modal-prog-label");
+const modalStepBridge = document.getElementById("step-bridge");
+const modalStepStudio = document.getElementById("step-studio");
+const modalStepTools = document.getElementById("step-tools");
 let modalLogTimer = null;
+
+function setModalStepState(el, state) {
+  if (!el) return;
+  el.classList.remove("done", "active", "warn", "err");
+  if (state) el.classList.add(state);
+}
+
+function updateModalProgress(pct, label, tone, steps = {}) {
+  if (typeof pct === "number") {
+    if (modalProgPct) modalProgPct.textContent = `${Math.round(pct)}%`;
+    if (modalProgFill) modalProgFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  } else if (modalProgPct) {
+    modalProgPct.textContent = String(pct);
+  }
+  if (label && modalProgLabel) modalProgLabel.textContent = label;
+  if (modalProgFill) {
+    modalProgFill.classList.remove("ok", "warn", "err");
+    if (tone) modalProgFill.classList.add(tone);
+  }
+  if (steps.bridge) setModalStepState(modalStepBridge, steps.bridge);
+  if (steps.studio) setModalStepState(modalStepStudio, steps.studio);
+  if (steps.tools) setModalStepState(modalStepTools, steps.tools);
+}
 
 if (modalCopyBtn) {
   modalCopyBtn.addEventListener("click", () => {
     navigator.clipboard.writeText("start.bat").then(() => {
-      modalCopyBtn.textContent = "คัดลอกสำเร็จ";
+      modalCopyBtn.textContent = "✓ คัดลอกแล้ว";
       showToast("คัดลอก start.bat แล้ว");
+      addModalLog("คัดลอกคำสั่ง start.bat ไปยัง Clipboard แล้ว", "log-info");
       setTimeout(() => {
-        if (modalCopyBtn) modalCopyBtn.textContent = "คัดลอก start.bat";
+        if (modalCopyBtn) modalCopyBtn.textContent = "คัดลอกคำสั่ง";
       }, 2000);
+    }).catch(() => {
+      modalCopyBtn.textContent = "คัดลอกไม่สำเร็จ";
     });
   });
 }
@@ -126,6 +166,37 @@ function showPopupModal() {
       clearInterval(modalLogTimer);
       modalLogTimer = null;
     }
+
+    // Inspect live state immediately upon open
+    try {
+      chrome.runtime.sendMessage({ type: "status" }, (st) => {
+        if (st && st.connected) {
+          const hasTools = st.tools && st.tools > 0;
+          const studioReady = st.studio === true || hasTools;
+          if (studioReady) {
+            updateModalProgress(100, `เชื่อมต่อสำเร็จ (${st.tools || 0} คำสั่งพร้อมใช้งาน)`, "ok", {
+              bridge: "done",
+              studio: "done",
+              tools: "done",
+            });
+            if (modalStartBtn) modalStartBtn.textContent = "เชื่อมต่อแล้ว (100%)";
+          } else {
+            updateModalProgress(75, st.studioProc ? "Bridge ออนไลน์ · รอเปิดแมพใน Studio" : "Bridge ออนไลน์ · รอเปิด Studio", "warn", {
+              bridge: "done",
+              studio: st.studioProc ? "done" : "active",
+              tools: "",
+            });
+            if (modalStartBtn) modalStartBtn.textContent = "Bridge พร้อม (รอเปิด Studio)";
+          }
+        } else {
+          updateModalProgress(0, "พร้อมเชื่อมต่อ (พอร์ต 17613)", "", {
+            bridge: "",
+            studio: "",
+            tools: "",
+          });
+        }
+      });
+    } catch {}
   }
 }
 
@@ -158,53 +229,116 @@ if (popupModal) {
 
 function startBridgePolling(onDone) {
   let polls = 0;
+  const maxPolls = 25;
   if (modalLogTimer) clearInterval(modalLogTimer);
+
   modalLogTimer = setInterval(() => {
     polls++;
     chrome.runtime.sendMessage({ type: "status" }, (s) => {
-      if (s && s.connected) {
-        clearInterval(modalLogTimer);
-        modalLogTimer = null;
-        addModalLog("เชื่อมต่อสำเร็จ (34 เครื่องมือพร้อมใช้งาน)", "log-ok");
-        if (modalStartBtn) {
-          modalStartBtn.disabled = false;
-          modalStartBtn.textContent = "เชื่อมต่อแล้ว";
+      if (!s || !s.connected) {
+        const pct = Math.min(15 + Math.round((polls / maxPolls) * 35), 50);
+        updateModalProgress(pct, `กำลังรอพอร์ต 17613 ตอบสนอง... (${polls}/${maxPolls})`, "", {
+          bridge: "active",
+          studio: "",
+          tools: "",
+        });
+      } else {
+        const hasTools = s.tools && s.tools > 0;
+        const studioReady = s.studio === true || hasTools;
+
+        if (studioReady) {
+          // REAL 100% verified!
+          clearInterval(modalLogTimer);
+          modalLogTimer = null;
+          const count = s.tools || 0;
+          updateModalProgress(100, `เชื่อมต่อ Studio สำเร็จ (${count} คำสั่งพร้อมใช้งาน)`, "ok", {
+            bridge: "done",
+            studio: "done",
+            tools: "done",
+          });
+          addModalLog(`✓ เชื่อมต่อ Roblox Studio สำเร็จ (${count} คำสั่งพร้อมใช้งาน)`, "log-ok");
+          if (modalStartBtn) {
+            modalStartBtn.disabled = false;
+            modalStartBtn.textContent = "เชื่อมต่อแล้ว";
+          }
+          showToast("เชื่อมต่อเรียบร้อยแล้ว");
+          setTimeout(() => {
+            hidePopupModal();
+            refresh();
+            if (onDone) onDone();
+          }, 1100);
+          return;
+        } else {
+          updateModalProgress(75, s.studioProc ? "Bridge ออนไลน์แล้ว · รอเปิดแมพใน Studio" : "Bridge ออนไลน์แล้ว · รอเปิด Roblox Studio", "warn", {
+            bridge: "done",
+            studio: s.studioProc ? "done" : "active",
+            tools: "",
+          });
+          if (polls === 1 || polls % 4 === 0) {
+            addModalLog("✓ Bridge ออนไลน์แล้ว (127.0.0.1:17613)", "log-ok");
+            if (s.studioProc) {
+              addModalLog("• ตรวจพบโปรเซส Studio แต่ยังไม่พบแมพที่เปิด (กรุณาเปิด Place)", "log-info");
+            } else {
+              addModalLog("• กำลังรอเปิดโปรแกรม Roblox Studio...", "log-info");
+            }
+          }
+          if (polls >= 10 && modalStartBtn) {
+            modalStartBtn.disabled = false;
+            modalStartBtn.textContent = "Bridge พร้อม (รอเปิด Studio)";
+          }
         }
-        showToast("เชื่อมต่อเรียบร้อยแล้ว");
-        setTimeout(() => {
-          hidePopupModal();
-          refresh();
-          if (onDone) onDone();
-        }, 700);
       }
     });
-    if (polls > 14) {
+
+    if (polls >= maxPolls) {
       clearInterval(modalLogTimer);
       modalLogTimer = null;
-      addModalLog("หมดเวลาเชื่อมต่อ: ตรวจสอบสถานะแล้วลองใหม่อีกครั้ง", "log-err");
-      if (modalStartBtn) {
-        modalStartBtn.disabled = false;
-        modalStartBtn.textContent = "ลองอีกครั้ง";
-      }
+      chrome.runtime.sendMessage({ type: "status" }, (s) => {
+        if (!s || !s.connected) {
+          updateModalProgress(0, "คุณต้องเปิด start.bat ก่อนสิ (ไม่พบเซิร์ฟเวอร์)", "err", {
+            bridge: "err",
+            studio: "",
+            tools: "",
+          });
+          addModalLog("✕ คุณต้องเปิด start.bat ก่อนสิ! ยังไม่มีเซิร์ฟเวอร์ที่ 127.0.0.1:17613", "log-err");
+          addModalLog("• ดับเบิลคลิกเปิดไฟล์ start.bat ในโฟลเดอร์โปรเจกต์ หรือกด 'เปิดการเชื่อมต่อ'", "log-info");
+          if (modalStartBtn) {
+            modalStartBtn.disabled = false;
+            modalStartBtn.textContent = "ลองอีกครั้ง";
+          }
+        } else if (modalStartBtn) {
+          modalStartBtn.disabled = false;
+          modalStartBtn.textContent = "Bridge พร้อม (รอเปิด Studio)";
+        }
+      });
     }
-  }, 1200);
+  }, 1000);
 }
 
 if (modalStartBtn) {
   modalStartBtn.addEventListener("click", () => {
     modalStartBtn.disabled = true;
-    modalStartBtn.textContent = "กำลังเปิด...";
+    modalStartBtn.textContent = "กำลังตรวจสอบ...";
 
     // 1. Check if already connected
     chrome.runtime.sendMessage({ type: "status" }, (st) => {
       if (st && st.connected) {
-        addModalLog("เชื่อมต่ออยู่แล้ว (พร้อมใช้งาน)", "log-ok");
-        modalStartBtn.disabled = false;
-        modalStartBtn.textContent = "เชื่อมต่อแล้ว";
-        setTimeout(() => { hidePopupModal(); refresh(); }, 600);
-        return;
+        const hasTools = st.tools && st.tools > 0;
+        if (st.studio === true || hasTools) {
+          updateModalProgress(100, `เชื่อมต่ออยู่แล้ว (${st.tools || 0} คำสั่งพร้อมใช้งาน)`, "ok", {
+            bridge: "done",
+            studio: "done",
+            tools: "done",
+          });
+          addModalLog(`✓ ระบบเชื่อมต่อและ Roblox Studio พร้อมใช้งานอยู่แล้ว (${st.tools || 0} คำสั่ง)`, "log-ok");
+          modalStartBtn.disabled = false;
+          modalStartBtn.textContent = "เชื่อมต่อแล้ว";
+          setTimeout(() => { hidePopupModal(); refresh(); }, 800);
+          return;
+        }
       }
 
+      updateModalProgress(15, "กำลังเริ่มระบบเชื่อมต่อ (Headless)...", "", { bridge: "active" });
       addModalLog("กำลังส่งคำสั่งเชื่อมต่อในเบื้องหลัง...", "log-info");
       chrome.runtime.sendMessage({ type: "native_start" }, (resp) => {
         if (resp && resp.ok) {

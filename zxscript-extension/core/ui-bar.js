@@ -9,7 +9,8 @@
   const { A, EXT_VERSION } = window.ZS.constants || window.ZS || {};
 
   const ui = (() => {
-    let root, bar, dot, brandEl, stateEl, actionBtn, stopBtn, switchBtn, creditEl, menuEl, unstableEl;
+    let root, bar, dot, brandEl, stateEl, actionBtn, stopBtn, switchBtn, supportBtn, discordEl, menuEl, unstableEl;
+    let badgeBtn, triggerBox;
     let bridgeOk = false, studioDown = false, placeDown = false, appDown = false, addonOk = false, studioProcUp = false;
     let wasConnected = false;
     let barRaf = null;
@@ -18,23 +19,41 @@
 
     function build() {
       const P = window.ZSProvider;
+      const wingUrl = (typeof chrome !== "undefined" && chrome && chrome.runtime && chrome.runtime.getURL)
+        ? chrome.runtime.getURL("icons/dragon-wing.png")
+        : "";
       root = document.createElement("div");
       root.id = "zs-root";
 
       root.innerHTML = `
         <div id="zs-bar">
-          <span id="zs-dot" class="off" title="สถานะการเชื่อมต่อ Studio"></span>
-          <span id="zs-brand"><svg class="zs-rbx-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><path d="M5.26 2L2 18.74 18.74 22 22 5.26 5.26 2zm8.28 11.23l-3.27-.63.63-3.27 3.27.63-.63 3.27z"/></svg>Studio <span class="zs-free">v${EXT_VERSION}</span></span>
-          <span class="zs-sep"></span>
-          <span id="zs-state"></span>
-          <button id="zs-action" data-kind="start">▶ เริ่มทำงาน</button>
-          <button id="zs-stop" hidden title="หยุดการทำงาน">■ หยุด</button>
-          <span class="zs-sep"></span>
-          <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span class="zs-sw-glyph" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M7 0h2v4H7V0zm0 12h2v4H7v-4zm-7-5h4v2H0V7zm12 0h4v2h-4V7zM4 3h2v2H4V3zm6 6h2v2h-2V9zm-6 2h2v2H4v-2zm6-8h2v2h-2V3z"/></svg></span><span id="zs-switch-name"></span><svg class="zs-sw-arrow" width="8" height="8" viewBox="0 0 12 12" fill="currentColor"><path d="M2 4h8L6 9z"/></svg></button>
-          <span id="zs-credit" class="zs-credit" title="ผู้พัฒนา ZXD44">ZXD44</span>
+          <img id="zs-wing-left" class="zs-wing" src="${wingUrl}" alt="" aria-hidden="true" draggable="false">
+          
+          <!-- Segment 1: Dragon Orb & AI Badge -->
+          <button id="zs-badge" class="zs-hud-badge" title="สถานะ Studio และสลับโมเดล AI (คลิกเพื่อสลับ)">
+            <span id="zs-dot" class="off" title="สถานะการเชื่อมต่อ Studio"></span>
+            <span id="zs-switch-name">AI</span>
+          </button>
+
+          <div class="zs-hud-sep" aria-hidden="true"></div>
+
+          <!-- Segment 2: Central Action Trigger -->
+          <div id="zs-trigger-box" class="zs-hud-trigger">
+            <button id="zs-action" data-kind="start">🔥 เริ่มทำงาน</button>
+            <button id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">■ หยุด</button>
+            <span id="zs-state" hidden></span>
+          </div>
+
+          <!-- Hidden legacy hooks for compatibility -->
+          <button id="zs-switch" style="display:none !important" aria-label="สลับ AI"></button>
+          <span id="zs-brand" style="display:none !important"></span>
+          <span id="zs-discord" style="display:none !important"></span>
+          <span id="zs-support" style="display:none !important"></span>
+
+          <img id="zs-wing-right" class="zs-wing" src="${wingUrl}" alt="" aria-hidden="true" draggable="false">
         </div>
         <div id="zs-menu" hidden></div>
-        ${P && P.unstableWarning ? `<button id="zs-unstable" aria-label="Provider may be unstable" hidden>ไม่เสถียร</button>` : ""}
+        ${P && P.unstableWarning ? `<button id="zs-unstable" aria-label="Provider may be unstable" hidden>⚠ ไม่เสถียร</button>` : ""}
       `;
       document.documentElement.appendChild(root);
       bar = root.querySelector("#zs-bar");
@@ -44,7 +63,10 @@
       actionBtn = root.querySelector("#zs-action");
       stopBtn = root.querySelector("#zs-stop");
       switchBtn = root.querySelector("#zs-switch");
-      creditEl = root.querySelector("#zs-credit");
+      supportBtn = root.querySelector("#zs-support");
+      discordEl = root.querySelector("#zs-discord");
+      badgeBtn = root.querySelector("#zs-badge");
+      triggerBox = root.querySelector("#zs-trigger-box");
       const swName = root.querySelector("#zs-switch-name");
       if (swName && P) swName.textContent = P.displayName || P.id;
       menuEl = root.querySelector("#zs-menu");
@@ -62,11 +84,25 @@
       stopBtn.addEventListener("click", () => {
         if (window.ZS.stopLoop) window.ZS.stopLoop();
       });
-      dot.addEventListener("click", () => {
-        if (!A.bridge || !A.bridge.connected) window.ZS.showBridgeModal();
+      dot.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (A.staleExtension) { location.reload(); return; }
+        if (!A.bridge || !A.bridge.connected) onActionClick();
       });
+      if (badgeBtn) {
+        badgeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (A.staleExtension) { location.reload(); return; }
+          if (!A.bridge || !A.bridge.connected) {
+            onActionClick();
+          } else {
+            if (window.ZS.menu) window.ZS.menu.toggleMenu();
+          }
+        });
+      }
       stateEl.addEventListener("click", () => {
-        if (!A.bridge || !A.bridge.connected) window.ZS.showBridgeModal();
+        if (A.staleExtension) { location.reload(); return; }
+        if (!A.bridge || !A.bridge.connected) onActionClick();
       });
 
       unstableEl = root.querySelector("#zs-unstable");
@@ -83,11 +119,28 @@
         if (window.ZS.menu) window.ZS.menu.toggleMenu();
       });
 
+      if (supportBtn) {
+        supportBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (window.ZS.menu) {
+            if (window.ZS.menu.isMenuOpen && window.ZS.menu.isMenuOpen()) {
+              window.ZS.menu.closeMenu();
+            } else {
+              window.ZS.menu.openMenu(true);
+            }
+          }
+        });
+      }
+
       document.addEventListener(
         "click",
         (e) => {
           if (!menuEl || menuEl.hidden) return;
-          if (!menuEl.contains(e.target) && !switchBtn.contains(e.target)) {
+          if (
+            !menuEl.contains(e.target) &&
+            !switchBtn.contains(e.target) &&
+            (!supportBtn || !supportBtn.contains(e.target))
+          ) {
             if (window.ZS.menu) window.ZS.menu.closeMenu();
             else menuEl.hidden = true;
           }
@@ -101,10 +154,43 @@
       placeBar();
     }
 
-    function onActionClick() {
-      const kind = actionBtn.dataset.kind;
-      if (kind === "start" || kind === "start-degraded") {
-        if (window.ZS.startSession) window.ZS.startSession();
+    async function onActionClick() {
+      const kind = actionBtn ? actionBtn.dataset.kind : "";
+      if (kind === "reload") {
+        location.reload();
+        return;
+      }
+      const bgFn = (window.ZS && window.ZS.tools && window.ZS.tools.bg) || (window.ZS && window.ZS.bg);
+      if (!A.bridge || !A.bridge.connected) {
+        if (actionBtn) {
+          actionBtn.disabled = true;
+          actionBtn.textContent = "⚡ กำลังเชื่อมต่อ…";
+        }
+        try {
+          if (bgFn) {
+            const rec = await bgFn({ type: "reconnect" });
+            if (rec && rec.connected) {
+              setStatus(rec);
+              if (actionBtn) actionBtn.disabled = false;
+              renderBar();
+              if (window.ZS && window.ZS.startSession) {
+                window.ZS.startSession();
+              }
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("[ZXScript] reconnect error:", e);
+        }
+        if (actionBtn) {
+          actionBtn.disabled = false;
+          renderBar();
+        }
+        if (window.ZS && window.ZS.showBridgeModal) window.ZS.showBridgeModal();
+        return;
+      }
+      if (window.ZS && window.ZS.startSession) {
+        window.ZS.startSession();
       }
     }
 
@@ -264,61 +350,61 @@
         if (dot) dot.className = "off";
         toneClass = "warn";
         warn = true;
-        msg = `รีเฟรชหน้าเพื่อเชื่อมต่อใหม่`;
+        msg = `<b>ส่วนขยายอัปเดตแล้ว</b> · กรุณารีเฟรช`;
+        label = "🔄 รีเฟรช F5";
+        kind = "reload";
+        disabled = false;
       } else if (A.starting) {
         toneClass = "starting";
         indicator = `<span class="zs-spin"></span>`;
-        msg = `<b>กำลังเริ่ม…</b>`;
-        label = "กำลังเริ่ม…";
+        msg = `<b>${_startingStep || "กำลังเริ่มระบบ…"}</b>`;
+        label = `⏳ กำลังเริ่ม…`;
         kind = "starting";
         disabled = true;
       } else if (A.started) {
-        const healthTotal = A.bridge && (A.bridge.servers || []).reduce((n, x) => n + (x.tools || 0), 0);
-        const tools = A.toolList.length || healthTotal || (A.bridge && A.bridge.tools) || 0;
-        if (A.bridge && A.bridge.connected === false) {
+        const tools = (A.toolList && A.toolList.length) || (A.bridge && A.bridge.tools) || 0;
+        if (!A.bridge || A.bridge.connected === false) {
           toneClass = "warn";
           warn = true;
-          msg = `<b>AI พร้อม</b> · ออฟไลน์`;
-        } else if ((placeDown || appDown || studioDown) && addonOk) {
-          toneClass = "warn";
-          msg = A.running ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`) : `<b>พร้อมรับคำสั่ง</b> · Studio ออฟไลน์`;
-        } else if (placeDown) {
+          msg = `<b>AI พร้อม</b> · Bridge ออฟไลน์`;
+        } else if (!bridgeOk) {
           toneClass = "warn";
           warn = true;
-          msg = `<b>AI พร้อม</b> · เปิดแมพใน Studio`;
-        } else if (appDown || studioDown) {
-          toneClass = "warn";
-          warn = true;
-          msg = `<b>AI พร้อม</b> · รอเปิด Studio`;
+          msg = studioProcUp ? `<b>AI พร้อม</b> · รอเปิดแมพใน Studio` : `<b>AI พร้อม</b> · Studio ออฟไลน์`;
         } else {
           toneClass = "active";
+          indicator = `<span class="zs-live-dot ${A.running ? "" : "idle"}"></span>`;
           msg = A.running
             ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`)
             : `<b>พร้อมรับคำสั่ง</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
         }
       } else {
-        // Standby or existing chat: ALWAYS allow start!
-        kind = "start";
-        label = "▶ เริ่มทำงาน";
         disabled = false;
-        if (bridgeOk) {
-          toneClass = "standby";
-          msg = `พร้อมเริ่มระบบ`;
-        } else if (addonOk) {
+        kind = "start";
+        const hasBridge = !!(A.bridge && A.bridge.connected);
+        const toolsCount = (A.toolList && A.toolList.length) || (A.bridge && A.bridge.tools) || 0;
+        const studioReady = hasBridge && (A.bridge.studio === true || toolsCount > 0);
+
+        if (!hasBridge) {
           toneClass = "warn";
           warn = true;
-          msg = !A.bridge.connected
-            ? `กรุณาเปิดระบบเชื่อมต่อ`
-            : studioProcUp
-            ? `<b>เปิด Studio แล้ว</b>`
-            : `<b>Studio ออฟไลน์</b>`;
+          msg = `<b>Bridge ออฟไลน์</b> · คลิกเพื่อเชื่อมต่อ`;
+          label = "⚡ ต่อ Studio";
+        } else if (!studioReady) {
+          toneClass = "warn";
+          warn = true;
+          if (studioProcUp) {
+            msg = `<b>Bridge ออนไลน์</b> · รอเปิดแมพใน Studio`;
+            label = "⏳ รอแมพ Studio";
+          } else {
+            msg = `<b>Bridge ออนไลน์</b> · รอเปิด Roblox Studio`;
+            label = "⏳ รอเปิด Studio";
+          }
         } else {
           toneClass = "standby";
-          msg = !A.bridge.connected
-            ? `รอเชื่อมต่อ Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
-            : placeDown
-            ? `รอเปิดแมพใน Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
-            : `พร้อมเริ่มระบบ`;
+          warn = false;
+          msg = `<b>Studio พร้อมทำงาน</b> · ${toolsCount} คำสั่ง`;
+          label = "🔥 เริ่มทำงาน";
         }
       }
 
@@ -349,19 +435,61 @@
       const isBusyOrRunning = busy || A.running || A.starting;
       bar.classList.toggle("zs-island-active", isBusyOrRunning);
       bar.classList.toggle("is-busy", isBusyOrRunning);
-      stateEl.innerHTML = indicator + `<span class="zs-state-txt">${msg}</span>`;
-      stateEl.classList.toggle("zs-state-warn", warn);
+      // Update Dot status
+      if (dot) {
+        if (!A.bridge || !A.bridge.connected) dot.className = "off";
+        else if (!bridgeOk) dot.className = "warn";
+        else dot.className = "on";
+      }
+
+      if (badgeBtn) {
+        const cleanMsg = msg.replace(/<[^>]*>/g, "");
+        badgeBtn.title = `${cleanMsg} · คลิกเพื่อสลับ AI`;
+      }
+
       actionBtn.textContent = label;
       actionBtn.dataset.kind = kind;
       actionBtn.disabled = disabled;
-      actionBtn.style.display = busy ? "none" : "";
-      if (switchBtn) switchBtn.style.display = showExtras ? "" : "none";
+
+      if (isBusyOrRunning) {
+        actionBtn.style.display = "none";
+        stopBtn.hidden = false;
+        stateEl.hidden = false;
+        stateEl.innerHTML = indicator + `<span class="zs-state-txt">${_hudStatusText || msg}</span>`;
+      } else if (A.started) {
+        actionBtn.style.display = "none";
+        stopBtn.hidden = true;
+        stateEl.hidden = false;
+        stateEl.innerHTML = `<span class="zs-state-txt">${msg}</span>`;
+      } else {
+        actionBtn.style.display = "";
+        stopBtn.hidden = true;
+        stateEl.hidden = true;
+      }
+
+      if (switchBtn) switchBtn.style.display = "none";
+      if (supportBtn) supportBtn.style.display = "none";
+      if (discordEl) discordEl.style.display = "none";
     }
 
-    function setStarted() {
+    let _startingPct = 0;
+    let _startingStep = "";
+
+    function setStarted(v) {
+      if (typeof v === "boolean") A.started = v;
       renderBar();
     }
-    function setStarting() {
+
+    function setStarting(on, pct = 0, step = "") {
+      A.starting = !!on;
+      _startingPct = Math.max(0, Math.min(100, pct || 0));
+      _startingStep = step || "";
+      renderBar();
+    }
+
+    function setStartingProgress(pct, step) {
+      _startingPct = Math.max(0, Math.min(100, pct || 0));
+      if (step) _startingStep = step;
       renderBar();
     }
 
@@ -369,30 +497,25 @@
       A.bridge = s;
       if (!dot) return;
       const servers = s.servers || [];
-      const roblox = servers.find((x) => x.id === "roblox");
-      const mcpUp = roblox ? !!roblox.alive : !!s.mcpAlive || servers.some((x) => x.alive);
-      const robloxTools = roblox ? roblox.tools || 0 : s.tools || 0;
-      const mcpOk = s.connected && (mcpUp || robloxTools > 0);
-      const totalTools = servers.reduce((n, x) => n + (x.tools || 0), 0) || s.tools || robloxTools;
-      const studioOff = mcpOk && s.studio === false;
-      const noApp = studioOff && s.studioApp === false;
-      const noPlace = studioOff && s.studioApp === true;
-      const ok = mcpOk && !studioOff;
-      dot.className = s.connected ? (ok ? "on" : "warn") : "off";
-
+      const totalTools = s.tools || 0;
+      const studioReady = s.connected && (s.studio === true || totalTools > 0);
       const procUp = s.studioProc === true;
+
+      dot.className = s.connected ? (studioReady ? "on" : "warn") : "off";
+
       let txt;
-      if (!s.connected) txt = "ออฟไลน์, คลิกเพื่อเชื่อมต่อ";
-      else if (!mcpOk) txt = "เชื่อมต่อแล้ว, เปิด Roblox Studio";
-      else if (noPlace) txt = "Studio เปิดอยู่, ยังไม่มีแมพ";
-      else if (noApp) txt = procUp ? "Studio เปิดอยู่แต่ยังไม่พร้อม" : "Roblox Studio ออฟไลน์";
-      else if (studioOff) txt = "Studio ยังไม่ได้เชื่อมต่อ";
-      else txt = `เชื่อมต่อแล้ว · พร้อมใช้งาน ${totalTools} คำสั่ง`;
+      if (!s.connected) {
+        txt = "คุณต้องเปิด start.bat ก่อนสิ · คลิกเพื่อเปิดระบบ (127.0.0.1:17613)";
+      } else if (!studioReady) {
+        txt = procUp ? "Bridge ออนไลน์แล้ว · รอเปิดแมพใน Roblox Studio" : "Bridge ออนไลน์แล้ว · ยังไม่ได้เปิดโปรแกรม Roblox Studio";
+      } else {
+        txt = `เชื่อมต่อ Studio สำเร็จ · พร้อมใช้งาน ${totalTools} คำสั่ง`;
+      }
       dot.title = txt;
-      bridgeOk = ok;
-      studioDown = studioOff;
-      placeDown = noPlace;
-      appDown = noApp;
+      bridgeOk = studioReady;
+      studioDown = !studioReady;
+      placeDown = s.connected && !s.studio;
+      appDown = s.connected && !procUp;
       studioProcUp = procUp;
       addonOk = !!s.connected && servers.some((x) => x.id !== "roblox" && x.alive && (x.tools || 0) > 0);
 
@@ -454,6 +577,7 @@
       setStatus,
       setStarted,
       setStarting,
+      setStartingProgress,
       showStop,
       markStopping,
       inputCover,
@@ -461,6 +585,13 @@
       nudgeStart,
       updateStartGate,
       renderBar,
+      toast: (...a) => (window.ZS.toast ? window.ZS.toast(...a) : console.log(...a)),
+      banner: (...a) => (window.ZS.banner ? window.ZS.banner(...a) : console.warn(...a)),
+      clearBanner: (...a) => (window.ZS.clearBanner ? window.ZS.clearBanner(...a) : undefined),
+      showBridgeModal: (...a) => (window.ZS.showBridgeModal ? window.ZS.showBridgeModal(...a) : undefined),
+      showImages: (...a) => (window.ZS.showImages ? window.ZS.showImages(...a) : undefined),
+      staleExtensionAlert: (...a) => (window.ZS.staleExtensionAlert ? window.ZS.staleExtensionAlert(...a) : undefined),
+      bridgeAlert: (...a) => (window.ZS.bridgeAlert ? window.ZS.bridgeAlert(...a) : undefined),
       refreshSetup: (c) => window.ZS.menu && window.ZS.menu.refreshSetup(c),
       getCustomPrompt: () => window.ZS.menu && window.ZS.menu.getCustomPrompt(),
       getCustomMcpServers: () => window.ZS.menu && window.ZS.menu.getCustomMcpServers(),
@@ -468,6 +599,7 @@
     };
   })();
 
-  window.ZS.ui = ui;
-  window.ui = ui;
+  window.ZS = window.ZS || {};
+  window.ZS.ui = Object.assign(window.ZS.ui || {}, ui);
+  window.ui = window.ZS.ui;
 })();

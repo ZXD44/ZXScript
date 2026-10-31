@@ -8,6 +8,7 @@
   "permissions": [
     "storage",
     "tabs",
+    "alarms",
     "nativeMessaging",
     "notifications"
   ],
@@ -55,6 +56,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/deepseek.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -64,8 +67,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/deepseek.js",
         "core/main.js"
       ],
       "css": [
@@ -95,6 +96,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/chatgpt.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -104,8 +107,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/chatgpt.js",
         "core/main.js"
       ],
       "css": [
@@ -123,6 +124,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/gemini.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -132,8 +135,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/gemini.js",
         "core/main.js"
       ],
       "css": [
@@ -152,6 +153,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/kimi.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -161,8 +164,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/kimi.js",
         "core/main.js"
       ],
       "css": [
@@ -180,6 +181,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/glm.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -189,8 +192,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/glm.js",
         "core/main.js"
       ],
       "css": [
@@ -208,6 +209,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/arena.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -217,8 +220,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/arena.js",
         "core/main.js"
       ],
       "css": [
@@ -237,6 +238,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/meta.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -246,8 +249,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/meta.js",
         "core/main.js"
       ],
       "css": [
@@ -275,6 +276,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/qwen.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -284,8 +287,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/qwen.js",
         "core/main.js"
       ],
       "css": [
@@ -303,6 +304,8 @@
       "js": [
         "core/config.js",
         "core/constants.js",
+        "core/parser.js",
+        "providers/claude.js",
         "core/icons.js",
         "core/audio.js",
         "core/camouflage.js",
@@ -312,8 +315,6 @@
         "core/tools.js",
         "core/response-watcher.js",
         "core/agent.js",
-        "core/parser.js",
-        "providers/claude.js",
         "core/main.js"
       ],
       "css": [
@@ -323,6 +324,16 @@
         "styles/modals.css"
       ],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*"
+      ],
+      "matches": [
+        "https://*/*"
+      ]
     }
   ]
 }

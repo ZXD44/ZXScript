@@ -10,7 +10,7 @@ import threading
 HOST = "127.0.0.1"
 BRIDGE_VERSION = "0.0.2"
 PORT = int(os.environ.get("ZS_BRIDGE_PORT", "17613"))
-STUDIO_MCP_PORT = 33882
+STUDIO_MCP_PORT = 13469
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(HERE)

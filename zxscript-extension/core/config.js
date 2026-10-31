@@ -33,7 +33,7 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
         stack ? `Stack Trace:\n${stack}` : "",
         `ลิงก์ (URL): ${location.href}`,
         `เวลา: ${new Date().toLocaleString("th-TH")}`,
-        `เวอร์ชัน: 0.0.2`,
+        `เวอร์ชัน: ${((typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : "0.0.3")}`,
         "=================================="
       ].filter(Boolean).join("\n");
 
@@ -358,6 +358,9 @@ ${BT}
 - สร้าง UI/วัตถุก่อนเขียนสคริปต์: สร้าง Instance ก่อน แล้วจึงเขียน Script เชื่อมโยงผ่าน WaitForChild(name, 5)
 - ห้าม Destroy() สุ่มสี่สุ่มห้า: ห้ามสั่ง ClearAllChildren() หรือ Destroy() โฟลเดอร์หลักโดยไม่ระบุเป้าหมายชัดเจน
 - AUTO-DEBUG: หลังสร้างหรือแก้สคริปต์ ให้รัน get_console_output เพื่อตรวจจับ runtime error และแก้ปัญหาอัตโนมัติ
+
+━━━ คำสั่งเริ่มต้น (FIRST TURN ACTION) ━━━
+เมื่อได้รับข้อความตั้งค่าระบบนี้ ให้คุณตอบกลับด้วยคำสั่ง list_commands ในบล็อก ${BT}json ทันทีเพื่อยืนยันการเชื่อมต่อ Studio
 
 ━━━ หน่วยความจำโปรเจกต์ (PROJECT MEMORY) ━━━
 game.ServerStorage.ZXScript.Memory (ModuleScript) เป็นหน่วยความจำถาวรของโปรเจกต์นี้

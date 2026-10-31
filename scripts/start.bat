@@ -123,17 +123,18 @@ echo   [5/6] กำลังตรวจสอบ Roblox Studio และระ�
 set "STUDIO_MCP="
 set "STUDIO_EXE="
 
-for /f "tokens=*" %%a in ('%PY% -c "import sys; sys.path.insert(0, r'%ROOT%bridge'); import launch_studio_mcp as m; p = m.find_studio_mcp(); print(p if p else \"\")"') do (
+for /f "delims=" %%a in ('call %PY% "%ROOT%bridge\launch_studio_mcp.py" --mcp-exe 2^>nul') do (
     set "STUDIO_MCP=%%a"
+)
+
+for /f "delims=" %%a in ('call %PY% "%ROOT%bridge\launch_studio_mcp.py" --studio-exe 2^>nul') do (
+    set "STUDIO_EXE=%%a"
 )
 
 if defined STUDIO_MCP (
     echo         [OK] ตรวจพบโมดูล StudioMCP:
     echo              !STUDIO_MCP!
     call :log "Detected StudioMCP at !STUDIO_MCP!"
-    for /f "tokens=*" %%a in ('%PY% -c "import sys, os; sys.path.insert(0, r'%ROOT%bridge'); import launch_studio_mcp as m; p = m.find_studio_mcp(); d = os.path.dirname(p) if p else \"\"; s = os.path.join(d, \"RobloxStudioBeta.exe\"); print(s if os.path.isfile(s) else \"\")"') do (
-        set "STUDIO_EXE=%%a"
-    )
 ) else (
     echo         [คำเตือน] ไม่พบ StudioMCP.exe อัตโนมัติ (เปิด Studio เพื่อเชื่อมต่อ)
     call :log "WARN: StudioMCP binary not detected."

@@ -6,7 +6,10 @@
   "use strict";
 
   window.ZS = window.ZS || {};
-  const { A, diag, bareToolName, IMAGE_FEEDBACK_RE, ui } = window.ZS;
+  const { A, diag, bareToolName, IMAGE_FEEDBACK_RE } = window.ZS;
+  const ui = window.ZS.ui || {};
+  if (!ui.banner) ui.banner = (...a) => (window.ZS.banner ? window.ZS.banner(...a) : console.warn("[ZS banner]", ...a));
+  if (!ui.toast) ui.toast = (...a) => (window.ZS.toast ? window.ZS.toast(...a) : console.log("[ZS toast]", ...a));
 
   const isContextInvalidated = (m) =>
     /Extension context invalidated|Receiving end does not exist|message port closed/i.test(m || "");

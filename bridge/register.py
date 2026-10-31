@@ -113,11 +113,14 @@ def register_all():
         except Exception:
             pass
 
-    # Windows Startup: Run ZXScript Bridge headless on boot
+    # Do not auto-register to Windows Startup unconditionally.
+    # Autostart should only be toggled explicitly by the user via extension / native_host.
     try:
-        krun = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run")
-        run_cmd = f'"{runner}" "{os.path.join(HERE, "bridge.py")}"'
-        winreg.SetValueEx(krun, "ZXScriptBridge", 0, winreg.REG_SZ, run_cmd)
+        krun = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
+        try:
+            winreg.DeleteValue(krun, "ZXScriptBridge")
+        except FileNotFoundError:
+            pass
         winreg.CloseKey(krun)
     except Exception:
         pass

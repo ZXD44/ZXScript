@@ -160,7 +160,101 @@ def find_studio_mcp() -> Optional[Path]:
     return _find_studio_mcp_windows()
 
 
+def find_studio_exe() -> Optional[Path]:
+    """Return path to RobloxStudioBeta.exe / RobloxStudio.exe / macOS app binary."""
+    # 1. Look adjacent to detected StudioMCP
+    mcp = find_studio_mcp()
+    if mcp:
+        candidates = WINDOWS_STUDIO_EXECUTABLES if sys.platform != "darwin" else MAC_STUDIO_EXECUTABLES
+        target_dir = mcp.parent
+        for name in candidates:
+            cand = target_dir / name
+            if cand.is_file():
+                return cand
+
+    # 2. Look in candidate version roots
+    if sys.platform != "darwin":
+        for root in _candidate_roots():
+            if not root.is_dir():
+                continue
+            try:
+                for version_dir in root.iterdir():
+                    if not version_dir.is_dir():
+                        continue
+                    for name in WINDOWS_STUDIO_EXECUTABLES:
+                        cand = version_dir / name
+                        if cand.is_file():
+                            return cand
+            except OSError:
+                continue
+    else:
+        for app in _mac_app_candidates():
+            macos_dir = app / "Contents" / "MacOS"
+            for name in MAC_STUDIO_EXECUTABLES:
+                cand = macos_dir / name
+                if cand.is_file():
+                    return cand
+
+    return None
+
+
+def launch_studio(place_path: Optional[str] = None) -> bool:
+    """Launch Roblox Studio in the background without blocking."""
+    exe = find_studio_exe()
+    if not exe:
+        return False
+    cmd = [str(exe)]
+    if place_path:
+        cmd.append(place_path)
+    try:
+        if sys.platform == "win32":
+            # DETACHED_PROCESS (0x00000008) | CREATE_NEW_PROCESS_GROUP (0x00000200)
+            subprocess.Popen(
+                cmd,
+                creationflags=0x00000008 | 0x00000200,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+            )
+        else:
+            subprocess.Popen(
+                cmd,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+        return True
+    except Exception:
+        return False
+
+
 def main() -> int:
+    args = sys.argv[1:]
+    if "--studio-exe" in args:
+        s = find_studio_exe()
+        if s:
+            print(str(s))
+            return 0
+        return 1
+
+    if "--mcp-exe" in args:
+        m = find_studio_mcp()
+        if m:
+            print(str(m))
+            return 0
+        return 1
+
+    if "--launch-studio" in args:
+        ok = launch_studio()
+        if ok:
+            s = find_studio_exe()
+            print(f"Launched Roblox Studio: {s}")
+            return 0
+        sys.stderr.write("Failed to launch Roblox Studio (executable not found)\n")
+        return 1
+
     exe = find_studio_mcp()
     binary_name = "StudioMCP" if sys.platform == "darwin" else "StudioMCP.exe"
     if not exe:
@@ -171,7 +265,7 @@ def main() -> int:
         return 1
     sys.stderr.write(f"launch_studio_mcp: using {exe}\n")
     sys.stderr.flush()
-    proc = subprocess.Popen([str(exe)] + sys.argv[1:])
+    proc = subprocess.Popen([str(exe)] + args)
     try:
         return proc.wait()
     except KeyboardInterrupt:

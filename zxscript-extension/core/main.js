@@ -19,7 +19,7 @@
   const TOKEN_CHARS = C.TOKEN_CHARS || Z.TOKEN_CHARS || 4;
 
   const ui = Z.ui || {};
-  const P = window.ZSProvider;
+  const P = (window.ZS && window.ZS.getProvider ? window.ZS.getProvider() : null) || window.ZSProvider;
   if (!P) {
     console.warn("[ZXScript] No provider registered for this page");
     return;
@@ -75,6 +75,17 @@
   // ── Native Send / Stop Hooks ───────────────────────────────────────────────
   if (P.installSendHooks) {
     P.installSendHooks({
+      isBlocked: () => A.injecting || A.running || A.starting,
+      isStarted: () => A.started,
+      onBlockedAttempt: () => (ui.nudgeStart ? ui.nudgeStart() : undefined),
+      onUserMessage: (base) => {
+        A.userStopped = false;
+        A.lastGenAt = Date.now();
+        syncSessionState();
+        setTimeout(() => {
+          if (!A.running && !A.userStopped && agentLoop) agentLoop(base);
+        }, 300);
+      },
       onUserSend: () => {
         A.userStopped = false;
         A.lastGenAt = Date.now();
@@ -83,9 +94,18 @@
       onNativeStop: () => {
         A.userStopped = true;
         A.stopping = true;
+        A.stop = true;
         A.stopAt = Date.now();
         A.stopStreamLen = P.streamLen ? P.streamLen() : 0;
+        if (A.running && !A.stopping && ui.markStopping) ui.markStopping();
         diag("native.stopClicked");
+      },
+      onNativeContinue: () => {
+        A.userStopped = false;
+        A.stop = false;
+        const it = P.lastAssistant ? P.lastAssistant() : null;
+        if (it) { delete it.dataset.zStopped; }
+        diag("nativeContinue");
       },
     });
   }
@@ -94,6 +114,7 @@
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg) return;
     if (msg.type === "zs-status") {
+      A.staleExtension = false;
       ui.setStatus({
         connected: msg.connected,
         mcpAlive: msg.mcpAlive,
@@ -126,11 +147,14 @@
   function onStatus(s) {
     if (!s) return;
     if (s.kind === "stale-extension") {
+      A.staleExtension = true;
       clearInterval(statusTimer);
+      if (ui.renderBar) ui.renderBar();
       if (window.ZS.staleExtensionAlert) window.ZS.staleExtensionAlert();
       diag("bridge.staleExtension", { via: "status", error: s.error });
       return;
     }
+    A.staleExtension = false;
     ui.setStatus(s);
   }
 

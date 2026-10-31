@@ -20,6 +20,13 @@ All notable changes to ZXScript are documented here.
   - Complete elimination of emoji clutter across all buttons, status indicators, and notification banners.
   - Restructured Thai text to be terse, high-density, and structured into clean, readable paragraphs.
 - **34 Ready-to-Run Roblox Studio Tools**: Expanded tool discovery and Luau executor for modern Roblox engine 0.744 / Luau 0.743.
+- **Critical Action Bar & Bootstrap Injection Fix**: Fixed failure where clicking "▶ เริ่มทำงาน" did not inject the initial system prompt to the AI composer. Exported `window.ZSProvider` across all 9 providers, corrected `manifest.json` load order, eliminated premature bailout in `landed()`, and removed silent early exit on non-empty chats. Full incident analysis recorded in [`docs/CRITICAL_ISSUES.md`](./CRITICAL_ISSUES.md).
+- **Red Dragon Wings & Flapping Dynamics Overhaul**:
+  - Enlarged dragon wings (+43%, from $46\times 26\text{px}$ to $66\times 37\text{px}$) with crimson ember glow drop shadows.
+  - Symmetrical coordinate calibration: fixed detached gap on the right wing using precision reflection geometry (`left: -42px`, `right: 6px`, `transform-origin: calc(100% - 9px) 50%`) ensuring 0.00px error symmetry across all frames.
+  - Fluid multi-phase flapping animation: implemented organic 5-stage flight cycles (`zs-wing-flap-left`, `zs-wing-flap-right`) with 2.0s standby, 1.0s active tool-run boost, and 1.4s hover cycle.
+  - Removed `!important` from base `transform` selectors conforming to W3C CSS Animations Level 1 cascade rules, eliminating animation freeze.
+  - Enforced `display: none !important;` on all `[hidden]` elements (`#zs-stop[hidden]`, `#zs-state[hidden]`), preventing idle button leakage.
 
 ---
 

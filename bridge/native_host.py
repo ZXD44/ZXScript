@@ -16,6 +16,14 @@ if getattr(sys, "frozen", False):
 else:
     HERE = os.path.dirname(os.path.abspath(__file__))
 
+if sys.platform == "win32":
+    import msvcrt
+    try:
+        msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+        msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+    except Exception:
+        pass
+
 ROOT_DIR = os.path.dirname(HERE)
 BRIDGE_PY = os.path.join(HERE, "bridge.py")
 EXE_PATH = os.path.join(ROOT_DIR, "ZXScript.exe")
@@ -102,8 +110,29 @@ def find_python():
     return sys.executable if "python" in sys.executable.lower() else "python"
 
 
+def launch_studio_if_needed():
+    """Ensure Roblox Studio is opened if installed and not running."""
+    try:
+        from bridge.studio_watcher import roblox_studio_app_running
+        from bridge.launch_studio_mcp import launch_studio
+    except Exception:
+        try:
+            from studio_watcher import roblox_studio_app_running
+            from launch_studio_mcp import launch_studio
+        except Exception:
+            return False
+
+    if not roblox_studio_app_running():
+        ok = launch_studio()
+        if ok:
+            log_host("Auto-launched Roblox Studio")
+        return ok
+    return True
+
+
 def start_bridge():
     """Launch bridge.py as a detached background daemon (headless, no CMD window)."""
+    launch_studio_if_needed()
     pid = find_bridge_pid()
     if pid:
         log_host(f"Bridge already running (PID {pid})")
@@ -233,6 +262,8 @@ def main():
                 send_msg(start_bridge())
             elif action == "status":
                 send_msg(get_status())
+            elif action in ("launch_studio", "start_studio"):
+                send_msg({"ok": launch_studio_if_needed(), "running": True})
             elif action == "autostart":
                 send_msg(set_autostart(msg.get("enable", True)))
             elif action == "logs":

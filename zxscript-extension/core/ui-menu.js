@@ -174,7 +174,22 @@
     }
 
     const mergedServers = mergedMcpServers();
-    let mcpList = `<div class="zs-mcp-item zs-mcp-item-primary"><span class="zs-mcp-health zs-mcp-health-on" title="เชื่อมต่อแล้ว"></span><div class="zs-mcp-info"><span class="zs-mcp-name">Roblox Studio</span><span class="zs-mcp-url">ระบบหลัก · เชื่อมต่ออัตโนมัติ</span></div></div>`;
+    const robloxAlive = A.bridge && A.bridge.connected && (A.bridge.studio === true || (A.bridge.tools > 0));
+    const robloxHealth = !A.bridge || !A.bridge.connected ? "off" : robloxAlive ? "on" : "warn";
+    const robloxTitle = !A.bridge || !A.bridge.connected
+      ? "Bridge ออฟไลน์"
+      : robloxAlive
+      ? `เชื่อมต่อ Studio แล้ว (${A.bridge.tools || 0} คำสั่ง)`
+      : (A.bridge && A.bridge.studioProc)
+      ? "รอเปิด Place ใน Studio"
+      : "รอเปิด Roblox Studio";
+    const robloxSub = !A.bridge || !A.bridge.connected
+      ? "ระบบหลัก · ออฟไลน์ (พอร์ต 17613)"
+      : robloxAlive
+      ? `พร้อมใช้งาน · ${A.bridge.tools || 0} คำสั่ง`
+      : "รอเชื่อมต่อแมพใน Studio";
+
+    let mcpList = `<div class="zs-mcp-item zs-mcp-item-primary"><span class="zs-mcp-health zs-mcp-health-${robloxHealth}" title="${esc(robloxTitle)}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">Roblox Studio</span><span class="zs-mcp-url">${esc(robloxSub)}</span></div></div>`;
     mergedServers.forEach((s) => {
       const healthClass = s.alive === true ? "on" : s.alive === false ? "off" : "unknown";
       const healthTitle =
@@ -245,6 +260,8 @@
           <span class="zs-foot-dragon">Red Dragon</span>
         </div>
         <div class="zs-foot-links">
+          <a href="https://www.zirconx.xyz" target="_blank" rel="noopener" class="zs-foot-link" title="เว็บไซต์ผู้พัฒนา: www.zirconx.xyz">🌐 เว็บไซต์</a>
+          <span class="zs-foot-sep">·</span>
           <a href="${GITHUB_URL}" target="_blank" rel="noopener" class="zs-foot-link">GitHub</a>
           ${VIDEO_URL ? `<span class="zs-foot-sep">·</span><a href="${VIDEO_URL}" target="_blank" rel="noopener" class="zs-foot-link">คู่มือ</a>` : ""}
         </div>
@@ -337,18 +354,20 @@
     });
   }
 
-  function openMenu(atMcp = false) {
+  function openMenu(toSupport = false) {
     if (!menuEl) return;
     buildMenu();
     menuEl.hidden = false;
     const swBtn = document.getElementById("zs-switch");
     if (swBtn) swBtn.classList.add("zs-switch-open");
-    if (atMcp) {
-      setTimeout(() => {
-        const sec = menuEl.querySelector("#zs-mcp-list");
-        if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
-    }
+    requestAnimationFrame(() => {
+      if (!menuEl || menuEl.hidden) return;
+      if (toSupport) {
+        menuEl.scrollTop = menuEl.scrollHeight;
+      } else {
+        menuEl.scrollTop = 0;
+      }
+    });
   }
 
   function closeMenu() {

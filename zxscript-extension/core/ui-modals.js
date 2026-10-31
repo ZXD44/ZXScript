@@ -106,7 +106,25 @@
 
     const openBridgeBtn = b.querySelector(".zs-action-openbridge");
     if (openBridgeBtn) {
-      openBridgeBtn.addEventListener("click", () => showBridgeModal());
+      openBridgeBtn.addEventListener("click", async () => {
+        openBridgeBtn.disabled = true;
+        openBridgeBtn.textContent = "กำลังเชื่อมต่อ…";
+        const bgFn = (window.ZS.tools && window.ZS.tools.bg) || window.ZS.bg;
+        if (bgFn) {
+          try {
+            const rec = await bgFn({ type: "reconnect" });
+            if (rec && rec.connected) {
+              toast("เชื่อมต่อ Studio สำเร็จแล้ว");
+              if (window.ZS.ui && window.ZS.ui.setStatus) window.ZS.ui.setStatus(rec);
+              b.remove();
+              return;
+            }
+          } catch {}
+        }
+        openBridgeBtn.disabled = false;
+        openBridgeBtn.textContent = "เชื่อมต่อ Studio";
+        showBridgeModal();
+      });
     }
 
     const retryBtn = b.querySelector(".zs-action-retry");
@@ -244,9 +262,9 @@
     }
     banner(
       "warn",
-      "ยังไม่ได้เชื่อมต่อ Studio",
-      "ไม่สามารถเชื่อมต่อไปยัง Studio ได้\n" +
-        "• วิธีแก้: กดปุ่ม 'เชื่อมต่อ Studio' ด้านล่างเพื่อเริ่มระบบ"
+      "คุณต้องเปิด start.bat ก่อนสิ!",
+      "ยังไม่ได้เปิด Bridge Server (127.0.0.1:17613)\n" +
+        "• คุณต้องเปิดไฟล์ start.bat ก่อนสิ หรือกดปุ่ม 'เชื่อมต่อ Studio' ด้านล่าง"
     );
   }
 
@@ -290,8 +308,8 @@
     backdrop.innerHTML = `
       <div class="zs-modal-card">
         <div class="zs-modal-header">
-          <span class="zs-modal-tag">Studio</span>
-          <button class="zs-modal-close" title="Close">&times;</button>
+          <span class="zs-modal-tag"><svg class="zs-rbx-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><path d="M5.26 2L2 18.74 18.74 22 22 5.26 5.26 2zm8.28 11.23l-3.27-.63.63-3.27 3.27.63-.63 3.27z"/></svg>Studio</span>
+          <button class="zs-modal-close" title="ปิดหน้าต่าง">&times;</button>
         </div>
         <div class="zs-modal-title">เชื่อมต่อ Roblox Studio</div>
         <div class="zs-modal-body">
@@ -307,6 +325,20 @@
             <span class="zs-modal-info-val">Headless (No CMD window)</span>
           </div>
         </div>
+        <div class="zs-modal-prog">
+          <div class="zs-modal-prog-hdr">
+            <span class="zs-modal-prog-label">สถานะการเชื่อมต่อ</span>
+            <span class="zs-modal-prog-pct">0%</span>
+          </div>
+          <div class="zs-modal-prog-track">
+            <div class="zs-modal-prog-fill" style="width: 0%"></div>
+          </div>
+          <div class="zs-modal-steps">
+            <span class="zs-modal-step step-bridge"><span class="zs-modal-step-dot"></span> 1. Bridge Server</span>
+            <span class="zs-modal-step step-studio"><span class="zs-modal-step-dot"></span> 2. Studio App</span>
+            <span class="zs-modal-step step-tools"><span class="zs-modal-step-dot"></span> 3. Place & คำสั่ง</span>
+          </div>
+        </div>
         <div class="zs-modal-log" style="display:none;"></div>
         <div class="zs-modal-actions">
           <button class="zs-modal-btn secondary zs-modal-cancel">ยกเลิก</button>
@@ -318,25 +350,44 @@
 
     root.appendChild(backdrop);
 
+    const progFill = backdrop.querySelector(".zs-modal-prog-fill");
+    const progPct = backdrop.querySelector(".zs-modal-prog-pct");
+    const progLabel = backdrop.querySelector(".zs-modal-prog-label");
+    const stepBridge = backdrop.querySelector(".step-bridge");
+    const stepStudio = backdrop.querySelector(".step-studio");
+    const stepTools = backdrop.querySelector(".step-tools");
+    const confirmBtn = backdrop.querySelector(".zs-modal-confirm");
     const copyBtn = backdrop.querySelector(".zs-modal-copy");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", () => {
-        navigator.clipboard.writeText("start.bat").then(() => {
-          copyBtn.textContent = "คัดลอกสำเร็จ";
-          toast("คัดลอก start.bat แล้ว");
-          setTimeout(() => {
-            if (copyBtn) copyBtn.textContent = "คัดลอก start.bat";
-          }, 2000);
-        });
-      });
+    const logBox = backdrop.querySelector(".zs-modal-log");
+
+    function setStepClass(el, state) {
+      if (!el) return;
+      el.classList.remove("done", "active", "warn", "err");
+      if (state) el.classList.add(state);
     }
 
-    const logBox = backdrop.querySelector(".zs-modal-log");
+    function updateProgress(pct, label, tone, steps = {}) {
+      if (typeof pct === "number") {
+        progPct.textContent = `${Math.round(pct)}%`;
+        progFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+      } else {
+        progPct.textContent = String(pct);
+      }
+      if (label) progLabel.textContent = label;
+      progFill.classList.remove("ok", "warn", "err");
+      if (tone) progFill.classList.add(tone);
+
+      if (steps.bridge) setStepClass(stepBridge, steps.bridge);
+      if (steps.studio) setStepClass(stepStudio, steps.studio);
+      if (steps.tools) setStepClass(stepTools, steps.tools);
+    }
+
     const addLog = (text, cls) => {
       logBox.style.display = "";
       const line = document.createElement("div");
       if (cls) line.className = cls;
-      line.textContent = `[${new Date().toLocaleTimeString("th-TH")}] ${text}`;
+      const ts = new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      line.textContent = `[${ts}] ${text}`;
       logBox.appendChild(line);
       logBox.scrollTop = logBox.scrollHeight;
     };
@@ -352,73 +403,215 @@
       if (e.target === backdrop) close();
     });
 
-    const confirmBtn = backdrop.querySelector(".zs-modal-confirm");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText("start.bat").then(() => {
+          copyBtn.textContent = "✓ คัดลอกแล้ว";
+          toast("คัดลอก start.bat แล้ว");
+          addLog("คัดลอกคำสั่ง start.bat ไปยัง Clipboard แล้ว", "log-info");
+          setTimeout(() => {
+            if (copyBtn) copyBtn.textContent = "คัดลอกคำสั่ง";
+          }, 2000);
+        }).catch(() => {
+          copyBtn.textContent = "คัดลอกไม่สำเร็จ";
+        });
+      });
+    }
+
+    const callBg = (msg) => {
+      const fn = (window.ZS.tools && window.ZS.tools.bg) || window.ZS.bg;
+      if (fn) return fn(msg);
+      return new Promise((resolve) => {
+        try {
+          chrome.runtime.sendMessage(msg, (r) => {
+            if (chrome.runtime.lastError) {
+              resolve({ ok: false, kind: "stale-extension", error: chrome.runtime.lastError.message });
+            } else {
+              resolve(r || { ok: false });
+            }
+          });
+        } catch (e) {
+          resolve({ ok: false, kind: "stale-extension", error: String(e) });
+        }
+      });
+    };
+
+    // Inspect live state immediately upon open
+    const checkState = async () => {
+      const st = await callBg({ type: "reconnect" });
+      if (st && st.kind === "stale-extension") {
+        updateProgress(0, "ส่วนขยายได้รับการอัปเดตแล้ว กรุณารีเฟรชหน้านี้ (F5)", "err", { bridge: "err" });
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "🔄 รีเฟรชหน้านี้ (F5)";
+        confirmBtn.onclick = () => location.reload();
+        return;
+      }
+      if (st && st.connected) {
+        const hasTools = (st.tools && st.tools > 0) || (window.ZS.A && window.ZS.A.toolList && window.ZS.A.toolList.length > 0);
+        const studioReady = st.studio === true || hasTools;
+        if (studioReady) {
+          updateProgress(100, `เชื่อมต่อสำเร็จ (${st.tools || 0} คำสั่งพร้อมใช้งาน)`, "ok", {
+            bridge: "done",
+            studio: "done",
+            tools: "done",
+          });
+          confirmBtn.textContent = "เชื่อมต่อแล้ว (100%)";
+          setTimeout(close, 800);
+          return;
+        } else {
+          updateProgress(75, st.studioProc ? "Bridge ออนไลน์ · รอเปิดแมพใน Studio" : "Bridge ออนไลน์ · รอเปิด Studio", "warn", {
+            bridge: "done",
+            studio: st.studioProc ? "done" : "active",
+            tools: "",
+          });
+          confirmBtn.textContent = "Bridge พร้อม (รอเปิด Studio)";
+        }
+      }
+    };
+    checkState();
+
     let logTimer = null;
 
     function startModalPolling() {
       let polls = 0;
+      const maxPolls = 25;
       if (logTimer) clearInterval(logTimer);
-      logTimer = setInterval(() => {
+
+      logTimer = setInterval(async () => {
         polls++;
-        chrome.runtime.sendMessage({ type: "status" }, (s) => {
-          if (s && s.connected) {
-            clearInterval(logTimer);
-            logTimer = null;
-            addLog("เชื่อมต่อสำเร็จ (34 เครื่องมือพร้อมใช้งาน)", "log-ok");
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = "เชื่อมต่อแล้ว";
-            setTimeout(close, 700);
-          }
-        });
-        if (polls > 14) {
+        const s = await callBg({ type: "status" });
+        if (s && s.kind === "stale-extension") {
           clearInterval(logTimer);
           logTimer = null;
-          addLog("หมดเวลาเชื่อมต่อ: ตรวจสอบสถานะแล้วลองใหม่อีกครั้ง", "log-err");
+          updateProgress(0, "ส่วนขยายได้รับการอัปเดตแล้ว กรุณารีเฟรชหน้านี้ (F5)", "err", { bridge: "err" });
           confirmBtn.disabled = false;
-          confirmBtn.textContent = "ลองอีกครั้ง";
-        }
-      }, 1200);
-    }
-
-    confirmBtn.addEventListener("click", () => {
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = "กำลังเปิด...";
-
-      // 1. Check if already connected
-      chrome.runtime.sendMessage({ type: "status" }, (st) => {
-        if (st && st.connected) {
-          addLog("เชื่อมต่ออยู่แล้ว (พร้อมใช้งาน)", "log-ok");
-          confirmBtn.disabled = false;
-          confirmBtn.textContent = "เชื่อมต่อแล้ว";
-          setTimeout(close, 600);
+          confirmBtn.textContent = "🔄 รีเฟรชหน้านี้ (F5)";
+          confirmBtn.onclick = () => location.reload();
           return;
         }
 
-        addLog("กำลังส่งคำสั่งเชื่อมต่อในเบื้องหลัง...", "log-info");
-        chrome.runtime.sendMessage({ type: "native_start" }, (resp) => {
-          if (resp && resp.ok) {
-            addLog("ระบบเชื่อมต่อเริ่มทำงานแล้ว (PID: " + (resp.pid || "Headless") + ")", "log-ok");
-            startModalPolling();
+        if (!s || !s.connected) {
+          // Still waiting for Bridge port 17613
+          const pct = Math.min(15 + Math.round((polls / maxPolls) * 35), 50);
+          updateProgress(pct, `กำลังรอพอร์ต 17613 ตอบสนอง... (${polls}/${maxPolls})`, "", {
+            bridge: "active",
+            studio: "",
+            tools: "",
+          });
+        } else {
+          // Bridge is connected!
+          const hasTools = (s.tools && s.tools > 0) || (window.ZS.A && window.ZS.A.toolList && window.ZS.A.toolList.length > 0);
+          const studioReady = s.studio === true || hasTools;
+
+          if (studioReady) {
+            // REAL 100% verified!
+            clearInterval(logTimer);
+            logTimer = null;
+            const count = s.tools || 0;
+            updateProgress(100, `เชื่อมต่อ Studio สำเร็จ (${count} คำสั่งพร้อมใช้งาน)`, "ok", {
+              bridge: "done",
+              studio: "done",
+              tools: "done",
+            });
+            addLog(`✓ เชื่อมต่อ Roblox Studio สำเร็จ (${count} คำสั่งพร้อมใช้งาน)`, "log-ok");
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "เชื่อมต่อแล้ว";
+            setTimeout(close, 1100);
+            return;
           } else {
-            const err = (resp && resp.error) || "Native host did not respond";
-            addLog("Host: " + err, "log-err");
-            // Fallback to Protocol Handler immediately
-            addLog("กำลังสลับไปเปิดผ่าน Windows Protocol (zxscript://)...", "log-info");
-            const link = document.createElement("a");
-            link.href = "zxscript://start";
-            link.style.display = "none";
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => link.remove(), 1000);
-            addLog("หากเบราว์เซอร์แจ้งเตือน ให้กดยืนยันเพื่อเริ่มการเชื่อมต่อ", "log-ok");
-            startModalPolling();
+            // Bridge connected, Studio app / place pending
+            updateProgress(75, s.studioProc ? "Bridge ออนไลน์แล้ว · รอเปิดแมพใน Studio" : "Bridge ออนไลน์แล้ว · รอเปิด Roblox Studio", "warn", {
+              bridge: "done",
+              studio: s.studioProc ? "done" : "active",
+              tools: "",
+            });
+            if (polls === 1 || polls % 4 === 0) {
+              addLog("✓ Bridge ออนไลน์แล้ว (127.0.0.1:17613)", "log-ok");
+              if (s.studioProc) {
+                addLog("• ตรวจพบโปรเซส Studio แต่ยังไม่พบแมพที่เปิด (กรุณาเปิด Place)", "log-info");
+              } else {
+                addLog("• กำลังรอเปิดโปรแกรม Roblox Studio...", "log-info");
+              }
+            }
+            if (polls >= 10) {
+              confirmBtn.disabled = false;
+              confirmBtn.textContent = "Bridge พร้อม (รอเปิด Studio)";
+            }
           }
-        });
-      });
+        }
+
+        if (polls >= maxPolls) {
+          clearInterval(logTimer);
+          logTimer = null;
+          const sFinal = await callBg({ type: "status" });
+          if (!sFinal || !sFinal.connected) {
+            updateProgress(0, "คุณต้องเปิด start.bat ก่อนสิ (ไม่พบเซิร์ฟเวอร์)", "err", {
+              bridge: "err",
+              studio: "",
+              tools: "",
+            });
+            addLog("✕ คุณต้องเปิด start.bat ก่อนสิ! ยังไม่มีเซิร์ฟเวอร์ที่ 127.0.0.1:17613", "log-err");
+            addLog("• ดับเบิลคลิกเปิดไฟล์ start.bat ในโฟลเดอร์โปรเจกต์ หรือกดปุ่มด้านล่าง", "log-info");
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "ลองอีกครั้ง";
+          } else {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "Bridge พร้อม (รอเปิด Studio)";
+          }
+        }
+      }, 1000);
+    }
+
+    confirmBtn.addEventListener("click", async () => {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "กำลังตรวจสอบ...";
+
+      // 1. Check if already connected or can connect directly
+      const st = await callBg({ type: "reconnect" });
+      if (st && st.kind === "stale-extension") {
+        location.reload();
+        return;
+      }
+      if (st && st.connected) {
+        const hasTools = (st.tools && st.tools > 0) || (window.ZS.A && window.ZS.A.toolList && window.ZS.A.toolList.length > 0);
+        if (st.studio === true || hasTools) {
+          updateProgress(100, `เชื่อมต่ออยู่แล้ว (${st.tools || 0} คำสั่งพร้อมใช้งาน)`, "ok", {
+            bridge: "done",
+            studio: "done",
+            tools: "done",
+          });
+          addLog(`✓ ระบบเชื่อมต่อและ Roblox Studio พร้อมใช้งานอยู่แล้ว (${st.tools || 0} คำสั่ง)`, "log-ok");
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = "เชื่อมต่อแล้ว";
+          setTimeout(close, 800);
+          return;
+        }
+      }
+
+      updateProgress(15, "กำลังเริ่มระบบเชื่อมต่อ (Headless)...", "", { bridge: "active" });
+      addLog("กำลังส่งคำสั่งเชื่อมต่อในเบื้องหลัง...", "log-info");
+      const resp = await callBg({ type: "native_start" });
+      if (resp && resp.ok) {
+        addLog("ระบบเชื่อมต่อเริ่มทำงานแล้ว (PID: " + (resp.pid || "Headless") + ")", "log-ok");
+        startModalPolling();
+      } else {
+        const err = (resp && resp.error) || "Native host did not respond";
+        addLog("Host: " + err, "log-err");
+        // Fallback to Protocol Handler immediately
+        addLog("กำลังสลับไปเปิดผ่าน Windows Protocol (zxscript://)...", "log-info");
+        const link = document.createElement("a");
+        link.href = "zxscript://start";
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => link.remove(), 1000);
+        addLog("หากเบราว์เซอร์แจ้งเตือน ให้กดยืนยันเพื่อเริ่มการเชื่อมต่อ", "log-ok");
+        startModalPolling();
+      }
     });
   }
 
-  Object.assign(window.ZS, {
+  const modalMethods = {
     formatMsg,
     toast,
     banner,
@@ -427,8 +620,13 @@
     bridgeAlert,
     showImages,
     showBridgeModal,
-  });
-  window.ZS.modals = window.ZS;
+  };
+
+  window.ZS = window.ZS || {};
+  window.ZS.ui = window.ZS.ui || {};
+  Object.assign(window.ZS, modalMethods);
+  Object.assign(window.ZS.ui, modalMethods);
+  window.ZS.modals = modalMethods;
 
   window.toast = toast;
   window.banner = banner;

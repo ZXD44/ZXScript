@@ -402,3 +402,13 @@ const ZSProvider = (() => {
     turnHalted, findContinueBtn, clickContinueBtn,
   };
 })();
+
+// Export ZSProvider to window and module scopes
+if (typeof window !== "undefined") {
+  window.ZSProvider = ZSProvider;
+  window.ZS = window.ZS || {};
+  window.ZS.provider = ZSProvider;
+}
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = ZSProvider;
+}

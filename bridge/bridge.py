@@ -97,6 +97,14 @@ async def main():
         ])
 
     async def _boot_and_diagnose():
+        if await asyncio.to_thread(roblox_studio_app_running) is False:
+            try:
+                from bridge.launch_studio_mcp import launch_studio
+                if await asyncio.to_thread(launch_studio):
+                    log("Roblox Studio is not running - auto-launched Roblox Studio.", "cy")
+            except Exception as e:
+                log(f"Could not auto-launch Roblox Studio: {e}", "yl")
+
         try:
             await asyncio.to_thread(mgr.start_all)
         except Exception as e:
@@ -122,8 +130,8 @@ async def main():
             roblox_client is not None
             and roblox_total == 0
             and await asyncio.to_thread(roblox_studio_app_running) is True
-            and await asyncio.to_thread(reclaim_studio_port, roblox_client)
         ):
+            await asyncio.to_thread(reclaim_studio_port, roblox_client, True)
             try:
                 await asyncio.to_thread(mgr.restart, PRIMARY_SERVER_ID)
                 roblox_total = len(roblox_client.tools_cache)

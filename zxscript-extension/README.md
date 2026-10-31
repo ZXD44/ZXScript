@@ -11,7 +11,7 @@ It's a Chrome/Edge browser extension plus a small local bridge that connects the
 - **Clean Architecture & Modular Core:** Decomposed all files to strictly under 500-600 lines across backend and frontend for maximum reliability, speed, and maintainability.
 - **Headless Native Host:** Automatically runs Bridge in the background (`CREATE_NO_WINDOW`) with live log streaming inside the extension popup and in-page modal dialog.
 - **Impeccable Style UI:** Sleek, minimal interface adhering to impeccable.style standards: 60fps hardware acceleration, zero emoji clutter, and slim 5px pill scrollbars.
-- **Dynamic Island Morph Bar:** Floating capsule that stays compact in standby and smoothly expands into an active HUD with a 1-click stop button.
+- **Dynamic Island Morph Bar with Red Dragon Wings:** Floating glassmorphic capsule flanked by organically animated flapping dragon wings (2.0s idle, 1.0s active execution boost) and crimson ember backglow.
 - **Smart Error Notification System:** Categorizes issues into Studio, Bridge, AI Model, and Context Limit with quick 1-click action triggers and collapsible technical diagnostics.
 - **ChatGPT Auto-Recovery Engine:** Automatically detects empty responses or stalled streams and continues generation autonomously.
 - **Zero-Latency Web Audio Synthesizer:** Elegant success chimes and error alerts synthesized natively via the Web Audio API without external audio assets.

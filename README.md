@@ -83,6 +83,7 @@ ZXScript/
 ## 🚀 Key Features
 
 - **Headless Native Bridge:** Runs completely in the background via `CREATE_NO_WINDOW`. Eliminates intrusive separate CMD popups; streams real-time logs directly inside the extension popup and in-page modal dialog.
+- **Red Dragon Dynamic Island HUD:** Floating glassmorphic capsule with organic flapping dragon wings, adaptive morphing geometry (standby vs. executing), and crimson ember ambiance.
 - **Impeccable Style Design System:** Inspired by [impeccable.style](https://impeccable.style/) principles. Features deep Zinc-950 surfaces, 60fps hardware-accelerated animations, zero emoji clutter on action buttons, and slim 5px custom scrollbars.
 - **Modular Clean Architecture:** All files adhere to strict separation of concerns and remain under 500-600 lines. Configs, constants, parsers, watchers, and UI engines are completely decoupled.
 - **Native Bloxstrap & Vanilla Studio Support:** Automatically discovers `StudioMCP.exe` across standard Roblox installations and Bloxstrap directories without manual path configuration.

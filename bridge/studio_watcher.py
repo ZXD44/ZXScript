@@ -165,7 +165,7 @@ def descendant_pids(root_pid: int) -> set:
     return pids
 
 
-def reclaim_studio_port(client) -> bool:
+def reclaim_studio_port(client=None, force: bool = False) -> bool:
     """Kill external StudioMCP.exe listening on port 13469."""
     owner = port_owner(STUDIO_MCP_PORT)
     if not owner:
@@ -177,7 +177,7 @@ def reclaim_studio_port(client) -> bool:
         pid_i = int(pid)
     except (TypeError, ValueError):
         return False
-    if client is not None and client.proc is not None and client.is_alive():
+    if not force and client is not None and client.proc is not None and client.is_alive():
         tree = descendant_pids(client.proc.pid)
         if tree is None or pid_i in tree:
             return False
@@ -401,15 +401,15 @@ async def studio_watch(mgr, broadcast_status_func, initial_app: bool, initial_pl
                             log(f"restart after squatter kill failed: {e}", "rd")
                         print_squatter_hint(sname)
                         await broadcast_status_func()
-                elif now0 - empty_since > 20 and now0 - last_reclaim > 180 and await asyncio.to_thread(roblox_studio_app_running) is True:
-                    last_reclaim = now0
-                    if await asyncio.to_thread(reclaim_studio_port, rc0):
-                        try:
-                            await asyncio.to_thread(mgr.restart, PRIMARY_SERVER_ID)
-                        except Exception as e:
-                            log(f"restart after zombie kill failed: {e}", "rd")
-                        print_reregister_hint()
+                elif now0 - empty_since > 8 and now0 - last_auto_restart > 20 and await asyncio.to_thread(roblox_studio_app_running) is True:
+                    last_auto_restart = now0
+                    log("Roblox Studio is running but tools are not attached. Auto-reconnecting MCP proxy...", "yl")
+                    await asyncio.to_thread(reclaim_studio_port, rc0, True)
+                    try:
+                        await asyncio.to_thread(mgr.restart, PRIMARY_SERVER_ID)
                         await broadcast_status_func()
+                    except Exception as e:
+                        log(f"auto-restart of StudioMCP failed: {e}", "rd")
         else:
             empty_since = None
 
@@ -443,10 +443,19 @@ async def studio_watch(mgr, broadcast_status_func, initial_app: bool, initial_pl
             await broadcast_status_func()
 
         now = time.time()
-        if app is False and ever_connected and disconnected_since is not None and not update_suspected:
-            if now - disconnected_since > 20 and now - last_auto_restart > 90:
+        if app is False and not update_suspected:
+            studio_live = await asyncio.to_thread(roblox_studio_app_running)
+            if studio_live is True and now - last_auto_restart > 25:
                 last_auto_restart = now
-                if await asyncio.to_thread(roblox_studio_app_running) is True:
+                log("Studio is active - reconnecting MCP proxy...", "yl")
+                try:
+                    await asyncio.to_thread(mgr.restart, PRIMARY_SERVER_ID)
+                    await broadcast_status_func()
+                except Exception as e:
+                    log(f"auto-restart failed: {e}", "rd")
+            elif ever_connected and disconnected_since is not None and now - disconnected_since > 20 and now - last_auto_restart > 90:
+                last_auto_restart = now
+                if studio_live is True:
                     log("Studio is running but MCP plugin not yet registered. Open Assistant Settings > MCP Servers.", "yl")
                 else:
                     log("Studio proxy reconnecting...", "yl")
