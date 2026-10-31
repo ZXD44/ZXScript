@@ -1,20 +1,21 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-/* overlay.css - ZXScript (by ZXD44) in-page UI. Scoped under #zs-root / .zs-* */
+/* overlay.css - Red Dragon Pixel Art in-page UI for ZXScript (by ZXD44) */
 
 #zs-root {
   position: fixed;
   z-index: 2147483600;
-  font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  image-rendering: pixelated;
 }
 
-/* ── Style 1: Dynamic Island Morph (เกาะลอยปรับขนาดอัตโนมัติ) ── */
+/* ── Red Dragon Floating Action Bar ── */
 #zs-bar,
 #zs-bar.zs-bar-inline,
 #zs-bar.zs-bar-inline.zs-prov-chatgpt,
 #zs-bar.zs-bar-inline.zs-prov-claude,
 #zs-bar.zs-bar-anchored {
   position: fixed !important;
-  top: 14px !important;
+  top: 12px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   z-index: 2147483640 !important;
@@ -22,364 +23,361 @@
   align-items: center !important;
   gap: 6px !important;
   box-sizing: border-box !important;
-  padding: 3px 8px 3px 10px !important;
-  height: 35px !important;
-  min-height: 35px !important;
-  max-height: 35px !important;
+  padding: 4px 10px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
   width: auto !important;
   min-width: 0 !important;
-  max-width: min(92vw, 440px) !important;
-  background: rgba(16, 18, 22, 0.94) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-  border: 1px solid rgba(0, 162, 255, 0.3) !important;
-  border-radius: 9999px !important;
-  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 162, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-  color: #f4f4f5 !important;
+  max-width: min(94vw, 560px) !important;
+  background: #12050e !important;
+  border: 2px solid #5a142c !important;
+  border-radius: 4px !important;
+  box-shadow: 3px 3px 0 #000000, 0 0 16px rgba(225, 29, 72, 0.2), inset 0 0 10px rgba(225, 29, 72, 0.1) !important;
+  color: #fff1f2 !important;
   font-size: 11px !important;
-  font-family: "Builder Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
   user-select: none !important;
   white-space: nowrap !important;
   margin: 0 !important;
-  transition: max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              padding 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.35s ease !important;
-  animation: zs-bar-drop 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  image-rendering: pixelated !important;
+  transition: max-width 0.3s ease, padding 0.3s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+  animation: zs-bar-drop 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* ── Dynamic Island Morph: Working State with Neon Breathing Glow ── */
+/* ── Active Dragon Breathing Pulse ── */
 #zs-bar.zs-island-active,
 #zs-bar.is-busy {
-  max-width: min(95vw, 560px) !important;
-  padding: 3px 9px 3px 12px !important;
-  background: rgba(14, 16, 20, 0.96) !important;
-  border-color: rgba(0, 162, 255, 0.65) !important;
-  box-shadow: 0 18px 44px -4px rgba(0, 0, 0, 0.8), 0 0 22px rgba(0, 162, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
-  animation: zs-island-breathe 2.4s ease-in-out infinite alternate !important;
+  max-width: min(96vw, 620px) !important;
+  padding: 4px 12px !important;
+  background: #160713 !important;
+  border-color: #e11d48 !important;
+  box-shadow: 3px 3px 0 #000000, 0 0 24px rgba(225, 29, 72, 0.45), inset 0 0 12px rgba(225, 29, 72, 0.2) !important;
+  animation: zs-dragon-pulse 2s ease-in-out infinite alternate !important;
 }
 
-@keyframes zs-island-breathe {
+@keyframes zs-dragon-pulse {
   0% {
-    border-color: rgba(0, 162, 255, 0.45);
-    box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.75), 0 0 14px rgba(0, 162, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    border-color: #881337;
+    box-shadow: 3px 3px 0 #000000, 0 0 14px rgba(225, 29, 72, 0.25), inset 0 0 8px rgba(225, 29, 72, 0.1);
   }
   100% {
-    border-color: rgba(0, 162, 255, 0.85);
-    box-shadow: 0 20px 48px -4px rgba(0, 0, 0, 0.85), 0 0 28px rgba(0, 162, 255, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    border-color: #f43f5e;
+    box-shadow: 3px 3px 0 #000000, 0 0 26px rgba(244, 63, 94, 0.55), inset 0 0 16px rgba(244, 63, 94, 0.25);
   }
 }
 
 #zs-bar.zs-island-active #zs-brand,
 #zs-bar.is-busy #zs-brand {
-  background: rgba(0, 162, 255, 0.18);
-  border-color: rgba(0, 162, 255, 0.5);
-  box-shadow: 0 0 10px rgba(0, 162, 255, 0.25);
+  background: #2b0b20;
+  border-color: #f43f5e;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
 }
 
 #zs-bar.zs-island-active #zs-state,
 #zs-bar.is-busy #zs-state {
-  max-width: 250px;
+  max-width: 260px;
 }
 #zs-bar.zs-island-active .zs-state-txt,
 #zs-bar.is-busy .zs-state-txt {
-  max-width: 230px;
+  max-width: 240px;
 }
 
 @keyframes zs-bar-drop {
-  from { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+  from { opacity: 0; transform: translate(-50%, -10px) scale(0.97); }
   to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
 html.zs-light #zs-bar,
 html.zs-light #zs-bar.zs-bar-inline,
-html.zs-light #zs-bar.zs-bar-inline.zs-prov-chatgpt,
-html.zs-light #zs-bar.zs-bar-inline.zs-prov-claude,
 html.zs-light #zs-bar.zs-bar-anchored {
-  background: rgba(245, 247, 250, 0.95) !important;
-  border-color: rgba(0, 162, 255, 0.3) !important;
-  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 162, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-  color: #191b1d !important;
+  background: #fff5f7 !important;
+  border-color: #e11d48 !important;
+  box-shadow: 3px 3px 0 #000000, 0 0 12px rgba(225, 29, 72, 0.15) !important;
+  color: #1f0814 !important;
 }
 
+/* ── Dragon Eye Status Dot (Pixel Square) ── */
 #zs-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 0 !important;
+  border: 1px solid #000;
   flex: none;
-  cursor: help;
-  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 1px 1px 0 #000;
+  transition: all 0.15s ease;
 }
 #zs-dot.on {
-  background: #00b06f;
-  box-shadow: 0 0 8px #00b06f, 0 0 14px rgba(0, 176, 111, 0.5);
+  background: #f43f5e;
+  box-shadow: 0 0 6px #f43f5e, 0 0 12px #e11d48;
+  animation: dragon-dot-glow 1.5s infinite alternate;
 }
 #zs-dot.warn {
   background: #f59e0b;
-  box-shadow: 0 0 8px #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
 }
 #zs-dot.off {
-  background: #e2231a;
-  box-shadow: 0 0 6px rgba(226, 35, 26, 0.6);
+  background: #731738;
+  box-shadow: 0 0 4px rgba(115, 23, 56, 0.6);
+}
+@keyframes dragon-dot-glow {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.4); }
 }
 
+/* ── Dragon Crest Brand Badge ── */
 #zs-brand {
-  font-size: 10px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 9.5px;
   font-weight: 700;
-  color: #00a2ff;
-  background: rgba(0, 162, 255, 0.12);
-  border: 1px solid rgba(0, 162, 255, 0.35);
-  padding: 2px 8px;
-  border-radius: 9999px;
-  letter-spacing: 0.02em;
+  color: #f43f5e;
+  background: #240a1b;
+  border: 1px solid #731738;
+  padding: 2px 7px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
   flex: none;
   display: inline-flex;
   align-items: center;
+  gap: 4px;
+  box-shadow: 1px 1px 0 #000;
 }
 #zs-brand .zs-free {
-  font-size: 8.5px;
-  opacity: 0.8;
-  margin-left: 3px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 8px;
+  color: #f59e0b;
+  margin-left: 2px;
 }
 .zs-rbx-icon {
   flex: none;
-  color: #00a2ff;
+  color: #f43f5e;
 }
 html.zs-light #zs-brand {
-  color: #007acc;
-  background: rgba(0, 122, 204, 0.1);
-  border-color: rgba(0, 122, 204, 0.25);
+  color: #be123c;
+  background: #ffe4e6;
+  border-color: #fda4af;
 }
 
+/* ── Separator ── */
 .zs-sep {
-  width: 1px;
+  width: 2px;
   height: 14px;
-  background: rgba(255, 255, 255, 0.14);
+  background: #4a1024;
+  border-right: 1px solid #1a0510;
   flex: none;
-  margin: 0 2px;
+  margin: 0 1px;
 }
 html.zs-light .zs-sep {
-  background: rgba(0, 0, 0, 0.12);
-}
-html.zs-light #zs-brand .zs-free {
-  color: rgba(0, 0, 0, 0.5);
+  background: #fecdd3;
+  border-right-color: #ffe4e6;
 }
 
+/* ── State Typography ── */
 #zs-state {
   flex: 0 1 auto;
   min-width: 0;
-  max-width: 190px;
+  max-width: 210px;
   display: flex;
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  color: #d4d4d8;
+  font-weight: 600;
+  color: #fecdd3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 }
 .zs-state-txt {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
-  max-width: 165px;
+  max-width: 185px;
   vertical-align: middle;
 }
-#zs-state b { font-weight: 600; color: #e4e4e7; }
+#zs-state b { font-weight: 700; color: #fff1f2; }
 #zs-state.zs-state-warn { color: #fca5a5; }
-#zs-state.zs-state-warn b { color: #fecaca; }
-html.zs-light #zs-state { color: #52525b; }
-html.zs-light #zs-state b { color: #18181b; }
+#zs-state.zs-state-warn b { color: #ff859c; }
+html.zs-light #zs-state { color: #881337; }
+html.zs-light #zs-state b { color: #4c0519; }
 
 .zs-live-dot { display: none !important; }
-.zs-live-dot.idle { background: #9ca3af; animation: none; box-shadow: none; }
 
+/* ── Pixel RPG Action Button (Start Agent) ── */
 #zs-action {
   flex: none;
-  height: 25px;
-  padding: 2px 12px;
-  border-radius: 9999px;
+  height: 26px;
+  padding: 2px 11px;
+  border-radius: 2px !important;
   font-size: 11px;
-  font-weight: 600;
-  border: none;
+  font-weight: 700;
+  font-family: 'Silkscreen', 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 4px;
+  background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #ff708f !important;
+  box-shadow: 0 3px 0 #4c0519, inset 1px 1px 0 rgba(255, 255, 255, 0.35) !important;
+  text-shadow: 1px 1px 0 #000;
+  image-rendering: pixelated;
+  transition: all 0.1s ease;
 }
-#zs-action[data-kind="start"] {
-  background: linear-gradient(135deg, #00b06f, #008a56);
-  color: #ffffff;
-  border: 1px solid rgba(0, 176, 111, 0.5);
-  box-shadow: 0 2px 8px rgba(0, 176, 111, 0.35);
+#zs-action:hover {
+  background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%) !important;
+  box-shadow: 0 3px 0 #4c0519, 0 0 10px rgba(244, 63, 94, 0.6) !important;
 }
-#zs-action[data-kind="start"]:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 3px 12px rgba(0, 176, 111, 0.55);
-  filter: brightness(1.1);
-}
-#zs-action[data-kind="start"]:active {
-  transform: translateY(0) scale(0.97);
+#zs-action:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 #4c0519 !important;
 }
 #zs-action[data-kind="start-degraded"] {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
+  background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%) !important;
+  border-color: #fcd34d !important;
+  box-shadow: 0 3px 0 #451a03, inset 1px 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 #zs-action:disabled {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.4);
+  background: #331221 !important;
+  border-color: #551c35 !important;
+  color: #7d425c !important;
+  box-shadow: none !important;
   cursor: not-allowed;
-  box-shadow: none;
 }
 #zs-action.zs-flash { animation: zs-flash 0.4s ease-in-out 3; }
 @keyframes zs-flash {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(0, 162, 255, 0.5); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.5); }
 }
 
+/* ── Stop Button ── */
 #zs-stop {
   flex: none;
-  height: 25px;
-  padding: 2px 11px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #e2231a, #b8181f);
-  border: 1px solid rgba(226, 35, 26, 0.6);
-  color: #ffffff;
+  height: 26px;
+  padding: 2px 10px;
+  border-radius: 2px !important;
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%) !important;
+  border: 1px solid #ef4444 !important;
+  color: #ffffff !important;
   font-size: 10.5px;
   font-weight: 700;
+  font-family: 'Silkscreen', monospace;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 8px rgba(226, 35, 26, 0.4);
-  transition: all 0.15s ease;
+  box-shadow: 0 3px 0 #450a0a, inset 1px 1px 0 rgba(255, 255, 255, 0.3) !important;
+  text-shadow: 1px 1px 0 #000;
+  image-rendering: pixelated;
+  transition: all 0.1s ease;
 }
 #zs-stop:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 3px 12px rgba(226, 35, 26, 0.6);
-  transform: translateY(-1px) scale(1.03);
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
+  box-shadow: 0 3px 0 #450a0a, 0 0 10px rgba(239, 68, 68, 0.6) !important;
+}
+#zs-stop:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 #450a0a !important;
 }
 #zs-stop[data-state="stopping"] {
-  background: #b45309; cursor: progress; opacity: 0.85;
+  background: #b45309 !important;
+  cursor: progress;
+  opacity: 0.85;
 }
 
+/* ── Switch Button ── */
 #zs-switch {
   flex: none;
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 25px;
-  padding: 0 9px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  color: #bac0cb;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-#zs-switch:hover {
-  background: rgba(0, 162, 255, 0.15);
-  border-color: rgba(0, 162, 255, 0.4);
-  color: #ffffff;
-  transform: scale(1.03);
-}
-#zs-switch svg { opacity: 0.7; }
-
-#zs-credit {
-  flex: none;
+  height: 26px;
+  padding: 0 8px;
+  background: #240a1b !important;
+  border: 1px solid #5a142c !important;
+  border-radius: 2px !important;
+  color: #fecdd3 !important;
   font-size: 10px;
   font-weight: 700;
+  font-family: 'Silkscreen', monospace;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 1px 1px 0 #000;
+  image-rendering: pixelated;
+  transition: all 0.1s ease;
+}
+#zs-switch:hover {
+  background: #38102a !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 1px 1px 0 #000, 0 0 6px rgba(244, 63, 94, 0.4);
+}
+#zs-switch svg { opacity: 0.8; }
+
+/* ── Credit Badge ── */
+#zs-credit {
+  flex: none;
+  font-family: 'Silkscreen', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
   letter-spacing: 0.04em;
-  color: #bac0cb;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2px 7px;
-  border-radius: 9999px;
+  color: #f43f5e;
+  background: #240a1c;
+  border: 1px solid #731738;
+  padding: 2px 6px;
+  border-radius: 2px;
   user-select: none;
-  transition: all 0.15s ease;
   line-height: 1.2;
   display: inline-flex;
   align-items: center;
-  cursor: default;
+  box-shadow: 1px 1px 0 #000;
+  image-rendering: pixelated;
+  transition: all 0.1s ease;
 }
 #zs-credit:hover {
-  background: rgba(0, 162, 255, 0.15);
-  border-color: rgba(0, 162, 255, 0.4);
+  border-color: #f43f5e;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
   color: #ffffff;
-  transform: scale(1.04);
 }
-#zs-switch svg { opacity: 0.6; }
 
 html.zs-light #zs-switch,
 html.zs-light #zs-credit {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #52525b;
+  background: #ffe4e6 !important;
+  border-color: #fda4af !important;
+  color: #9f1239 !important;
 }
 html.zs-light #zs-switch:hover,
 html.zs-light #zs-credit:hover {
-  background: rgba(0, 0, 0, 0.09);
-  color: #18181b;
+  background: #fecdd3 !important;
+  color: #881337 !important;
 }
 
-/* ── the "more" menu popover (right/bottom set inline) ────────────────────── */
-/* ── input cover: fully hides the text the extension types + sends ──
-   background colour is set inline at runtime to match the input box,
-   so the masked input simply looks empty. */
-/* Live Agent HUD status is integrated directly into #zs-bar */
-
-/* belt-and-suspenders: the typed text itself is rendered invisible
-   (DeepSeek's composer is a <textarea>; the Kimi build used a contenteditable)
-   Matched on [contenteditable] with NO VALUE, deliberately. These rules used to
-   require [contenteditable='true'], but a provider that locks the composer by
-   flipping the attribute to "false" (ChatGPT's setInputLock does exactly that)
-   dropped straight out of the selector: measured live, the same node went from
-   colour rgba(0,0,0,0) to rgb(255,255,255) and max-height 140px to none the
-   instant it was locked. So the mask and the height cap were inert for the whole
-   time the input was locked - precisely when they are needed. */
+/* ── typing mask ── */
 textarea.zs-typing,
 div[contenteditable].zs-typing,
 div[contenteditable].zs-typing * { color: transparent !important; }
 textarea.zs-typing,
 div[contenteditable].zs-typing { caret-color: transparent !important; }
 
-/* Keep the composer from ballooning while the extension injects the (large)
-   system prompt or a big tool output. The typed text is transparent and hidden
-   under #zs-input-cover anyway, so there is nothing to see - but without a cap
-   the editor grows to fit every line (e.g. Kimi's inner .chat-input-editor hit
-   ~1500px), which then makes the cover (sized to the editor rect) a giant white
-   slab over the page, and on composers with no clipping ancestor (DeepSeek's
-   textarea, Gemini's Quill) balloons the visible box itself. Clipping the height
-   only affects DISPLAY; the full value/content is intact and still sent. The
-   class is present only during agent injection, never while the user types, so
-   this never clips real typing. */
 textarea.zs-typing,
 div[contenteditable].zs-typing {
   max-height: 140px !important;
   overflow-y: hidden !important;
 }
 
-/* ── spinner element ───────────────────────────────────────── */
+/* ── spinner element ── */
 .zs-spin {
-  width: 12px; height: 12px; flex: none; display: inline-block;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  border-top-color: #c8c8ce;
-  border-radius: 50%;
+  width: 10px; height: 10px; flex: none; display: inline-block;
+  border: 2px solid #5a142c;
+  border-top-color: #f43f5e;
+  border-radius: 0;
   animation: zs-rot 0.7s linear infinite;
 }
-.zs-spin.big { width: 26px; height: 26px; border-width: 3px; }
+.zs-spin.big { width: 22px; height: 22px; border-width: 3px; }
 @keyframes zs-rot { to { transform: rotate(360deg); } }
 
-/* animated bouncing dots (ไข่ปลาขยับๆ) */
+/* animated bouncing dots */
 .zs-dots {
   display: inline-flex;
   align-items: center;
@@ -396,24 +394,24 @@ div[contenteditable].zs-typing {
 .zs-dots span:nth-child(3) { animation-delay: 0s; }
 @keyframes zs-dots-bounce {
   0%, 80%, 100% {
-    opacity: 0.25;
+    opacity: 0.3;
     transform: translateY(0);
   }
   40% {
     opacity: 1;
-    transform: translateY(-2.5px);
-    color: #818cf8;
+    transform: translateY(-2px);
+    color: #f43f5e;
   }
 }
 
-/* ── Responsive Action Bar ────────────────────────────────── */
+/* ── Responsive Action Bar ── */
 @media (max-width: 680px) {
   #zs-bar,
   #zs-bar.zs-bar-inline,
   #zs-bar.zs-bar-anchored {
-    max-width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 16px) !important;
     gap: 4px !important;
-    padding: 3px 7px !important;
+    padding: 3px 6px !important;
   }
   #zs-bar .zs-sep {
     display: none !important;
@@ -436,25 +434,25 @@ div[contenteditable].zs-typing {
   #zs-bar,
   #zs-bar.zs-bar-inline,
   #zs-bar.zs-bar-anchored {
-    top: 8px !important;
+    top: 6px !important;
     height: 32px !important;
     min-height: 32px !important;
-    padding: 2px 6px !important;
+    padding: 2px 5px !important;
   }
   #zs-state {
-    max-width: 110px !important;
+    max-width: 105px !important;
   }
   .zs-state-txt {
-    max-width: 100px !important;
+    max-width: 95px !important;
   }
   #zs-action {
     height: 22px !important;
-    padding: 1px 8px !important;
-    font-size: 10px !important;
+    padding: 1px 7px !important;
+    font-size: 9.5px !important;
   }
   #zs-switch {
     height: 22px !important;
-    padding: 0 6px !important;
-    font-size: 10px !important;
+    padding: 0 5px !important;
+    font-size: 9px !important;
   }
 }

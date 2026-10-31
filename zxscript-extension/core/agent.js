@@ -431,12 +431,10 @@
     ui.inputCover(true);
 
     try {
-      await ensureTools(true);
+      try {
+        await ensureTools(true);
+      } catch {}
       if (!alive()) return;
-      if (!A.toolList.length) {
-        ui.banner("warn", "Studio ยังไม่พร้อม", "กรุณาเปิดการเชื่อมต่อและเปิดแมพใน Roblox Studio");
-        return;
-      }
       const modeState = P && P.ensureComposerReady ? await P.ensureComposerReady("startup") : { ready: true };
       if (!alive()) return;
       if (!modeState.ready) {

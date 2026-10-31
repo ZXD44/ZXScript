@@ -23,12 +23,12 @@
 
       root.innerHTML = `
         <div id="zs-bar">
-          <span id="zs-dot" class="off" title=""></span>
+          <span id="zs-dot" class="off" title="สถานะการเชื่อมต่อ Studio"></span>
           <span id="zs-brand"><svg class="zs-rbx-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><path d="M5.26 2L2 18.74 18.74 22 22 5.26 5.26 2zm8.28 11.23l-3.27-.63.63-3.27 3.27.63-.63 3.27z"/></svg>Studio <span class="zs-free">v${EXT_VERSION}</span></span>
           <span class="zs-sep"></span>
           <span id="zs-state"></span>
-          <button id="zs-action"></button>
-          <button id="zs-stop" hidden title="หยุดการทำงาน">หยุด</button>
+          <button id="zs-action" data-kind="start">▶ เริ่มทำงาน</button>
+          <button id="zs-stop" hidden title="หยุดการทำงาน">■ หยุด</button>
           <span class="zs-sep"></span>
           <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span id="zs-switch-name"></span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <span id="zs-credit" class="zs-credit" title="ผู้พัฒนา ZXD44">ZXD44</span>
@@ -290,12 +290,14 @@
             ? (_hudStatusText ? `<b>${_hudStatusText}</b>` : `<b>AI กำลังทำงาน</b>`)
             : `<b>พร้อมรับคำสั่ง</b>${tools ? ` · ${tools} คำสั่ง` : ""}`;
         }
-      } else if (P && (P.isFreshChat() || P.chatIsEmpty())) {
+      } else {
+        // Standby or existing chat: ALWAYS allow start!
+        kind = "start";
+        label = "▶ เริ่มทำงาน";
+        disabled = false;
         if (bridgeOk) {
           toneClass = "standby";
-          msg = `พร้อมเชื่อมต่อ Studio`;
-          label = "เริ่มให้ AI ทำงาน";
-          kind = "start";
+          msg = `พร้อมเริ่มระบบ`;
         } else if (addonOk) {
           toneClass = "warn";
           warn = true;
@@ -304,23 +306,14 @@
             : studioProcUp
             ? `<b>เปิด Studio แล้ว</b>`
             : `<b>Studio ออฟไลน์</b>`;
-          label = "เริ่มทำงาน (Studio ออฟไลน์)";
-          kind = "start-degraded";
         } else {
-          toneClass = "warn";
-          warn = true;
+          toneClass = "standby";
           msg = !A.bridge.connected
             ? `รอเชื่อมต่อ Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
             : placeDown
             ? `รอเปิดแมพใน Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`
-            : `กำลังเชื่อมต่อ Studio<span class="zs-dots"><span>.</span><span>.</span><span>.</span></span>`;
-          label = "เริ่มทำงาน";
-          kind = "start";
+            : `พร้อมเริ่มระบบ`;
         }
-        disabled = !bridgeOk && !addonOk;
-      } else {
-        toneClass = "noagent";
-        msg = `เปิดแชตใหม่เพื่อเริ่มใช้งาน`;
       }
 
       if (A.parked && (A.running || A.starting)) {
@@ -340,7 +333,7 @@
       }
 
       const busy = !stopBtn.hidden;
-      const showExtras = !!A.started;
+      const showExtras = true;
       const sig = [toneClass, indicator, msg, label, kind, disabled, warn, busy, showExtras].join("|");
       if (sig === lastBarSig) return;
       lastBarSig = sig;
@@ -355,7 +348,7 @@
       actionBtn.textContent = label;
       actionBtn.dataset.kind = kind;
       actionBtn.disabled = disabled;
-      actionBtn.style.display = busy || !kind ? "none" : "";
+      actionBtn.style.display = busy ? "none" : "";
       if (switchBtn) switchBtn.style.display = showExtras ? "" : "none";
     }
 
