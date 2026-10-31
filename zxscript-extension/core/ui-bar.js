@@ -30,7 +30,7 @@
           <button id="zs-action" data-kind="start">▶ เริ่มทำงาน</button>
           <button id="zs-stop" hidden title="หยุดการทำงาน">■ หยุด</button>
           <span class="zs-sep"></span>
-          <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span id="zs-switch-name"></span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button id="zs-switch" aria-label="สลับ AI และการตั้งค่า" title="สลับเว็บ AI, ตั้งค่า Prompt, จัดการ MCP"><span class="zs-sw-glyph" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M7 0h2v4H7V0zm0 12h2v4H7v-4zm-7-5h4v2H0V7zm12 0h4v2h-4V7zM4 3h2v2H4V3zm6 6h2v2h-2V9zm-6 2h2v2H4v-2zm6-8h2v2h-2V3z"/></svg></span><span id="zs-switch-name"></span><svg class="zs-sw-arrow" width="8" height="8" viewBox="0 0 12 12" fill="currentColor"><path d="M2 4h8L6 9z"/></svg></button>
           <span id="zs-credit" class="zs-credit" title="ผู้พัฒนา ZXD44">ZXD44</span>
         </div>
         <div id="zs-menu" hidden></div>
@@ -196,11 +196,17 @@
 
       if (menuEl && !menuEl.hidden) {
         const br = bar.getBoundingClientRect();
+        const menuWidth = 330;
+        let left = Math.round(br.left + br.width / 2);
+        const half = menuWidth / 2;
+        if (left - half < 12) left = half + 12;
+        if (left + half > window.innerWidth - 12) left = window.innerWidth - 12 - half;
+
         menuEl.style.position = "fixed";
         menuEl.style.top = Math.round(br.bottom + 8) + "px";
-        menuEl.style.left = Math.round(br.left + br.width / 2) + "px";
+        menuEl.style.left = left + "px";
         menuEl.style.transform = "translateX(-50%)";
-        menuEl.style.maxHeight = Math.max(160, Math.round(window.innerHeight - br.bottom - 24)) + "px";
+        menuEl.style.maxHeight = Math.max(200, Math.round(window.innerHeight - br.bottom - 24)) + "px";
       }
     }
 

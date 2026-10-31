@@ -286,34 +286,68 @@ html.zs-light #zs-state b { color: #4c0519; }
   opacity: 0.85;
 }
 
-/* ── Switch Button ── */
+/* ── Pixel Red Dragon Switch Button ── */
 #zs-switch {
   flex: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   height: 26px;
   padding: 0 8px;
-  background: #240a1b !important;
-  border: 1px solid #5a142c !important;
+  background: linear-gradient(180deg, #2b0b1e 0%, #170410 100%) !important;
+  border: 1px solid #731738 !important;
   border-radius: 2px !important;
   color: #fecdd3 !important;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
-  font-family: 'Silkscreen', monospace;
+  font-family: 'Silkscreen', 'Plus Jakarta Sans', monospace;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 1px 1px 0 #000;
+  box-shadow: 0 2px 0 #000, inset 0 1px 0 rgba(255, 112, 143, 0.25) !important;
+  text-shadow: 1px 1px 0 #000;
   image-rendering: pixelated;
-  transition: all 0.1s ease;
+  transition: all 0.12s ease;
 }
 #zs-switch:hover {
-  background: #38102a !important;
+  background: linear-gradient(180deg, #3d102b 0%, #240a1c 100%) !important;
   border-color: #f43f5e !important;
   color: #ffffff !important;
-  box-shadow: 1px 1px 0 #000, 0 0 6px rgba(244, 63, 94, 0.4);
+  box-shadow: 0 2px 0 #000, 0 0 10px rgba(244, 63, 94, 0.5) !important;
 }
-#zs-switch svg { opacity: 0.8; }
+#zs-switch:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 1px 0 #000 !important;
+}
+#zs-switch.zs-switch-open {
+  background: linear-gradient(180deg, #be123c 0%, #881337 100%) !important;
+  border-color: #ff708f !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 0 #4c0519, 0 0 12px rgba(244, 63, 94, 0.7) !important;
+}
+.zs-sw-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f43f5e;
+  filter: drop-shadow(0 0 3px rgba(244, 63, 94, 0.6));
+  transition: all 0.15s ease;
+}
+#zs-switch:hover .zs-sw-glyph,
+#zs-switch.zs-switch-open .zs-sw-glyph {
+  color: #fef08a;
+  filter: drop-shadow(0 0 4px #f59e0b);
+}
+.zs-sw-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+  transition: transform 0.18s ease;
+}
+#zs-switch.zs-switch-open .zs-sw-arrow {
+  transform: rotate(180deg);
+  opacity: 1;
+}
 
 /* ── Credit Badge ── */
 #zs-credit {
