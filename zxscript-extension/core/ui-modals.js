@@ -199,7 +199,7 @@
       `ลิงก์ (URL): ${location.href}`,
       `AI / เบราว์เซอร์: ${(P && P.displayName) || (P && P.id) || "Browser"}`,
       `เวลา: ${new Date().toLocaleString("th-TH")}`,
-      `เวอร์ชัน: ${EXT_VERSION || "0.0.2"}`,
+      `เวอร์ชัน: ${EXT_VERSION || (window.ZS && (window.ZS.EXT_VERSION || window.ZS.VERSION)) || "0.0.3"}`,
       "==================================",
     ].filter(Boolean).join("\n");
 

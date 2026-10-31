@@ -27,6 +27,11 @@ All notable changes to ZXScript are documented here.
   - Fluid multi-phase flapping animation: implemented organic 5-stage flight cycles (`zs-wing-flap-left`, `zs-wing-flap-right`) with 2.0s standby, 1.0s active tool-run boost, and 1.4s hover cycle.
   - Removed `!important` from base `transform` selectors conforming to W3C CSS Animations Level 1 cascade rules, eliminating animation freeze.
   - Enforced `display: none !important;` on all `[hidden]` elements (`#zs-stop[hidden]`, `#zs-state[hidden]`), preventing idle button leakage.
+- **Single Source of Truth (SSOT) Version Management Engine**:
+  - Centralized project versioning into `version.json` and `VERSION` at the repository root.
+  - Python bridge (`bridge/constants.py` and `bridge/__init__.py`) dynamically resolves version at runtime from SSOT with PyInstaller frozen environment support.
+  - Browser extension (`zxscript-extension/core/constants.js`) dynamically resolves version via `chrome.runtime.getManifest().version` with shared `window.ZS.VERSION` / `A.version` exports.
+  - Developed universal 1-click synchronizer script `scripts/bump_version.py` and root shortcut `bump-version.bat` supporting `--patch`, `--minor`, `--major`, and `--check` across all 16 target files.
 
 ---
 

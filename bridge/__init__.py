@@ -2,5 +2,8 @@
 """
 ZXScript Bridge Package.
 """
-__version__ = "1.5.0"
+from .constants import BRIDGE_VERSION as __version__
+
+__all__ = ["__version__"]
+
 

@@ -4,16 +4,54 @@ bridge/constants.py - Configuration constants, ANSI styling, paths, and logger f
 """
 import os
 import sys
+import json
 import time
 import threading
 
 HOST = "127.0.0.1"
-BRIDGE_VERSION = "0.0.2"
 PORT = int(os.environ.get("ZS_BRIDGE_PORT", "17613"))
 STUDIO_MCP_PORT = 13469
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(HERE)
+
+
+def _load_version() -> str:
+    """Load canonical project version from version.json (SSOT) or fallback."""
+    candidates = [
+        os.path.join(ROOT_DIR, "version.json"),
+        os.path.join(HERE, "version.json"),
+        os.path.join(ROOT_DIR, "VERSION"),
+        os.path.join(HERE, "VERSION"),
+    ]
+    # Also support PyInstaller extracted directory
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass:
+        candidates.extend([
+            os.path.join(meipass, "version.json"),
+            os.path.join(meipass, "VERSION"),
+        ])
+    for p in candidates:
+        if os.path.isfile(p):
+            try:
+                if p.endswith(".json"):
+                    with open(p, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if isinstance(data, dict) and "version" in data:
+                            return str(data["version"]).strip()
+                else:
+                    with open(p, "r", encoding="utf-8") as f:
+                        val = f.read().strip()
+                        if val:
+                            return val
+            except Exception:
+                pass
+    return "0.0.3"
+
+
+BRIDGE_VERSION = _load_version()
+VERSION = BRIDGE_VERSION
+
 CONFIG_PATH = os.path.join(HERE, "config.json")
 LOGS_DIR = os.path.join(ROOT_DIR, "logs") if os.path.isdir(os.path.join(ROOT_DIR, "logs")) else os.path.join(HERE, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)

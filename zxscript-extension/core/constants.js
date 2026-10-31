@@ -25,11 +25,25 @@
 
   const WEBSITE_URL = "https://www.zirconx.xyz";
   const GITHUB_URL = "https://github.com/ZXD44/ZXScript";
-  let extVersion = "0.0.3";
-  try {
-    extVersion = (chrome.runtime && chrome.runtime.getManifest && chrome.runtime.getManifest().version) || "0.0.3";
-  } catch {}
-  const EXT_VERSION = extVersion;
+
+  const getExtensionVersion = () => {
+    try {
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) {
+        const v = chrome.runtime.getManifest().version;
+        if (v) return v;
+      }
+    } catch (_) {}
+    try {
+      if (typeof browser !== "undefined" && browser.runtime && browser.runtime.getManifest) {
+        const v = browser.runtime.getManifest().version;
+        if (v) return v;
+      }
+    } catch (_) {}
+    return "0.0.3";
+  };
+
+  const EXT_VERSION = getExtensionVersion();
+  const VERSION = EXT_VERSION;
   const VIDEO_URL = "https://youtu.be/kPKiZLZ9_Ps";
 
   const AI_SITES = [
@@ -137,6 +151,7 @@
     WEBSITE_URL,
     GITHUB_URL,
     EXT_VERSION,
+    VERSION,
     VIDEO_URL,
     AI_SITES,
     A,
@@ -144,6 +159,7 @@
     initStallDetector,
   };
 
+  A.version = EXT_VERSION;
 
   const getProvider = () =>
     (typeof window !== "undefined" && window.ZSProvider) ||
@@ -155,6 +171,8 @@
   // Export to namespace
   Object.assign(window.ZS, constantsObj);
   window.ZS.constants = window.ZS;
+  window.ZS.EXT_VERSION = EXT_VERSION;
+  window.ZS.VERSION = EXT_VERSION;
   window.ZS.getProvider = getProvider;
   window.getProvider = getProvider;
 

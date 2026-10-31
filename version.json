@@ -1,0 +1,10 @@
+{
+  "version": "0.0.3",
+  "releaseDate": "2026-10-31",
+  "name": "ZXScript",
+  "displayName": "ZXScript - AI Agent for Roblox Studio",
+  "author": "ZXD44 (ZirconX)",
+  "website": "https://www.zirconx.xyz",
+  "repository": "https://github.com/ZXD44/ZXScript",
+  "license": "GPL-3.0"
+}
