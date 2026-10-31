@@ -224,3 +224,4 @@ def process_tool_backup(place_name: str, tool_name: str, arguments: dict, result
                 created_backups.append(path)
 
     return created_backups
+

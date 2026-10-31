@@ -11,6 +11,10 @@ set "LOGFILE=%ROOT%logs\start.log"
 call :log "===== %DATE% %TIME%  start.bat launched ====="
 for /f "tokens=*" %%v in ('ver') do call :log "%%v"
 
+if /i "%~1"=="--doctor" goto :run_doctor
+if /i "%~1"=="doctor" goto :run_doctor
+if /i "%~1"=="-d" goto :run_doctor
+
 cls
 echo =====================================================================
 echo    ZXScript All-in-One Launcher - โดย ZXD44 (ZirconX)
@@ -210,4 +214,10 @@ exit /b %errorlevel%
 :log
 >>"%LOGFILE%" 2>nul echo(%~1
 exit /b 0
+
+:run_doctor
+set "PY=python"
+where py >nul 2>nul && set "PY=py -3"
+%PY% "%ROOT%bridge\doctor.py" %*
+exit /b %errorlevel%
 
