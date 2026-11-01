@@ -492,6 +492,49 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         });
         break;
       }
+      case "kill_all":
+      case "native_kill": {
+        log("kill_all requested from tab/popup");
+        stopHeartbeat();
+        failAllPending("ยกเลิกการทำงานและปิดโปรแกรมโดยผู้ใช้");
+
+        if (ws && connected) {
+          try {
+            ws.send(JSON.stringify({ type: "kill_all", kill_bridge: !!msg.kill_bridge }));
+          } catch {}
+        }
+
+        try {
+          chrome.runtime.sendNativeMessage("com.zxd44.zxscript", {
+            action: "kill",
+            kill_bridge: !!msg.kill_bridge,
+          }, (resp) => {
+            const err = chrome.runtime.lastError;
+            if (msg.kill_bridge) {
+              if (ws) {
+                try { ws.close(); } catch {}
+                ws = null;
+              }
+              connected = false;
+              mcpAlive = false;
+              studioConnected = null;
+              studioApp = null;
+              studioProc = null;
+              serversCache = [];
+            }
+            broadcastStatus();
+            sendResponse({
+              ok: !err,
+              killed: true,
+              message: "ปิดโปรแกรม Roblox Studio และโปรเซสที่เกี่ยวข้องทั้งหมดแล้ว",
+              ...(resp || {}),
+            });
+          });
+        } catch (e) {
+          sendResponse({ ok: false, error: String(e) });
+        }
+        break;
+      }
       case "native_status": {
         chrome.runtime.sendNativeMessage("com.zxd44.zxscript", { action: "status" }, (resp) => {
           sendResponse(resp || { ok: false, error: chrome.runtime.lastError ? chrome.runtime.lastError.message : "Error" });

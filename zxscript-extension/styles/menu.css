@@ -348,3 +348,38 @@ html.zs-light .zs-foot-links a:hover { color: #5865f2; }
   background: #5865f2;
   color: #ffffff;
 }
+
+
+/* Danger / Emergency Kill All Button */
+.zs-menu-danger-box {
+  padding: 4px 12px 10px;
+}
+.zs-btn-danger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(237, 66, 69, 0.12);
+  border: 1px solid rgba(237, 66, 69, 0.4);
+  border-radius: 6px;
+  color: #f23f43;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 7px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.zs-btn-danger:hover {
+  background: #ed4245;
+  border-color: #ed4245;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(237, 66, 69, 0.35);
+}
+.zs-btn-danger:active {
+  transform: translateY(1px);
+}
+.zs-btn-danger svg {
+  flex-shrink: 0;
+}

@@ -226,6 +226,14 @@
         </div>
       </section>
 
+      <!-- ปุ่มฉุกเฉิน: บังคับปิด Studio & Bridge ทั้งหมด -->
+      <div class="zs-menu-danger-box">
+        <button type="button" id="zs-kill-all-btn" class="zs-btn-danger" title="บังคับปิดโปรแกรม Roblox Studio, Bloxstrap และ Bridge ทั้งหมดทันที">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/></svg>
+          บังคับปิด Studio ทั้งหมด (Kill All)
+        </button>
+      </div>
+
       <!-- ส่วนที่ 4: เครื่องมือเสริมขั้นสูง (พับเก็บได้ ไม่รก ไม่เรื่องเยอะ) -->
       <details class="zs-mcp-fold">
         <summary class="zs-fold-title">
@@ -263,6 +271,25 @@
     `;
 
     // Hook listeners
+    const killAllBtn = menuEl.querySelector("#zs-kill-all-btn");
+    if (killAllBtn) {
+      killAllBtn.addEventListener("click", async () => {
+        killAllBtn.disabled = true;
+        killAllBtn.textContent = "กำลังปิดโปรแกรมทั้งหมด…";
+        if (window.ZS.stopLoop) {
+          try { window.ZS.stopLoop({ killBridge: true }); } catch {}
+        }
+        const bgFn = window.ZS.bg || ((m) => new Promise((r) => chrome.runtime.sendMessage(m, r)));
+        try {
+          await bgFn({ type: "kill_all", kill_bridge: true });
+        } catch {}
+        if (ui.toast) ui.toast("สั่งปิด Roblox Studio และโปรแกรมทั้งหมดเรียบร้อยแล้ว");
+        setTimeout(() => {
+          closeMenu();
+        }, 600);
+      });
+    }
+
     const closeBtn = menuEl.querySelector("#zs-menu-close");
     if (closeBtn) closeBtn.addEventListener("click", () => closeMenu());
 

@@ -22,6 +22,11 @@ All notable changes to ZXScript are documented here.
 - **Headless Studio Connection Verification**:
   - Added user cancellation verification and graceful rollback to the connection prompt flow.
   - Verified active Studio instance connectivity prior to headless bridge execution.
+- **Real Emergency Stop & Process Termination Engine (Kill All)**:
+  - Overhauled #zs-stop button and stopLoop(): instantaneously cancels in-flight AI stream generation, invalidates bootstrap startup generation (startGen++), immediately settles tool promises in 0ms (	oolSettle), unlocks composer inputs, and clears overlay covers.
+  - Resolved turn completion race condition in gentLoop: eliminated ghost 'งานเสร็จสิ้นเรียบร้อยแล้ว!' banners and completion chimes on aborted loops.
+  - Added OS-level process termination across bridge server and native host: forcefully executes taskkill against RobloxStudioBeta.exe, RobloxStudio.exe, Bloxstrap.exe, and StudioMCP.exe.
+  - Added dedicated emergency 'บังคับปิด Studio ทั้งหมด (Kill All)' actions in the Action Bar, zs-menu drawer, and popup extension.
 - **Thai Language UX Polish**:
   - Polished all Thai copy across Action Bar, menu drawer, modals, popup, and notification toasts into natural, fluent, grammatically sound Thai.
 

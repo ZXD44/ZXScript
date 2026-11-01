@@ -27,3 +27,7 @@ __pycache__/
 # PyInstaller build artifacts
 build/
 *.spec
+
+# User Place Backups
+projects/*_(placeId_*
+

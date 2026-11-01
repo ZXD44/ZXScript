@@ -160,6 +160,33 @@ async def handler(ws, mgr):
                     "tools": mgr.list_tools(),
                 }))
 
+            elif mtype in ("kill_all", "kill_studio"):
+                def _do_kill():
+                    import subprocess
+                    killed = []
+                    for img in ("RobloxStudioBeta.exe", "RobloxStudio.exe", "Bloxstrap.exe", "StudioMCP.exe"):
+                        res = subprocess.run(f"taskkill /F /T /IM {img}", shell=True, capture_output=True)
+                        if res.returncode == 0:
+                            killed.append(img)
+                    return killed
+                killed_list = await asyncio.to_thread(_do_kill)
+                log(f"kill_all executed: {killed_list}", "yl")
+                await ws.send(json.dumps({
+                    "type": "kill_result",
+                    "id": rid,
+                    "ok": True,
+                    "killed": killed_list,
+                    "message": f"ปิดโปรแกรมสำเร็จ: {', '.join(killed_list) if killed_list else 'ไม่พบโปรแกรมที่กำลังทำงาน'}",
+                }))
+                if msg.get("kill_bridge", False):
+                    async def _delayed_stop():
+                        await asyncio.sleep(0.5)
+                        import os
+                        os._exit(0)
+                    asyncio.create_task(_delayed_stop())
+                else:
+                    await broadcast_status(mgr)
+
             else:
                 await ws.send(json.dumps({
                     "type": "error",

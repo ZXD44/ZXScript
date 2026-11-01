@@ -98,7 +98,7 @@
     }
   }
 
-  function stopLoop() {
+  async function stopLoop(opts = {}) {
     const P = window.ZSProvider;
     if (A.stopping) return;
     diag("stopLoop");
@@ -109,7 +109,19 @@
     A.userStopped = true;
     A.resumeArmed = false;
     A.injectHideUntil = 0;
+    A.startGen++; // Invalidate any running startSession sequence immediately
+    A.starting = false;
+    A.startingKey = null;
 
+    // 1. Immediately abort AI generation on provider
+    if (P && P.stopGeneration) {
+      try { P.stopGeneration(); } catch {}
+    }
+    if (P && P.setInputLock) {
+      try { P.setInputLock(false); } catch {}
+    }
+
+    // 2. Mark and halt in-flight assistant items and tool decorators
     const it = P && P.lastAssistant ? P.lastAssistant() : null;
     if (it) {
       it.dataset.zStopped = "1";
@@ -118,11 +130,29 @@
     if (A.toolRunning && A.toolItem) {
       A.toolItem.dataset.zStopped = "1";
       rememberHalted(A.toolItem);
-      decorate.toolBox(A.toolItem, A.toolName, "err", "stopped", true, "", window.ZS.toolCategory(A.toolName));
+      decorate.toolBox(A.toolItem, A.toolName, "err", "ยกเลิกแล้ว", true, "", window.ZS.toolCategory(A.toolName));
     }
+    A.toolRunning = false;
+    if (A.toolSettle) {
+      try { A.toolSettle("stopped"); } catch {}
+      A.toolSettle = null;
+    }
+
+    // 3. Reset UI controls
     ui.markStopping();
-    if (P && P.stopGeneration) P.stopGeneration();
-    ui.toast("กำลังหยุดทำงาน…");
+    ui.inputCover(false);
+    ui.showStop(false);
+    if (ui.setStarting) ui.setStarting(false);
+    if (ui.setHudStatus) ui.setHudStatus("หยุดทำงานแล้ว");
+
+    // 4. Forcefully terminate Roblox Studio, Bloxstrap, and StudioMCP
+    const killBridge = !!opts.killBridge;
+    try {
+      const bgFn = window.ZS.bg || ((m) => new Promise((r) => chrome.runtime.sendMessage(m, r)));
+      bgFn({ type: "kill_all", kill_bridge: killBridge });
+    } catch {}
+
+    ui.toast("หยุดทำงาน และปิดโปรแกรม Roblox Studio เรียบร้อยแล้ว");
   }
 
   function systemPrompt() {
@@ -397,6 +427,7 @@
       ZSSound.play("error");
       ui.banner("warn", "ข้อผิดพลาดภายในลูป", String((e && e.message) || e));
     } finally {
+      const wasStopped = A.userStopped || A.stop || A.stopping;
       A.running = false;
       A.stop = false;
       A.stopping = false;
@@ -406,8 +437,8 @@
       ui.showStop(false);
       ui.inputCover(false);
       if (P) P.setInputLock(false);
-      diag("loop.end");
-      if (!A.stop && !A.stopping) {
+      diag("loop.end", { wasStopped });
+      if (!wasStopped) {
         notifyTurnComplete("งานเสร็จสิ้นเรียบร้อยแล้ว!");
         ZSSound.play("done");
       }

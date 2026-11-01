@@ -195,14 +195,19 @@
     );
 
     let stopTimer;
+    let toolSettleResolve;
+    const settlePromise = new Promise((res) => { toolSettleResolve = res; });
+    A.toolSettle = (k) => { toolSettleResolve({ ok: false, kind: k || "stopped" }); };
+
     const stopWatch = new Promise((res) => {
       stopTimer = setInterval(() => {
         if (A.stop) res({ ok: false, kind: "stopped" });
-      }, 150);
+      }, 50);
     });
 
-    let r = await Promise.race([bg({ type: "call_tool", name, arguments: args, timeout }), hardCap, stopWatch]);
+    let r = await Promise.race([bg({ type: "call_tool", name, arguments: args, timeout }), hardCap, stopWatch, settlePromise]);
     clearInterval(stopTimer);
+    A.toolSettle = null;
 
     if (r && r.kind === "stopped") return "(stopped by user)";
     if (!r) return window.ZS.FEEDBACK.bridgeOffline;

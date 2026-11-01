@@ -40,7 +40,7 @@
           <!-- Segment 2: Central Action Trigger -->
           <div id="zs-trigger-box" class="zs-hud-trigger">
             <button type="button" id="zs-action" data-kind="start">เริ่มทำงาน</button>
-            <button type="button" id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">หยุด</button>
+            <button type="button" id="zs-stop" hidden title="หยุดทำงาน และปิด Roblox Studio (Kill All)">หยุด</button>
             <span id="zs-state" hidden></span>
           </div>
 
@@ -608,7 +608,7 @@
 
     function showStop(v) {
       if (!stopBtn) return;
-      const allow = (v || A.stopping) && !A.starting;
+      const allow = Boolean(v || A.stopping || A.running || A.starting);
       const was = stopBtn.hidden;
       stopBtn.hidden = !allow;
       if (allow && !A.stopping && stopBtn.dataset.state === "stopping") {

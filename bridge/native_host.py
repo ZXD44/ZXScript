@@ -193,6 +193,36 @@ def stop_bridge():
     return {"ok": True, "message": "Bridge stopped successfully", "running": False}
 
 
+def kill_all_related(kill_bridge=False):
+    """Forcefully terminate Roblox Studio, Bloxstrap, StudioMCP, and all related processes."""
+    killed = []
+    targets = [
+        "RobloxStudioBeta.exe",
+        "RobloxStudio.exe",
+        "Bloxstrap.exe",
+        "StudioMCP.exe",
+    ]
+    for img in targets:
+        try:
+            res = subprocess.run(f"taskkill /F /T /IM {img}", shell=True, capture_output=True)
+            if res.returncode == 0:
+                killed.append(img)
+        except Exception:
+            pass
+
+    if kill_bridge:
+        stop_bridge()
+
+    msg = f"Terminated Roblox Studio processes: {', '.join(killed) if killed else 'None active'}"
+    log_host(f"kill_all_related: {msg} (kill_bridge={kill_bridge})")
+    return {
+        "ok": True,
+        "message": msg,
+        "killed": killed,
+        "running": False if kill_bridge else bool(find_bridge_pid()),
+    }
+
+
 def get_status():
     """Check bridge status."""
     pid = find_bridge_pid()
@@ -257,6 +287,8 @@ def main():
                 send_msg(start_bridge())
             elif action == "stop":
                 send_msg(stop_bridge())
+            elif action in ("kill", "kill_all", "kill_studio"):
+                send_msg(kill_all_related(kill_bridge=msg.get("kill_bridge", False)))
             elif action == "restart":
                 stop_bridge()
                 send_msg(start_bridge())
@@ -281,6 +313,14 @@ if __name__ == "__main__":
         if "start" in arg or "run" in arg or "zxscript" in arg:
             res = start_bridge()
             log_host(f"CLI start result: {res}")
+            sys.exit(0)
+        elif "kill" in arg:
+            res = kill_all_related(kill_bridge="bridge" in arg or "all" in arg)
+            log_host(f"CLI kill result: {res}")
+            try:
+                print(json.dumps(res))
+            except Exception:
+                pass
             sys.exit(0)
         elif "stop" in arg:
             res = stop_bridge()
