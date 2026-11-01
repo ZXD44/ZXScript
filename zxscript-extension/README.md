@@ -6,12 +6,15 @@ It's a Chrome/Edge browser extension plus a small local bridge that connects the
 
 ---
 
-## Latest Features & Enhancements
+## Latest Features & Enhancements (v0.0.4)
 
+- **Discord Cyber Dragon UI & Blurple Highlights:** Sleek Discord dark theme (`#23272a`, `#2b2d31`, `#1e1f22`) paired with Discord Blurple (`#5865F2`) for active selections, model tabs, and highlight states.
+- **Organic Wing Dynamics & Fluid Flight:** Re-tuned flapping cycles for lifelike fluidity (4.8s idle breathing, 3.6s hover, 2.5s execution boost) with GPU acceleration and 0.00px symmetrical anchors.
+- **40% Compact Menu (290px):** Ultra-slim drawer UI with quick-access model selection pills, one-click bridge initialization, and folded MCP terminal.
+- **Pure CSS Viewport Centering:** Bulletproof horizontal centering (`left: 50%; transform: translateX(-50%)`) without JS layout shifts or container clipping bugs.
 - **Clean Architecture & Modular Core:** Decomposed all files to strictly under 500-600 lines across backend and frontend for maximum reliability, speed, and maintainability.
 - **Headless Native Host:** Automatically runs Bridge in the background (`CREATE_NO_WINDOW`) with live log streaming inside the extension popup and in-page modal dialog.
 - **Impeccable Style UI:** Sleek, minimal interface adhering to impeccable.style standards: 60fps hardware acceleration, zero emoji clutter, and slim 5px pill scrollbars.
-- **Dynamic Island Morph Bar with Red Dragon Wings:** Floating glassmorphic capsule flanked by organically animated flapping dragon wings (2.0s idle, 1.0s active execution boost) and crimson ember backglow.
 - **Smart Error Notification System:** Categorizes issues into Studio, Bridge, AI Model, and Context Limit with quick 1-click action triggers and collapsible technical diagnostics.
 - **ChatGPT Auto-Recovery Engine:** Automatically detects empty responses or stalled streams and continues generation autonomously.
 - **Zero-Latency Web Audio Synthesizer:** Elegant success chimes and error alerts synthesized natively via the Web Audio API without external audio assets.

@@ -8,7 +8,7 @@
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey?style=flat-square)]()
 [![Roblox Studio](https://img.shields.io/badge/Roblox_Studio-MCP_Supported-00A2FF?style=flat-square)]()
-[![Version](https://img.shields.io/badge/Version-0.0.3-success?style=flat-square)](version.json)
+[![Version](https://img.shields.io/badge/version-0.0.4-brightgreen?style=flat-square)](version.json)
 
 [🇹🇭 ภาษาไทย](#-ภาษาไทย) • [🇬🇧 English](#-english-overview)
 
@@ -25,8 +25,11 @@
 ### ✨ จุดเด่น
 
 * **ฟรี 100% ไม่ต้องซื้อ API Key:** ใช้โควตาคุยบนหน้าเว็บแชตตามปกติได้เลย
+* **ดีไซน์ Discord Cyber Dragon & โทน Blurple:** ดีไซน์สไตล์ Discord Dark Theme สวยงาม สบายตา พร้อมแถบไฮไลต์สี Discord Blurple
+* **ปีกมังกรมีชีวิตชีวา (Lifelike Wings):** ปีกมังกรขยับนุ่มนวลลื่นไหล 60 FPS ด้วย GPU Acceleration
+* **เมนูกะทัดรัด (Compact 290px):** เมนูตั้งค่าขนาดเล็ก กะทัดรัด ใช้งานง่าย ไม่เกะกะสายตาและพื้นที่แชต
 * **กด `Ctrl + Z` ย้อนกลับได้ตลอด:** ทุกคำสั่งที่ AI สั่งทำใน Studio จะผูกกับ `ChangeHistoryService` เลิกทำหรือย้อนกลับได้ทันที
-* **แถบควบคุมเรียบง่ายบนหน้าเว็บ:** มี Action Bar ลอยตัวบนหน้าแชต บอกสถานะการเชื่อมต่อ และกดเริ่ม-หยุดได้ในคลิกเดียว
+* **แถบควบคุม Action Bar จัดกึ่งกลางอัตโนมัติ:** แถบลอยตัวตรงกลางหน้าจอ บอกสถานะการเชื่อมต่อ และกดเริ่ม-หยุดได้ในคลิกเดียว
 * **ระบบเช็คอัตโนมัติ:** ค้นหาโฟลเดอร์ Roblox Studio และ Bloxstrap ให้เอง มีตัวตรวจความพร้อมก่อนเปิดใช้งาน
 * **เครื่องมือครบครัน:** AI มีสิทธิ์เรียกใช้คำสั่ง Studio ได้ถึง 34 คำสั่ง ทั้งรันโค้ด Luau, แก้ไขสคริปต์, เสกโมเดลจาก Marketplace, ดู Output Log และแคปภาพหน้าจอ
 

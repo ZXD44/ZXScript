@@ -131,44 +131,26 @@
     if (!menuEl) return;
     const P = window.ZSProvider;
     const here = ((P && P.displayName) || "").toLowerCase();
-    const hostOf = (u) => {
-      try {
-        return new URL(u).hostname.replace(/^www\./, "");
-      } catch {
-        return "";
-      }
-    };
 
     const esc = (s) =>
       String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+    // Compact AI model pills
     let sites = "";
     for (const s of AI_SITES) {
       const current = s.name.toLowerCase() === here;
-      const host = hostOf(s.url);
       if (current) {
         sites += `
-          <div class="zs-site-card zs-site-current" title="${esc(s.name)} (กำลังใช้งานหน้านี้)">
-            <div class="zs-site-card-top">
-              <span class="zs-site-badge-dot on"></span>
-              <span class="zs-site-name">${esc(s.name)}</span>
-            </div>
-            <div class="zs-site-card-bot">
-              <span class="zs-site-host">${esc(host)}</span>
-              <span class="zs-site-badge-active">ใช้งานอยู่</span>
-            </div>
+          <div class="zs-site-pill active" title="${esc(s.name)} (กำลังใช้งานหน้านี้)">
+            <span class="zs-pill-dot on"></span>
+            <span class="zs-pill-name">${esc(s.name)}</span>
+            <span class="zs-pill-badge">หน้านี้</span>
           </div>`;
       } else {
         sites += `
-          <button class="zs-site-card" data-u="${esc(s.url)}" title="เปิด ${esc(s.name)} ในแท็บใหม่">
-            <div class="zs-site-card-top">
-              <span class="zs-site-badge-dot"></span>
-              <span class="zs-site-name">${esc(s.name)}</span>
-              <span class="zs-site-go">&rarr;</span>
-            </div>
-            <div class="zs-site-card-bot">
-              <span class="zs-site-host">${esc(host)}</span>
-            </div>
+          <button class="zs-site-pill" data-u="${esc(s.url)}" title="เปิด ${esc(s.name)} ในหน้าต่างใหม่">
+            <span class="zs-pill-dot"></span>
+            <span class="zs-pill-name">${esc(s.name)}</span>
           </button>`;
       }
     }
@@ -177,90 +159,102 @@
     const robloxAlive = A.bridge && A.bridge.connected && (A.bridge.studio === true || (A.bridge.tools > 0));
     const robloxHealth = !A.bridge || !A.bridge.connected ? "off" : robloxAlive ? "on" : "warn";
     const robloxTitle = !A.bridge || !A.bridge.connected
-      ? "Bridge ออฟไลน์"
+      ? "ยังไม่ได้เปิดระบบเชื่อมต่อ"
       : robloxAlive
       ? `เชื่อมต่อ Studio แล้ว (${A.bridge.tools || 0} คำสั่ง)`
       : (A.bridge && A.bridge.studioProc)
-      ? "รอเปิด Place ใน Studio"
-      : "รอเปิด Roblox Studio";
+      ? "ตรวจพบโปรแกรม แต่ยังไม่ได้เปิดแมพ"
+      : "รอเปิดโปรแกรม Roblox Studio";
     const robloxSub = !A.bridge || !A.bridge.connected
-      ? "ระบบหลัก · ออฟไลน์ (พอร์ต 17613)"
+      ? "ระบบเชื่อมต่อออฟไลน์ (พอร์ต 17613)"
       : robloxAlive
       ? `พร้อมใช้งาน · ${A.bridge.tools || 0} คำสั่ง`
-      : "รอเชื่อมต่อแมพใน Studio";
+      : "รอเปิด Place ใน Roblox Studio";
 
-    let mcpList = `<div class="zs-mcp-item zs-mcp-item-primary"><span class="zs-mcp-health zs-mcp-health-${robloxHealth}" title="${esc(robloxTitle)}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">Roblox Studio</span><span class="zs-mcp-url">${esc(robloxSub)}</span></div></div>`;
+    let mcpList = `<div class="zs-mcp-item zs-mcp-item-primary"><span class="zs-mcp-health zs-mcp-health-${robloxHealth}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">Roblox Studio</span><span class="zs-mcp-url">${esc(robloxSub)}</span></div></div>`;
     mergedServers.forEach((s) => {
       const healthClass = s.alive === true ? "on" : s.alive === false ? "off" : "unknown";
       const healthTitle =
         s.alive === true ? `พร้อมใช้งาน ${s.tools || 0} คำสั่ง` : s.alive === false ? "ออฟไลน์" : "ไม่ทราบสถานะ";
-      mcpList += `<div class="zs-mcp-item"><span class="zs-mcp-health zs-mcp-health-${healthClass}" title="${healthTitle}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">${esc(s.name)}</span><span class="zs-mcp-url">${esc(s.command || s.id)}</span></div><button class="zs-mcp-remove" data-id="${esc(s.id)}" title="ลบเซิร์ฟเวอร์">✕</button></div>`;
+      mcpList += `<div class="zs-mcp-item"><span class="zs-mcp-health zs-mcp-health-${healthClass}" title="${healthTitle}"></span><div class="zs-mcp-info"><span class="zs-mcp-name">${esc(s.name)}</span><span class="zs-mcp-url">${esc(s.command || s.id)}</span></div><button class="zs-mcp-remove" data-id="${esc(s.id)}" title="ลบรายการ">✕</button></div>`;
     });
 
     menuEl.innerHTML = `
       <div class="zs-menu-head">
         <div class="zs-menu-brand">
-          <svg class="zs-dragon-icon" width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 7l6 8 6-8-6-6zm0 3l3.5 3.5L8 12.5 4.5 7.5 8 4z"/></svg>
+          <svg class="zs-dragon-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 9l3 13 6-4 6 4 3-13-9-7zm0 3.5l5.5 4.3-1.8 7.8-3.7-2.5-3.7 2.5-1.8-7.8L12 5.5z"/></svg>
           <span class="zs-menu-logo">ZXScript</span>
-          <span class="zs-menu-tag">v${EXT_VERSION}</span>
+          <span class="zs-menu-tag">ตั้งค่า</span>
         </div>
         <button id="zs-menu-close" class="zs-menu-close" title="ปิดหน้าต่าง">✕</button>
       </div>
 
+      <!-- ส่วนที่ 1: สถานะเชื่อมต่อ Studio -->
+      <div class="zs-menu-status-card ${robloxHealth}">
+        <span class="zs-status-card-dot ${robloxHealth}"></span>
+        <div class="zs-status-card-text">
+          <span class="zs-status-card-title">${esc(robloxTitle)}</span>
+          <span class="zs-status-card-sub">${esc(robloxSub)}</span>
+        </div>
+      </div>
+
+      <!-- ส่วนที่ 2: สลับหน้าต่าง AI (กะทัดรัด สบายตา) -->
       <section class="zs-menu-sec">
         <div class="zs-sec-head">
           <span class="zs-sec-title">
             <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h5v5H2V2zm7 0h5v5H9V2zM2 9h5v5H2V9zm7 0h5v5H9V9z"/></svg>
-            สลับโมเดล AI
+            สลับหน้าต่าง AI
           </span>
           <span class="zs-sec-badge">${AI_SITES.length} โมเดล</span>
         </div>
-        <div class="zs-site-grid">${sites}</div>
+        <div class="zs-site-pills">${sites}</div>
       </section>
 
-      <section class="zs-menu-sec">
-        <div class="zs-sec-head">
-          <span class="zs-sec-title">
-            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h8v3H4V1zm-2 5h12v4H2V6zm2 6h8v3H4v-3z"/></svg>
-            เซิร์ฟเวอร์ MCP เสริม
-          </span>
-        </div>
-        <div class="zs-sec-sub">คำสั่งและเครื่องมือจะส่งต่อไปยังโมเดล AI อัตโนมัติ</div>
-        <div id="zs-mcp-list">${mcpList}</div>
-        <div class="zs-mcp-add-box">
-          <div class="zs-mcp-inputs">
-            <input type="text" id="zs-mcp-name" class="zs-input" placeholder="ชื่อเซิร์ฟเวอร์ (เช่น Filesystem)">
-            <input type="text" id="zs-mcp-url" class="zs-input" placeholder="คำสั่งรัน (เช่น npx -y @modelcontextprotocol/...)">
-          </div>
-          <div class="zs-mcp-actions">
-            <button id="zs-mcp-add-btn" class="zs-btn-pixel">+ เพิ่มเซิร์ฟเวอร์</button>
-            <span id="zs-mcp-status" class="zs-mcp-status"></span>
-          </div>
-        </div>
-      </section>
-
+      <!-- ส่วนที่ 3: คำแนะนำช่วยจำสำหรับ AI -->
       <section class="zs-menu-sec">
         <div class="zs-sec-head">
           <span class="zs-sec-title">
             <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2V2zm0 4h10v2H2V6zm0 4h12v2H2v-2zm0 4h8v2H2v-2z"/></svg>
-            คำสั่งระบบเสริม (Custom Prompt)
+            คำแนะนำช่วยจำสำหรับ AI
           </span>
         </div>
-        <div class="zs-sec-sub">จะส่งประกบคำสั่งเริ่มต้นของ ZXScript ให้ AI เสมอ</div>
-        <textarea id="zs-set-text" class="zs-textarea" rows="3" placeholder="ตัวอย่าง: ตอบเป็นภาษาไทยเสมอ, ใช้ Rojo ในการจัดโครงสร้างโค้ด...">${esc(customPrompt)}</textarea>
+        <div class="zs-sec-sub">ส่งข้อความนี้ให้ AI ช่วยจำทุกครั้ง (เช่น สไตล์โค้ด)</div>
+        <textarea id="zs-set-text" class="zs-textarea" rows="2" placeholder="เช่น ตอบเป็นภาษาไทยเสมอ, ใช้โครงสร้าง Rojo ในการเขียนสคริปต์...">${esc(customPrompt)}</textarea>
         <div class="zs-menu-row">
-          <button id="zs-set-save" class="zs-btn-pixel">💾 บันทึกคำสั่ง</button>
+          <button id="zs-set-save" class="zs-btn-pixel">บันทึกข้อมูล</button>
           <span id="zs-set-status" class="zs-set-status"></span>
         </div>
       </section>
 
+      <!-- ส่วนที่ 4: เครื่องมือเสริมขั้นสูง (พับเก็บได้ ไม่รก ไม่เรื่องเยอะ) -->
+      <details class="zs-mcp-fold">
+        <summary class="zs-fold-title">
+          <span>เครื่องมือเสริมขั้นสูง (MCP)</span>
+          <span class="zs-fold-arrow">›</span>
+        </summary>
+        <div class="zs-fold-content">
+          <div class="zs-sec-sub">คำสั่งเครื่องมือเสริมจะส่งต่อไปยัง AI อัตโนมัติ</div>
+          <div id="zs-mcp-list">${mcpList}</div>
+          <div class="zs-mcp-add-box">
+            <div class="zs-mcp-inputs">
+              <input type="text" id="zs-mcp-name" class="zs-input" placeholder="ชื่อเครื่องมือ (เช่น Filesystem)">
+              <input type="text" id="zs-mcp-url" class="zs-input" placeholder="คำสั่งเปิด (เช่น npx -y @modelcontextprotocol/...)">
+            </div>
+            <div class="zs-mcp-actions">
+              <button id="zs-mcp-add-btn" class="zs-btn-pixel">+ เพิ่มเครื่องมือ</button>
+              <span id="zs-mcp-status" class="zs-mcp-status"></span>
+            </div>
+          </div>
+        </div>
+      </details>
+
       <div class="zs-menu-foot">
         <div class="zs-foot-left">
-          <span class="zs-foot-dev" title="ผู้พัฒนา ZXD44">ZXD44</span>
-          <span class="zs-foot-dragon">Red Dragon</span>
+          <span class="zs-foot-dev" title="ผู้พัฒนา">ZXD44</span>
+          <span class="zs-foot-dragon">มังกรดิสคอร์ด</span>
         </div>
         <div class="zs-foot-links">
-          <a href="https://www.zirconx.xyz" target="_blank" rel="noopener" class="zs-foot-link" title="เว็บไซต์ผู้พัฒนา: www.zirconx.xyz">🌐 เว็บไซต์</a>
+          <a href="https://www.zirconx.xyz" target="_blank" rel="noopener" class="zs-foot-link" title="เว็บไซต์หลัก">เว็บไซต์</a>
           <span class="zs-foot-sep">·</span>
           <a href="${GITHUB_URL}" target="_blank" rel="noopener" class="zs-foot-link">GitHub</a>
           ${VIDEO_URL ? `<span class="zs-foot-sep">·</span><a href="${VIDEO_URL}" target="_blank" rel="noopener" class="zs-foot-link">คู่มือ</a>` : ""}
@@ -272,7 +266,7 @@
     const closeBtn = menuEl.querySelector("#zs-menu-close");
     if (closeBtn) closeBtn.addEventListener("click", () => closeMenu());
 
-    menuEl.querySelectorAll(".zs-site-card[data-u]").forEach((b) =>
+    menuEl.querySelectorAll(".zs-site-pill[data-u], .zs-site-card[data-u]").forEach((b) =>
       b.addEventListener("click", () => {
         window.open(b.dataset.u, "_blank", "noopener");
         closeMenu();

@@ -39,7 +39,7 @@
         if (v) return v;
       }
     } catch (_) {}
-    return "0.0.3";
+    return "0.0.4";
   };
 
   const EXT_VERSION = getExtensionVersion();

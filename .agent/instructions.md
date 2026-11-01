@@ -2,7 +2,7 @@
 > **Author & Maintainer:** [ZXD44](https://github.com/ZXD44) (ZirconX) <gonhackergamer0@gmail.com>  
 > **Website:** [www.zirconx.xyz](https://www.zirconx.xyz)  
 > **Repository:** ZXScript - Roblox Studio AI Agent Bridge  
-> **Version:** `0.0.3` | **License:** GPL-3.0
+> **Version:** `0.0.4` | **License:** GPL-3.0
 
 This file guides AI coding agents working directly on the ZXScript codebase itself.
 

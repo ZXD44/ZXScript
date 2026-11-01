@@ -164,6 +164,8 @@
 
   // ── Streaming UI Monitor (200ms tick) ──────────────────────────────────────
   setInterval(() => {
+    // [PERF] Sleep UI queries when tab is in background (visibilitychange optimization)
+    if (typeof document !== "undefined" && document.hidden) return;
     const gen = P.isGenerating();
     if (gen) A.lastGenAt = Date.now();
 

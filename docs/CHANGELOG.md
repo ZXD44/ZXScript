@@ -2,6 +2,32 @@
 
 All notable changes to ZXScript are documented here.
 
+## [0.0.4] - 2026-11-01
+
+### Discord Cyber Dragon UI & Performance Tuning
+- **Discord Cyber Dragon UI Theme & Blurple Accents**:
+  - Re-themed the entire user interface to Discord dark aesthetics: `#23272a` (primary background/floating bar), `#2b2d31` (secondary surfaces/cards), `#1e1f22` (dark header/input backdrops), `#2f3136` (subtle borders), and authentic Discord Blurple (`#5865F2`).
+  - Active selection states updated from green (`#57f287`) to Discord Blurple (`#5865F2`) across AI model selection pills, menu badges, popup tabs, tab indicator dots, and text selection highlights (`::selection`).
+  - Applied Discord typography (`gg sans`, `Noto Sans`, `Helvetica Neue`, sans-serif) across all UI elements.
+- **Organic Wing Dynamics & Smooth Flight Cycles**:
+  - Re-tuned dragon wing flap animations to natural, majestic flight intervals: 4.8s idle cycle (calm breathing flight), 3.6s hover cycle, and 2.5s active execution boost.
+  - Maintained zero-gap symmetrical anchor geometry with GPU hardware acceleration (`transform: translate3d(...)`).
+- **Streamlined & Compact `zs-menu` UI (40% Footprint Reduction)**:
+  - Shrunk menu drawer width from 480px to 290px for a clean, non-intrusive screen footprint.
+  - Reorganized into an approachable, user-friendly layout: quick AI model selection pills, one-click bridge launch, and folded MCP terminal expander.
+  - Eliminated emoji clutter in favor of clean typography and minimalist status dots.
+- **Action Bar Viewport Centering & Rendering Stability**:
+  - Restored pure CSS-driven horizontal centering (`left: 50% !important; transform: translateX(-50%) !important;`), eliminating fragile JavaScript coordinate overrides.
+  - Removed layout containment (`contain: layout style`) on `#zs-root` that broke fixed positioning on web chat pages.
+- **Headless Studio Connection Verification**:
+  - Added user cancellation verification and graceful rollback to the connection prompt flow.
+  - Verified active Studio instance connectivity prior to headless bridge execution.
+- **Thai Language UX Polish**:
+  - Polished all Thai copy across Action Bar, menu drawer, modals, popup, and notification toasts into natural, fluent, grammatically sound Thai.
+
+
+---
+
 ## [0.0.3] - 2026-10-31
 
 ### Clean Architecture & Refactoring (Senior Architect Overhaul)

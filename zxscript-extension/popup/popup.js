@@ -200,12 +200,24 @@ function showPopupModal() {
   }
 }
 
+let isModalCancelled = false;
+
 function hidePopupModal() {
   if (popupModal) popupModal.style.display = "none";
   if (modalLogTimer) {
     clearInterval(modalLogTimer);
     modalLogTimer = null;
   }
+  if (modalStartBtn) {
+    modalStartBtn.disabled = false;
+    modalStartBtn.textContent = "เปิดการเชื่อมต่อ";
+  }
+}
+
+function handleModalCancel() {
+  isModalCancelled = true;
+  hidePopupModal();
+  showToast("ยกเลิกการเชื่อมต่อแล้ว");
 }
 
 function addModalLog(text, cls) {
@@ -219,11 +231,11 @@ function addModalLog(text, cls) {
   modalLogBox.scrollTop = modalLogBox.scrollHeight;
 }
 
-if (modalCloseBtn) modalCloseBtn.addEventListener("click", hidePopupModal);
-if (modalCancelBtn) modalCancelBtn.addEventListener("click", hidePopupModal);
+if (modalCloseBtn) modalCloseBtn.addEventListener("click", handleModalCancel);
+if (modalCancelBtn) modalCancelBtn.addEventListener("click", handleModalCancel);
 if (popupModal) {
   popupModal.addEventListener("click", (e) => {
-    if (e.target === popupModal) hidePopupModal();
+    if (e.target === popupModal) handleModalCancel();
   });
 }
 
@@ -233,8 +245,14 @@ function startBridgePolling(onDone) {
   if (modalLogTimer) clearInterval(modalLogTimer);
 
   modalLogTimer = setInterval(() => {
+    if (isModalCancelled) {
+      clearInterval(modalLogTimer);
+      modalLogTimer = null;
+      return;
+    }
     polls++;
     chrome.runtime.sendMessage({ type: "status" }, (s) => {
+      if (isModalCancelled) return;
       if (!s || !s.connected) {
         const pct = Math.min(15 + Math.round((polls / maxPolls) * 35), 50);
         updateModalProgress(pct, `กำลังรอพอร์ต 17613 ตอบสนอง... (${polls}/${maxPolls})`, "", {
@@ -317,6 +335,7 @@ function startBridgePolling(onDone) {
 
 if (modalStartBtn) {
   modalStartBtn.addEventListener("click", () => {
+    isModalCancelled = false;
     modalStartBtn.disabled = true;
     modalStartBtn.textContent = "กำลังตรวจสอบ...";
 

@@ -30,7 +30,7 @@
           <img id="zs-wing-left" class="zs-wing" src="${wingUrl}" alt="" aria-hidden="true" draggable="false">
           
           <!-- Segment 1: Dragon Orb & AI Badge -->
-          <button id="zs-badge" class="zs-hud-badge" title="สถานะ Studio และสลับโมเดล AI (คลิกเพื่อสลับ)">
+          <button type="button" id="zs-badge" class="zs-hud-badge" title="สถานะ Studio และเมนูสลับโมเดล AI (คลิกเพื่อเปิดเมนู)">
             <span id="zs-dot" class="off" title="สถานะการเชื่อมต่อ Studio"></span>
             <span id="zs-switch-name">AI</span>
           </button>
@@ -39,13 +39,13 @@
 
           <!-- Segment 2: Central Action Trigger -->
           <div id="zs-trigger-box" class="zs-hud-trigger">
-            <button id="zs-action" data-kind="start">🔥 เริ่มทำงาน</button>
-            <button id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">■ หยุด</button>
+            <button type="button" id="zs-action" data-kind="start">เริ่มทำงาน</button>
+            <button type="button" id="zs-stop" hidden title="หยุดการทำงานฉุกเฉิน (Stop)">หยุด</button>
             <span id="zs-state" hidden></span>
           </div>
 
           <!-- Hidden legacy hooks for compatibility -->
-          <button id="zs-switch" style="display:none !important" aria-label="สลับ AI"></button>
+          <button type="button" id="zs-switch" style="display:none !important" aria-label="สลับ AI"></button>
           <span id="zs-brand" style="display:none !important"></span>
           <span id="zs-discord" style="display:none !important"></span>
           <span id="zs-support" style="display:none !important"></span>
@@ -53,7 +53,7 @@
           <img id="zs-wing-right" class="zs-wing" src="${wingUrl}" alt="" aria-hidden="true" draggable="false">
         </div>
         <div id="zs-menu" hidden></div>
-        ${P && P.unstableWarning ? `<button id="zs-unstable" aria-label="Provider may be unstable" hidden>⚠ ไม่เสถียร</button>` : ""}
+        ${P && P.unstableWarning ? `<button type="button" id="zs-unstable" aria-label="Provider may be unstable" hidden>⚠ ไม่เสถียร</button>` : ""}
       `;
       document.documentElement.appendChild(root);
       bar = root.querySelector("#zs-bar");
@@ -87,22 +87,26 @@
       dot.addEventListener("click", (e) => {
         e.stopPropagation();
         if (A.staleExtension) { location.reload(); return; }
-        if (!A.bridge || !A.bridge.connected) onActionClick();
+        if (!A.bridge || !A.bridge.connected) {
+          onActionClick();
+        } else {
+          if (window.ZS.showBridgeModal) window.ZS.showBridgeModal();
+        }
       });
       if (badgeBtn) {
         badgeBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           if (A.staleExtension) { location.reload(); return; }
-          if (!A.bridge || !A.bridge.connected) {
-            onActionClick();
-          } else {
-            if (window.ZS.menu) window.ZS.menu.toggleMenu();
-          }
+          if (window.ZS.menu) window.ZS.menu.toggleMenu();
         });
       }
       stateEl.addEventListener("click", () => {
         if (A.staleExtension) { location.reload(); return; }
-        if (!A.bridge || !A.bridge.connected) onActionClick();
+        if (!A.bridge || !A.bridge.connected) {
+          onActionClick();
+        } else {
+          if (window.ZS.menu) window.ZS.menu.toggleMenu();
+        }
       });
 
       unstableEl = root.querySelector("#zs-unstable");
@@ -138,6 +142,7 @@
           if (!menuEl || menuEl.hidden) return;
           if (
             !menuEl.contains(e.target) &&
+            (!badgeBtn || !badgeBtn.contains(e.target)) &&
             !switchBtn.contains(e.target) &&
             (!supportBtn || !supportBtn.contains(e.target))
           ) {
@@ -148,10 +153,28 @@
         true
       );
 
-      applyTheme();
-      setInterval(applyTheme, 2000);
+      initThemeEngine();
       renderBar();
-      placeBar();
+      schedulePlaceBar();
+
+      // Passive event listeners for placeBar
+      window.addEventListener("resize", schedulePlaceBar, { passive: true });
+      window.addEventListener("scroll", schedulePlaceBar, { passive: true });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          if (barRaf) {
+            cancelAnimationFrame(barRaf);
+            barRaf = null;
+          }
+        } else {
+          schedulePlaceBar();
+        }
+      }, { passive: true });
+
+      // [PERF] Low-frequency idle heartbeat (2s) to catch async DOM host shifts without burning CPU
+      setInterval(() => {
+        if (!document.hidden) schedulePlaceBar();
+      }, 2000);
     }
 
     async function onActionClick() {
@@ -162,31 +185,24 @@
       }
       const bgFn = (window.ZS && window.ZS.tools && window.ZS.tools.bg) || (window.ZS && window.ZS.bg);
       if (!A.bridge || !A.bridge.connected) {
-        if (actionBtn) {
-          actionBtn.disabled = true;
-          actionBtn.textContent = "⚡ กำลังเชื่อมต่อ…";
-        }
-        try {
-          if (bgFn) {
-            const rec = await bgFn({ type: "reconnect" });
-            if (rec && rec.connected) {
-              setStatus(rec);
-              if (actionBtn) actionBtn.disabled = false;
+        if (bgFn) {
+          try {
+            const st = await bgFn({ type: "status" });
+            if (st && st.connected) {
+              setStatus(st);
               renderBar();
               if (window.ZS && window.ZS.startSession) {
                 window.ZS.startSession();
               }
               return;
             }
+          } catch (e) {
+            console.warn("[ZXScript] status check error:", e);
           }
-        } catch (e) {
-          console.warn("[ZXScript] reconnect error:", e);
         }
-        if (actionBtn) {
-          actionBtn.disabled = false;
-          renderBar();
+        if (window.ZS && window.ZS.showBridgeModal) {
+          window.ZS.showBridgeModal();
         }
-        if (window.ZS && window.ZS.showBridgeModal) window.ZS.showBridgeModal();
         return;
       }
       if (window.ZS && window.ZS.startSession) {
@@ -223,6 +239,10 @@
       return getComputedStyle(document.documentElement).backgroundColor || "rgb(255,255,255)";
     }
 
+    let lastThemeIsLight = null;
+    let themeObserver = null;
+
+    // [PERF] Reactive Theme Engine - caches state and avoids touching classList unless changed
     function applyTheme() {
       let light;
       const hint = pageThemeHint();
@@ -233,9 +253,33 @@
         if (m.length < 3) return;
         light = 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2] > 140;
       }
-      document.documentElement.classList.toggle("zs-light", light);
+      if (light !== lastThemeIsLight) {
+        lastThemeIsLight = light;
+        document.documentElement.classList.toggle("zs-light", light);
+      }
     }
 
+    function initThemeEngine() {
+      applyTheme();
+      try {
+        if (typeof MutationObserver !== "undefined") {
+          themeObserver = new MutationObserver(() => applyTheme());
+          themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class", "data-theme", "data-color-mode", "data-color-scheme", "style"]
+          });
+        }
+        if (window.matchMedia) {
+          const mq = window.matchMedia("(prefers-color-scheme: dark)");
+          if (mq.addEventListener) mq.addEventListener("change", applyTheme);
+          else if (mq.addListener) mq.addListener(applyTheme);
+        }
+      } catch {}
+      // Low-frequency fallback check (10s) instead of heavy 2s polling
+      setInterval(applyTheme, 10000);
+    }
+
+    let lastUnstableL = "", lastUnstableT = "", lastUnstableH = 0;
     function placeUnstable() {
       const u = unstableEl;
       if (!u) return;
@@ -249,16 +293,22 @@
         return;
       }
       if (u.hidden) u.hidden = false;
-      const uh = u.offsetHeight || 20;
+      const uh = lastUnstableH || (lastUnstableH = u.offsetHeight || 20);
       const nL = Math.round(br.left) + "px";
       const nT = Math.round(Math.max(4, br.top - uh - 5)) + "px";
-      if (u.style.left !== nL) u.style.left = nL;
-      if (u.style.top !== nT) u.style.top = nT;
+      if (lastUnstableL !== nL) {
+        lastUnstableL = nL;
+        u.style.left = nL;
+      }
+      if (lastUnstableT !== nT) {
+        lastUnstableT = nT;
+        u.style.top = nT;
+      }
     }
 
     function placeBar() {
-      barRaf = requestAnimationFrame(placeBar);
-      if (!bar) return;
+      barRaf = null;
+      if (!bar || document.hidden) return;
       const P = window.ZSProvider;
 
       if (root && !root.isConnected) {
@@ -267,32 +317,48 @@
         } catch {}
       }
 
+      if (bar.style.left) bar.style.left = "";
+
       placeUnstable();
 
       if (P && ((P.captchaPresent && P.captchaPresent()) || (P.overlayBlocking && P.overlayBlocking()))) {
-        bar.style.display = "none";
-        if (menuEl) menuEl.hidden = true;
+        if (bar.style.display !== "none") bar.style.display = "none";
+        if (menuEl && !menuEl.hidden) menuEl.hidden = true;
         return;
       }
 
       if (root && bar.parentElement !== root) {
         root.appendChild(bar);
       }
-      bar.style.display = "flex";
+      if (bar.style.display !== "flex") bar.style.display = "flex";
 
       if (menuEl && !menuEl.hidden) {
         const br = bar.getBoundingClientRect();
-        const menuWidth = 330;
+        const menuWidth = 290;
         let left = Math.round(br.left + br.width / 2);
         const half = menuWidth / 2;
         if (left - half < 12) left = half + 12;
         if (left + half > window.innerWidth - 12) left = window.innerWidth - 12 - half;
 
-        menuEl.style.position = "fixed";
-        menuEl.style.top = Math.round(br.bottom + 8) + "px";
-        menuEl.style.left = left + "px";
-        menuEl.style.transform = "translateX(-50%)";
-        menuEl.style.maxHeight = Math.max(200, Math.round(window.innerHeight - br.bottom - 24)) + "px";
+        const nTop = Math.round(br.bottom + 8) + "px";
+        const nLeft = left + "px";
+        const nMaxH = Math.max(200, Math.round(window.innerHeight - br.bottom - 24)) + "px";
+
+        if (menuEl.style.position !== "fixed") menuEl.style.position = "fixed";
+        if (menuEl.style.top !== nTop) menuEl.style.top = nTop;
+        if (menuEl.style.left !== nLeft) menuEl.style.left = nLeft;
+        if (menuEl.style.transform !== "translateX(-50%)") menuEl.style.transform = "translateX(-50%)";
+        if (menuEl.style.maxHeight !== nMaxH) menuEl.style.maxHeight = nMaxH;
+      }
+    }
+
+    // [PERF] Coalesces placement calls into next animation frame
+    function schedulePlaceBar() {
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (!barRaf) {
+        barRaf = (typeof requestAnimationFrame === "function")
+          ? requestAnimationFrame(placeBar)
+          : setTimeout(placeBar, 16);
       }
     }
 
@@ -350,15 +416,15 @@
         if (dot) dot.className = "off";
         toneClass = "warn";
         warn = true;
-        msg = `<b>ส่วนขยายอัปเดตแล้ว</b> · กรุณารีเฟรช`;
-        label = "🔄 รีเฟรช F5";
+        msg = `<b>ส่วนขยายอัปเดตแล้ว</b> · โปรดรีเฟรชหน้าเว็บ`;
+        label = "รีเฟรช F5";
         kind = "reload";
         disabled = false;
       } else if (A.starting) {
         toneClass = "starting";
         indicator = `<span class="zs-spin"></span>`;
         msg = `<b>${_startingStep || "กำลังเริ่มระบบ…"}</b>`;
-        label = `⏳ กำลังเริ่ม…`;
+        label = `กำลังเริ่ม…`;
         kind = "starting";
         disabled = true;
       } else if (A.started) {
@@ -366,11 +432,11 @@
         if (!A.bridge || A.bridge.connected === false) {
           toneClass = "warn";
           warn = true;
-          msg = `<b>AI พร้อม</b> · Bridge ออฟไลน์`;
+          msg = `<b>AI พร้อม</b> · รอเปิดระบบเชื่อมต่อ`;
         } else if (!bridgeOk) {
           toneClass = "warn";
           warn = true;
-          msg = studioProcUp ? `<b>AI พร้อม</b> · รอเปิดแมพใน Studio` : `<b>AI พร้อม</b> · Studio ออฟไลน์`;
+          msg = studioProcUp ? `<b>AI พร้อม</b> · รอเปิดแมพใน Studio` : `<b>AI พร้อม</b> · ยังไม่ได้เปิด Studio`;
         } else {
           toneClass = "active";
           indicator = `<span class="zs-live-dot ${A.running ? "" : "idle"}"></span>`;
@@ -388,23 +454,23 @@
         if (!hasBridge) {
           toneClass = "warn";
           warn = true;
-          msg = `<b>Bridge ออฟไลน์</b> · คลิกเพื่อเชื่อมต่อ`;
-          label = "⚡ ต่อ Studio";
+          msg = `<b>ยังไม่ได้เชื่อมต่อ</b> · คลิกเพื่อเปิดระบบ`;
+          label = "เชื่อมต่อ Studio";
         } else if (!studioReady) {
           toneClass = "warn";
           warn = true;
           if (studioProcUp) {
-            msg = `<b>Bridge ออนไลน์</b> · รอเปิดแมพใน Studio`;
-            label = "⏳ รอแมพ Studio";
+            msg = `<b>ระบบพร้อม</b> · รอเปิดแมพใน Studio`;
+            label = "รอเปิดแมพ Studio";
           } else {
-            msg = `<b>Bridge ออนไลน์</b> · รอเปิด Roblox Studio`;
-            label = "⏳ รอเปิด Studio";
+            msg = `<b>ระบบพร้อม</b> · รอเปิดโปรแกรม Studio`;
+            label = "รอเปิด Studio";
           }
         } else {
           toneClass = "standby";
           warn = false;
-          msg = `<b>Studio พร้อมทำงาน</b> · ${toolsCount} คำสั่ง`;
-          label = "🔥 เริ่มทำงาน";
+          msg = `<b>Studio พร้อมทำงาน</b> · ${toolsCount} คำสั่งพร้อมใช้`;
+          label = "เริ่มทำงาน";
         }
       }
 
@@ -444,7 +510,11 @@
 
       if (badgeBtn) {
         const cleanMsg = msg.replace(/<[^>]*>/g, "");
-        badgeBtn.title = `${cleanMsg} · คลิกเพื่อสลับ AI`;
+        badgeBtn.title = `${cleanMsg} · คลิกเพื่อเปิดเมนู / สลับ AI`;
+      }
+      if (stateEl) {
+        const fullTxt = (_hudStatusText || msg || "").replace(/<[^>]*>/g, "");
+        stateEl.title = fullTxt ? `${fullTxt} · คลิกเพื่อเปิดเมนู` : "";
       }
 
       actionBtn.textContent = label;
@@ -543,7 +613,7 @@
       stopBtn.hidden = !allow;
       if (allow && !A.stopping && stopBtn.dataset.state === "stopping") {
         stopBtn.disabled = false;
-        stopBtn.textContent = "หยุดการทำงาน";
+        stopBtn.textContent = "หยุด";
         delete stopBtn.dataset.state;
       }
       if (was !== stopBtn.hidden) renderBar();

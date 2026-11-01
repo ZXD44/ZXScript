@@ -1,7 +1,7 @@
 # ZXScript Agent Workflows & Maintenance Procedures
 > **Project:** ZXScript - Autonomous Roblox Studio AI Agent Bridge  
 > **Author & Maintainer:** [ZXD44](https://github.com/ZXD44) (ZirconX) <gonhackergamer0@gmail.com>  
-> **Version:** `0.0.3` | **License:** GPL-3.0
+> **Version:** `0.0.4` | **License:** GPL-3.0
 
 This document defines standard development workflows, test commands, and maintenance procedures for ZXScript.
 

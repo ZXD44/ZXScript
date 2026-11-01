@@ -23,8 +23,10 @@
   padding: 13px 15px !important;
   border-radius: 14px !important;
   background: rgba(20, 22, 27, 0.96) !important;
-  backdrop-filter: blur(24px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  backdrop-filter: blur(12px) saturate(140%) !important; /* [PERF] Optimized blur radius */
+  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+  contain: layout style;
+  will-change: transform, opacity;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-left: 3.5px solid #00a2ff !important;
   box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 162, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
@@ -306,42 +308,40 @@ html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !importa
 }
 #zs-setup-dismiss:hover { background: rgba(255, 255, 255, 0.06); }
 
-/* ── In-page Security Modal Dialog (Red Dragon Pixel Art) ── */
+/* ── In-page Security Modal Dialog (Discord Dragon Theme) ── */
 .zs-modal-backdrop {
   position: fixed; inset: 0; z-index: 9999999;
-  background: rgba(10, 3, 8, 0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; animation: zs-modal-fade 0.15s ease forwards;
 }
 @keyframes zs-modal-fade { to { opacity: 1; } }
 .zs-modal-card {
-  width: 90%; max-width: 420px; background: #150611;
-  border: 2px solid #731738; border-radius: 4px;
-  padding: 18px; box-shadow: 4px 4px 0 #000, 0 0 24px rgba(225, 29, 72, 0.25);
-  color: #fff1f2; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  width: 90%; max-width: 420px; background: #2b2d31;
+  border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+  padding: 18px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+  color: #ffffff; font-family: 'GG Sans', 'ABC Ginto Discord', 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
   transform: translateY(4px); animation: zs-modal-pop 0.15s ease forwards;
-  image-rendering: pixelated;
 }
 @keyframes zs-modal-pop { to { transform: translateY(0); } }
-.zs-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #4a1024; padding-bottom: 6px; }
-.zs-modal-tag { font-size: 9px; font-weight: 700; font-family: monospace; text-transform: uppercase; letter-spacing: 0.5px; color: #f43f5e; background: #27091d; padding: 2px 8px; border: 1px solid #731738; }
-.zs-modal-close { background: #27091d; border: 1px solid #731738; color: #fda4af; font-size: 14px; cursor: pointer; padding: 1px 6px; line-height: 1; }
-.zs-modal-close:hover { color: #ffffff; background: #e11d48; border-color: #ff708f; }
-.zs-modal-title { font-size: 14px; font-weight: 700; color: #fff1f2; margin-bottom: 6px; text-shadow: 1px 1px 0 #4c0519; }
-.zs-modal-body { font-size: 11.5px; color: #fecdd3; line-height: 1.45; margin-bottom: 12px; }
-.zs-modal-info { background: #0d040a; border: 1px solid #4a1024; border-radius: 2px; padding: 8px 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; box-shadow: 1px 1px 0 #000; }
+.zs-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; }
+.zs-modal-tag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #5865f2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border: 1px solid rgba(88, 101, 242, 0.35); border-radius: 6px; }
+.zs-modal-close { background: #1e1f22; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; color: #babcd9; font-size: 14px; cursor: pointer; padding: 2px 7px; line-height: 1; transition: all 0.15s ease; }
+.zs-modal-close:hover { color: #ffffff; background: #de2761; border-color: #de2761; }
+.zs-modal-title { font-family: 'ABC Ginto Discord', 'GG Sans', sans-serif; font-size: 13.5px; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+.zs-modal-body { font-size: 11.5px; color: #babcd9; line-height: 1.45; margin-bottom: 12px; }
+.zs-modal-info { background: #1e1f22; border: 1px solid #383a40; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; }
 .zs-modal-info-row { display: flex; justify-content: space-between; font-size: 10.5px; }
-.zs-modal-info-label { color: #9f7584; font-family: monospace; font-size: 9px; }
-.zs-modal-info-val { color: #fecdd3; font-family: Consolas, monospace; font-size: 10px; font-weight: 600; }
+.zs-modal-info-label { color: #99aab5; font-size: 9px; }
+.zs-modal-info-val { color: #ffffff; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 10px; font-weight: 600; }
 
-/* ── Progress Bar & Verification Steps (Red Dragon Pixel Art) ── */
+/* ── Progress Bar & Verification Steps (Discord Dragon Theme) ── */
 .zs-modal-prog {
   margin-bottom: 12px;
-  background: #0d040a;
-  border: 1px solid #4a1024;
-  border-radius: 2px;
+  background: #1e1f22;
+  border: 1px solid #383a40;
+  border-radius: 8px;
   padding: 8px 10px;
-  box-shadow: 1px 1px 0 #000;
 }
 .zs-modal-prog-hdr {
   display: flex;
@@ -351,36 +351,32 @@ html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !importa
   font-size: 10.5px;
 }
 .zs-modal-prog-label {
-  color: #fda4af;
+  color: #babcd9;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 .zs-modal-prog-pct {
-  color: #fef08a;
+  color: #57f287;
   font-family: Consolas, monospace;
   font-weight: 700;
   font-size: 11px;
-  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
 }
 .zs-modal-prog-track {
   width: 100%;
-  height: 8px;
-  background: #1f0616;
-  border: 1px solid #5a142c;
-  border-radius: 2px;
+  height: 6px;
+  background: #141517;
+  border-radius: 4px;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
   position: relative;
 }
 .zs-modal-prog-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #be123c 0%, #f43f5e 50%, #fb7185 100%);
-  box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+  background: linear-gradient(90deg, #3442d9 0%, #5865f2 50%, #8891f2 100%);
+  box-shadow: 0 0 6px rgba(88, 101, 242, 0.6);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  image-rendering: pixelated;
 }
 .zs-modal-prog-fill.ok {
   background: linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%);
@@ -391,8 +387,8 @@ html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !importa
   box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
 }
 .zs-modal-prog-fill.err {
-  background: linear-gradient(90deg, #991b1b 0%, #ef4444 100%);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+  background: linear-gradient(90deg, #991b1b 0%, #de2761 100%);
+  box-shadow: 0 0 8px rgba(222, 39, 97, 0.7);
 }
 .zs-modal-steps {
   display: flex;
@@ -400,31 +396,31 @@ html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !importa
   gap: 4px;
   margin-top: 8px;
   padding-top: 6px;
-  border-top: 1px dashed rgba(115, 23, 56, 0.4);
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
 }
 .zs-modal-step {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 9px;
-  color: #715260;
-  font-family: monospace;
+  color: #72767d;
+  font-family: inherit;
   transition: color 0.15s ease;
 }
 .zs-modal-step.done {
-  color: #34d399;
+  color: #57f287;
   font-weight: 700;
 }
 .zs-modal-step.active {
-  color: #fb7185;
+  color: #5865f2;
   font-weight: 700;
 }
 .zs-modal-step.warn {
-  color: #f59e0b;
+  color: #fda220;
   font-weight: 700;
 }
 .zs-modal-step.err {
-  color: #f87171;
+  color: #de2761;
   font-weight: 700;
 }
 .zs-modal-step-dot {
@@ -435,15 +431,15 @@ html.zs-light .zs-banner-acts a:hover { background: rgba(0, 0, 0, 0.08) !importa
   box-shadow: 0 0 4px currentColor;
 }
 
-.zs-modal-log { background: #080206; border: 1px solid #5a142c; border-radius: 2px; padding: 8px; margin-bottom: 12px; max-height: 110px; overflow-y: auto; font-family: Consolas, monospace; font-size: 9.5px; color: #fda4af; line-height: 1.4; white-space: pre-wrap; box-shadow: inset 0 0 8px rgba(0,0,0,0.8); }
-.zs-modal-log .log-ok { color: #34d399; font-weight: 600; }
-.zs-modal-log .log-err { color: #f87171; font-weight: 600; }
-.zs-modal-log .log-info { color: #f43f5e; }
-.zs-modal-actions { display: flex; justify-content: flex-end; gap: 6px; }
-.zs-modal-btn { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 2px; cursor: pointer; transition: all 0.1s ease; border: 1px solid transparent; image-rendering: pixelated; }
-.zs-modal-btn.secondary { background: #240a1b; color: #fecdd3; border: 1px solid #5a142c; box-shadow: 1px 1px 0 #000; }
-.zs-modal-btn.secondary:hover { background: #38102a; border-color: #f43f5e; color: #ffffff; }
-.zs-modal-btn.primary { background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%); color: #ffffff; border: 1px solid #ff708f; box-shadow: 0 2px 0 #4c0519; text-shadow: 1px 1px 0 #000; }
-.zs-modal-btn.primary:hover { background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%); }
-.zs-modal-btn.primary:active { transform: translateY(1px); box-shadow: none; }
+.zs-modal-log { background: #141517; border: 1px solid #383a40; border-radius: 6px; padding: 8px; margin-bottom: 12px; max-height: 110px; overflow-y: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 9.5px; color: #babcd9; line-height: 1.45; white-space: pre-wrap; }
+.zs-modal-log .log-ok { color: #57f287; font-weight: 600; }
+.zs-modal-log .log-err { color: #de2761; font-weight: 600; }
+.zs-modal-log .log-info { color: #5865f2; }
+.zs-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.zs-modal-btn { font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; border: 1px solid transparent; }
+.zs-modal-btn.secondary { background: #1e1f22; color: #babcd9; border: 1px solid #383a40; }
+.zs-modal-btn.secondary:hover { background: #35373c; border-color: #5865f2; color: #ffffff; }
+.zs-modal-btn.primary { background: #5865f2; color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 2px 6px rgba(88, 101, 242, 0.4); }
+.zs-modal-btn.primary:hover { background: #3442d9; box-shadow: 0 4px 12px rgba(88, 101, 242, 0.6); }
+.zs-modal-btn.primary:active { transform: translateY(1px); }
 .zs-modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }

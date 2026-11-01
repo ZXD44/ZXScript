@@ -1,7 +1,7 @@
 # ZXScript Agent Rules & Operational Constraints
 > **Owner & Maintainer:** ZXD44 (ZirconX) <gonhackergamer0@gmail.com>  
 > **Project:** ZXScript - Autonomous Roblox Studio AI Agent Bridge  
-> **Version:** `0.0.3` | **License:** GPL-3.0
+> **Version:** `0.0.4` | **License:** GPL-3.0
 
 This document specifies mandatory rules for any AI agent interacting with or developing ZXScript.
 

@@ -33,7 +33,7 @@ if (typeof window !== "undefined" && !window.__ZS_ERR_GUARD__) {
         stack ? `Stack Trace:\n${stack}` : "",
         `ลิงก์ (URL): ${location.href}`,
         `เวลา: ${new Date().toLocaleString("th-TH")}`,
-        `เวอร์ชัน: ${(typeof window !== "undefined" && window.ZS && (window.ZS.EXT_VERSION || window.ZS.VERSION)) || ((typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : "0.0.3")}`,
+        `เวอร์ชัน: ${(typeof window !== "undefined" && window.ZS && (window.ZS.EXT_VERSION || window.ZS.VERSION)) || ((typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : "0.0.4")}`,
         "=================================="
       ].filter(Boolean).join("\n");
 

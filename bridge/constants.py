@@ -46,7 +46,7 @@ def _load_version() -> str:
                             return val
             except Exception:
                 pass
-    return "0.0.3"
+    return "0.0.4"
 
 
 BRIDGE_VERSION = _load_version()

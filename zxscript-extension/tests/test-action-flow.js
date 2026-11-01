@@ -74,7 +74,7 @@ global.requestAnimationFrame = (cb) => setTimeout(cb, 16);
 global.chrome = {
   runtime: {
     onMessage: { addListener: () => {} },
-    getManifest: () => ({ version: "0.0.3" }),
+    getManifest: () => ({ version: "0.0.4" }),
     sendMessage: (msg, cb) => {
       if (msg.type === "reconnect" || msg.type === "status") {
         cb({ connected: true, studio: true, tools: 34 });

@@ -3,7 +3,7 @@
 > **Author & Maintainer:** [ZXD44](https://github.com/ZXD44) (ZirconX)  
 > **Website:** [www.zirconx.xyz](https://www.zirconx.xyz)  
 > **Contact:** [gonhackergamer0@gmail.com](mailto:gonhackergamer0@gmail.com)  
-> **Version:** `0.0.3` | **License:** GPL-3.0
+> **Version:** `0.0.4` | **License:** GPL-3.0
 
 ---
 
