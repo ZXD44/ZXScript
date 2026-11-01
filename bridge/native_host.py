@@ -196,24 +196,25 @@ def stop_bridge():
 def kill_all_related(kill_bridge=False):
     """Forcefully terminate Roblox Studio, Bloxstrap, StudioMCP, and all related processes."""
     killed = []
-    targets = [
-        "RobloxStudioBeta.exe",
-        "RobloxStudio.exe",
-        "Bloxstrap.exe",
-        "StudioMCP.exe",
-    ]
-    for img in targets:
+    # 1. taskkill with wildcards covering all variations
+    for pat in ("RobloxStudio*", "StudioMCP*", "Bloxstrap*", "RobloxCrashHandler*"):
         try:
-            res = subprocess.run(f"taskkill /F /T /IM {img}", shell=True, capture_output=True)
+            res = subprocess.run(f"taskkill /F /T /IM {pat}", shell=True, capture_output=True, text=True)
             if res.returncode == 0:
-                killed.append(img)
+                killed.append(pat)
         except Exception:
             pass
 
+    # 2. PowerShell process-tree termination fallback
+    ps_cmd = 'powershell -NoProfile -Command "Get-Process | Where-Object { $_.ProcessName -like \'*Roblox*\' -or $_.ProcessName -like \'*Bloxstrap*\' -or $_.ProcessName -like \'*StudioMCP*\' } | Stop-Process -Force -ErrorAction SilentlyContinue"'
+    try:
+        subprocess.run(ps_cmd, shell=True, capture_output=True)
+    except Exception:
+        pass
     if kill_bridge:
         stop_bridge()
 
-    msg = f"Terminated Roblox Studio processes: {', '.join(killed) if killed else 'None active'}"
+    msg = f"Terminated Roblox Studio processes: {', '.join(killed) if killed else 'Clean'}"
     log_host(f"kill_all_related: {msg} (kill_bridge={kill_bridge})")
     return {
         "ok": True,

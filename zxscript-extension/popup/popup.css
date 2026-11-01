@@ -562,26 +562,3 @@ input:checked + .slider::before {
   text-align: center;
   margin-top: 6px;
 }
-
-
-.btn-kill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: rgba(237, 66, 69, 0.15);
-  border: 1px solid rgba(237, 66, 69, 0.4);
-  color: #f23f43;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 6px 10px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.btn-kill:hover {
-  background: #ed4245;
-  color: #ffffff;
-  border-color: #ed4245;
-  box-shadow: 0 2px 8px rgba(237, 66, 69, 0.35);
-}

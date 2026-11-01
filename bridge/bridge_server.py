@@ -164,10 +164,22 @@ async def handler(ws, mgr):
                 def _do_kill():
                     import subprocess
                     killed = []
-                    for img in ("RobloxStudioBeta.exe", "RobloxStudio.exe", "Bloxstrap.exe", "StudioMCP.exe"):
-                        res = subprocess.run(f"taskkill /F /T /IM {img}", shell=True, capture_output=True)
+                    for pat in ("RobloxStudio*", "StudioMCP*", "Bloxstrap*", "RobloxCrashHandler*"):
+                        res = subprocess.run(f"taskkill /F /T /IM {pat}", shell=True, capture_output=True)
                         if res.returncode == 0:
-                            killed.append(img)
+                            killed.append(pat)
+                    ps_cmd = (
+                        'powershell -NoProfile -Command "'
+                        'Get-Process | Where-Object { '
+                        '$_.ProcessName -like '*Roblox*' -or '
+                        '$_.ProcessName -like '*Bloxstrap*' -or '
+                        '$_.ProcessName -like '*StudioMCP*' '
+                        '} | Stop-Process -Force -ErrorAction SilentlyContinue"'
+                    )
+                    try:
+                        subprocess.run(ps_cmd, shell=True, capture_output=True)
+                    except Exception:
+                        pass
                     return killed
                 killed_list = await asyncio.to_thread(_do_kill)
                 log(f"kill_all executed: {killed_list}", "yl")
@@ -176,7 +188,7 @@ async def handler(ws, mgr):
                     "id": rid,
                     "ok": True,
                     "killed": killed_list,
-                    "message": f"ปิดโปรแกรมสำเร็จ: {', '.join(killed_list) if killed_list else 'ไม่พบโปรแกรมที่กำลังทำงาน'}",
+                    "message": f"ปิดโปรแกรมสำเร็จ: {', '.join(killed_list) if killed_list else 'เรียบร้อย'}",
                 }))
                 if msg.get("kill_bridge", False):
                     async def _delayed_stop():

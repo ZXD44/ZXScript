@@ -40,7 +40,7 @@
           <!-- Segment 2: Central Action Trigger -->
           <div id="zs-trigger-box" class="zs-hud-trigger">
             <button type="button" id="zs-action" data-kind="start">เริ่มทำงาน</button>
-            <button type="button" id="zs-stop" hidden title="หยุดทำงาน และปิด Roblox Studio (Kill All)">หยุด</button>
+            <button type="button" id="zs-stop" hidden title="หยุดทำงาน">หยุดทำงาน</button>
             <span id="zs-state" hidden></span>
           </div>
 
@@ -521,16 +521,15 @@
       actionBtn.dataset.kind = kind;
       actionBtn.disabled = disabled;
 
-      if (isBusyOrRunning) {
+      if (isBusyOrRunning || A.started) {
         actionBtn.style.display = "none";
         stopBtn.hidden = false;
+        if (!stopBtn.dataset.state) {
+          stopBtn.textContent = "หยุดทำงาน";
+          stopBtn.disabled = false;
+        }
         stateEl.hidden = false;
-        stateEl.innerHTML = indicator + `<span class="zs-state-txt">${_hudStatusText || msg}</span>`;
-      } else if (A.started) {
-        actionBtn.style.display = "none";
-        stopBtn.hidden = true;
-        stateEl.hidden = false;
-        stateEl.innerHTML = `<span class="zs-state-txt">${msg}</span>`;
+        stateEl.innerHTML = (isBusyOrRunning ? indicator : "") + `<span class="zs-state-txt">${_hudStatusText || msg}</span>`;
       } else {
         actionBtn.style.display = "";
         stopBtn.hidden = true;

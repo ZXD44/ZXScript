@@ -79,15 +79,15 @@
       isStarted: () => A.started,
       onBlockedAttempt: () => (ui.nudgeStart ? ui.nudgeStart() : undefined),
       onUserMessage: (base) => {
-        A.userStopped = false;
+        if (!A.started || A.userStopped) return; // Do NOT auto-run when stopped!
         A.lastGenAt = Date.now();
         syncSessionState();
         setTimeout(() => {
-          if (!A.running && !A.userStopped && agentLoop) agentLoop(base);
+          if (A.started && !A.running && !A.userStopped && agentLoop) agentLoop(base);
         }, 300);
       },
       onUserSend: () => {
-        A.userStopped = false;
+        if (!A.started || A.userStopped) return;
         A.lastGenAt = Date.now();
         syncSessionState();
       },
@@ -214,8 +214,8 @@
   // ── Watchdog Auto-Resume (1s tick) ─────────────────────────────────────────
   setInterval(() => {
     syncSessionState();
-    if (!A.started || A.running || A.starting || A.injecting) return;
-    if (document.hidden || A.userStopped) return;
+    if (!A.started || A.userStopped || A.running || A.starting || A.injecting) return;
+    if (document.hidden) return;
     if (P.isGenerating()) return;
     if (Date.now() - A.lastGenAt > 8000) return;
 

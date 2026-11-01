@@ -402,21 +402,6 @@ document.getElementById("btn-stop-bridge").addEventListener("click", () => {
   });
 });
 
-const killStudioBtn = document.getElementById("btn-kill-studio");
-if (killStudioBtn) {
-  killStudioBtn.addEventListener("click", () => {
-    killStudioBtn.disabled = true;
-    killStudioBtn.textContent = "กำลังปิด Studio...";
-    chrome.runtime.sendMessage({ type: "kill_all", kill_bridge: false }, () => {
-      showToast("ปิด Roblox Studio เรียบร้อยแล้ว");
-      setTimeout(() => {
-        killStudioBtn.disabled = false;
-        killStudioBtn.textContent = "Kill Studio";
-        refresh();
-      }, 600);
-    });
-  });
-}
 
 document.getElementById("btn-restart-bridge").addEventListener("click", () => {
   const state = document.getElementById("screen-state");

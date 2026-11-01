@@ -106,14 +106,30 @@
     A.stopping = true;
     A.stopAt = Date.now();
     A.stopStreamLen = P && P.streamLen ? P.streamLen() : 0;
-    A.userStopped = true;
+    A.userStopped = true; // Hard stop flag: bans ALL auto-run/auto-resume
+    A.started = false;     // Session terminated: reverts button to "เริ่มทำงาน"
+    A.running = false;
     A.resumeArmed = false;
     A.injectHideUntil = 0;
     A.startGen++; // Invalidate any running startSession sequence immediately
     A.starting = false;
     A.startingKey = null;
 
-    // 1. Immediately abort AI generation on provider
+    // 1. Purge session from memory and storage so it never auto-resumes
+    const path = P && P.conversationKey ? P.conversationKey() : null;
+    if (path) {
+      startedSessions.delete(path);
+      try {
+        chrome.storage.local.get("zsStartedSessions", (r) => {
+          const list = (r && r.zsStartedSessions) || [];
+          const filtered = list.filter((k) => k !== path);
+          chrome.storage.local.set({ zsStartedSessions: filtered });
+        });
+      } catch {}
+    }
+    if (ui.setStarted) ui.setStarted(false);
+
+    // 2. Immediately abort AI generation on provider
     if (P && P.stopGeneration) {
       try { P.stopGeneration(); } catch {}
     }
@@ -121,7 +137,7 @@
       try { P.setInputLock(false); } catch {}
     }
 
-    // 2. Mark and halt in-flight assistant items and tool decorators
+    // 3. Mark and halt in-flight assistant items and tool decorators
     const it = P && P.lastAssistant ? P.lastAssistant() : null;
     if (it) {
       it.dataset.zStopped = "1";
@@ -138,19 +154,20 @@
       A.toolSettle = null;
     }
 
-    // 3. Reset UI controls
-    ui.markStopping();
-    ui.inputCover(false);
-    ui.showStop(false);
-    if (ui.setStarting) ui.setStarting(false);
-    if (ui.setHudStatus) ui.setHudStatus("หยุดทำงานแล้ว");
-
     // 4. Forcefully terminate Roblox Studio, Bloxstrap, and StudioMCP
     const killBridge = !!opts.killBridge;
     try {
-      const bgFn = window.ZS.bg || ((m) => new Promise((r) => chrome.runtime.sendMessage(m, r)));
+      const bgFn = (window.ZS && window.ZS.bg) || ((m) => new Promise((r) => chrome.runtime.sendMessage(m, r)));
       bgFn({ type: "kill_all", kill_bridge: killBridge });
     } catch {}
+
+    // 5. Clean up UI immediately
+    ui.inputCover(false);
+    A.stopping = false;
+    A.stop = false;
+    if (ui.setStarting) ui.setStarting(false);
+    if (ui.setHudStatus) ui.setHudStatus("หยุดทำงานแล้ว");
+    if (ui.showStop) ui.showStop(false);
 
     ui.toast("หยุดทำงาน และปิดโปรแกรม Roblox Studio เรียบร้อยแล้ว");
   }
@@ -615,6 +632,11 @@
   function syncSessionState() {
     const P = window.ZSProvider;
     if (!P) return;
+
+    if (A.userStopped) {
+      A.started = false;
+      return;
+    }
 
     if (A.starting) {
       const key = P.conversationKey();
